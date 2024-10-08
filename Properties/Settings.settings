@@ -1,0 +1,51 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="TFTprog.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="NameResultFile" Type="System.String" Scope="User">
+      <Value Profile="(Default)">NameResultFile</Value>
+    </Setting>
+    <Setting Name="DirResultGrafFile" Type="System.String" Scope="User">
+      <Value Profile="(Default)">c:\\Projects\\WaterMassProd1\\NEWAKVAimage\\</Value>
+    </Setting>
+    <Setting Name="DirGrafFiles" Type="System.String" Scope="User">
+      <Value Profile="(Default)">c:\Projects\WaterMassProd1\NEWAKVAimage\</Value>
+    </Setting>
+    <Setting Name="Version" Type="System.String" Scope="User">
+      <Value Profile="(Default)">V1.1</Value>
+    </Setting>
+    <Setting Name="CodeFilename" Type="System.String" Scope="User">
+      <Value Profile="(Default)">CodeFilename</Value>
+    </Setting>
+    <Setting Name="StartFLASHadr" Type="System.String" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
+    <Setting Name="EndFLASHadr" Type="System.String" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
+    <Setting Name="NameBaseFile" Type="System.String" Scope="User">
+      <Value Profile="(Default)">ReverdyFLASHfile</Value>
+    </Setting>
+    <Setting Name="NameInsFile" Type="System.String" Scope="User">
+      <Value Profile="(Default)">InsertFile</Value>
+    </Setting>
+    <Setting Name="StartInsAddr" Type="System.String" Scope="User">
+      <Value Profile="(Default)">0x80000</Value>
+    </Setting>
+    <Setting Name="COMportName" Type="System.String" Scope="User">
+      <Value Profile="(Default)">COM1</Value>
+    </Setting>
+    <Setting Name="COMportBaud" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">115200</Value>
+    </Setting>
+    <Setting Name="FolderGRAF" Type="System.String" Scope="User">
+      <Value Profile="(Default)">c:\Projects\WaterMassProd1\NEWAKVAimage\</Value>
+    </Setting>
+    <Setting Name="Interface" Type="System.String" Scope="User">
+      <Value Profile="(Default)">UART</Value>
+    </Setting>
+    <Setting Name="EnServMess" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>
