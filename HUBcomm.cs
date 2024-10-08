@@ -380,7 +380,7 @@ namespace ExtHubComm
             worker.ReportProgress(0, errorMessage); // Передаем сообщение через ProgressChanged
         }
 
-        public int Wr_RAMbuf_max252(byte[] data, int adr, Efl_DEV _RecDev)
+        public eFLASHresultEnum Wr_RAMbuf_max252(byte[] data, int adr, Efl_DEV _RecDev)
         {//запись в промежуточный буфер памяти
             int dataSize;
             try
@@ -403,33 +403,40 @@ namespace ExtHubComm
             }
             catch (Exception)
             {
-                return -1;
+                return eFLASHresultEnum.RAMBUF_READTIMEOUT;
             }
-            return 1;
+            return eFLASHresultEnum.ALL_OK;
         }
 
         //      cmd_wrver_TFTFLASH4096 = 0x33,//запись во FLASH через GRAM
 
-        public int WrVer_TFTFLASH4096(int StartGPUadr, int StartTFTFLASHadr, int length_data, int _CRC, Efl_DEV _RecDev)
+        public eFLASHresultEnum   WrVer_TFTFLASH4096(int StartGPUadr, int StartTFTFLASHadr, int length_data, int _CRC, Efl_DEV _RecDev)
         {//запись c верификацией из промежуточного буфера памяти во FLASH
             byte[] sendData = new byte[14];
+            try
+            {
+                // Помещаем StartGPUadr
+                Array.Copy(BitConverter.GetBytes(StartGPUadr), 0, sendData, 0, 4);
+                // Помещаем StartTFTFLASHad
+                Array.Copy(BitConverter.GetBytes(StartTFTFLASHadr), 0, sendData, 4, 4);
+                // Помещаем length_data
+                Array.Copy(BitConverter.GetBytes(length_data), 0, sendData, 8, 4);
+                // Помещаем два младших байта _CRC через Array.Copy
+                Array.Copy(BitConverter.GetBytes(_CRC), 0, sendData, 12, 2);
+                CommSendAnsv(ECommand.cmd_wrver_TFTFLASH4096, _RecDev, sendData, 0, 1000);
+                return (eFLASHresultEnum)(RxBuff[0]);//если равен нулю, процедура записи-верификации прошла успешно
+            }
+            catch (Exception)
+            {
+                return eFLASHresultEnum.ERR_TIMEOUT;
+            }
 
-            // Помещаем StartGPUadr
-            Array.Copy(BitConverter.GetBytes(StartGPUadr), 0, sendData, 0, 4);
-            // Помещаем StartTFTFLASHad
-            Array.Copy(BitConverter.GetBytes(StartTFTFLASHadr), 0, sendData, 4, 4);
-            // Помещаем length_data
-            Array.Copy(BitConverter.GetBytes(length_data), 0, sendData, 8, 4);
-            // Помещаем два младших байта _CRC через Array.Copy
-            Array.Copy(BitConverter.GetBytes(_CRC), 0, sendData, 12, 2);
-            CommSendAnsv(ECommand.cmd_wrver_TFTFLASH4096, _RecDev, sendData, 0, 1000);
-            return RxBuff[0];//если равен нулю, процедура записи-верификации прошла успешно
         }
 
 
         //success = WriteBlock(BlockBytes,  Flashaddr, BlockSize, ref totalProcessedBytes, worker);
 
-        public bool WriteBlock(byte[] BlockBytes, int validBytes,  ref int totalProcessedBytes, BackgroundWorker worker)
+        public eFLASHresultEnum WriteBlock(byte[] BlockBytes, int validBytes,  ref int totalProcessedBytes, BackgroundWorker worker)
         {
             try
             {
@@ -442,19 +449,19 @@ namespace ExtHubComm
                     byte[] dataChunk = new byte[bytesToWrite];
                     Array.Copy(BlockBytes, offset, dataChunk, 0, bytesToWrite);
 
-                    bool success = false;
+                    eFLASHresultEnum success = eFLASHresultEnum.ERR_RAM_WRITE;
                     int attempt = 0;
 
-                    while (attempt < 3 && !success)
+                    while (attempt < 3 && (success!= eFLASHresultEnum.ALL_OK))
                     {
                         if (worker.CancellationPending)
                         {
-                            return false; // Затем вручную установить флаг отмены
+                            return eFLASHresultEnum.ERR_RAM_WRITE; // Затем вручную установить флаг отмены
                         }
 
                         try
                         {
-                            success = (Wr_RAMbuf_max252(dataChunk, offset, Efl_DEV.fld_TFTboard)>0);
+                            success = Wr_RAMbuf_max252(dataChunk, offset, Efl_DEV.fld_TFTboard);
 
 
                         }
@@ -464,17 +471,17 @@ namespace ExtHubComm
                             ReportError("WriteData", ex, totalProcessedBytes, worker);
                             if (attempt == 3)
                             {
-                                return false;
+                                return eFLASHresultEnum.ERR_RAM_WRITE;
                             }
                         }
 
-                        if (!success)
+                        if (success != eFLASHresultEnum.ALL_OK)
                         {
                             attempt++;
                             ReportError("WriteData", null, totalProcessedBytes, worker);
                             if (attempt == 3)
                             {
-                                return false;//Все три попытки оказались неудачными
+                                return eFLASHresultEnum.ERR_RAM_WRITE;//Все три попытки оказались неудачными
                             }
                         }
                     }
@@ -487,16 +494,16 @@ namespace ExtHubComm
 
 
 
-                return true; // Успешная запись всех данных в блоке
+                return eFLASHresultEnum.ALL_OK; // Успешная запись всех данных в блоке
             }
             catch (Exception ex)
             {
                 ReportError("WriteBlock", ex, totalProcessedBytes, worker);
-                return false;
+                return eFLASHresultEnum.ERR_RAM_WRITE;
             }
         }
 
-        public bool WritePict(string Filename, int Flashaddr, BackgroundWorker worker)
+        public eFLASHresultEnum WritePict(string Filename, int Flashaddr, BackgroundWorker worker)
         {
             int totalProcessedBytes = 0;
             int procentFile = 0;
@@ -520,25 +527,25 @@ namespace ExtHubComm
                             }
                         }
 
-                        bool success = false;
+                        eFLASHresultEnum success = eFLASHresultEnum.ERR_FLASH_WRITE;
                         int attempt = 0;
 
-                        while (attempt < 3 && !success)
+                        while (attempt < 3 && (success != eFLASHresultEnum.ALL_OK))
                         {
                             try
                             {// public bool WriteBlock(byte[] BlockBytes, int Flashaddr, int validBytes,  ref int totalProcessedBytes, BackgroundWorker worker)
                                 success = WriteBlock(BlockBytes,  BlockSize, ref totalProcessedBytes, worker);
-                                if (success)
+                                if (success != eFLASHresultEnum.ALL_OK)
                                 {//если данные успешно записаны в RAM буфер делаем попытку записи их во FLASH память TFT панели
                                     int _crc = CRC16(BlockBytes, 0, BlockSize);
-                                    success = (WrVer_TFTFLASH4096(0, Flashaddr, BlockSize, _crc, Efl_DEV.fld_TFTboard)==0);
+                                    success = WrVer_TFTFLASH4096(0, Flashaddr, BlockSize, _crc, Efl_DEV.fld_TFTboard);
 
                                 }
                                 
 
                                 if (worker.CancellationPending)
                                 {
-                                    return false; // Затем вручную установить флаг отмены
+                                    return eFLASHresultEnum.ERR_FLASH_WRITE; // Затем вручную установить флаг отмены
                                 }
                             }
                             catch (Exception ex)
@@ -547,17 +554,17 @@ namespace ExtHubComm
                                 ReportError("WriteBlock", ex, totalProcessedBytes, worker);
                                 if (attempt == 3)
                                 {
-                                    return false;
+                                    return eFLASHresultEnum.ERR_CANCELPRO;
                                 }
                             }
 
-                            if (!success)
+                            if (success != eFLASHresultEnum.ALL_OK)
                             {
                                 attempt++;
                                 ReportError("WriteBlock", null, totalProcessedBytes, worker);
                                 if (attempt == 3)
                                 {
-                                    return false;
+                                    return eFLASHresultEnum.ERR_FLASH_WRITE;
                                 }
                             }
                         }
@@ -573,12 +580,12 @@ namespace ExtHubComm
                     }
                 }
 
-                return true; // Успешная запись всех блоков
+                return eFLASHresultEnum.ALL_OK; // Успешная запись всех блоков
             }
             catch (Exception ex)
             {
                 ReportError("WritePict", ex, totalProcessedBytes, worker);
-                return false;
+                return eFLASHresultEnum.ERR_FLASH_WRITE;
             }
         }
 

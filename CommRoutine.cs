@@ -35,6 +35,36 @@ namespace COMMAND
 		eopmpro_errOptMemWr,//ошибка записи в конечную память (например TFTFLASH)
 	}
 
+	public  enum eFLASHresultEnum
+	{
+		ALL_OK = 0,
+		RAMBUF_READTIMEOUT = 1,
+		RAMBUF_WRITETIMEOUT = 2,
+
+		START_ERROR = 0x80,
+
+		ERR_BUSY = 0x81,
+		ERR_NOT_CLEAR = 0x82,
+		ERR_VERIFY_FAILED = 0x83,
+		ERR_WRITE_PROTECT = 0x84,
+		ERR_ADDRES = 0x85,
+		ERR_OVERBUF = 0x86,
+		ERR_LENGTH = 0x87,
+		ERR_PAGESIZE = 0x89,
+		ERR_FLASH_WRITE = 0x8A,
+		ERR_READ = 0x8B,
+		ERR_BLOB = 0xC8,
+		ERR_COMM = 0x8D,
+		ERR_COMM_FORMAT = 0x8E,
+		ERR_DATA_LENGTH = 0x8F,
+		ERR_CRC = 0X90,
+		ERR_GRAM_CRC = 0X91,
+		ERR_GRAM_READ = 0X92,
+		ERR_CANCELPRO = 0X93,
+		ERR_TIMEOUT = 0X94,
+		ERR_RAM_WRITE = 0X95,
+	};
+
 
 	public enum ECommand
 	{
