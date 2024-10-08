@@ -474,7 +474,7 @@ namespace ExtHubComm
                             ReportError("WriteData", null, totalProcessedBytes, worker);
                             if (attempt == 3)
                             {
-                                return false;
+                                return false;//Все три попытки оказались неудачными
                             }
                         }
                     }
