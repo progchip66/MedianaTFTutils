@@ -436,7 +436,7 @@ namespace ExtHubComm
 
         //success = WriteBlock(BlockBytes,  Flashaddr, BlockSize, ref totalProcessedBytes, worker);
 
-        public eFLASHresultEnum WriteBlock(byte[] BlockBytes, int validBytes,  ref int totalProcessedBytes, BackgroundWorker worker)
+        public eFLASHresultEnum WriteBlock(byte[] BlockBytes, int validBytes,  int totalProcessedBytes, BackgroundWorker worker)
         {
             try
             {
@@ -534,8 +534,8 @@ namespace ExtHubComm
                         {
                             try
                             {// public bool WriteBlock(byte[] BlockBytes, int Flashaddr, int validBytes,  ref int totalProcessedBytes, BackgroundWorker worker)
-                                success = WriteBlock(BlockBytes,  BlockSize, ref totalProcessedBytes, worker);
-                                if (success != eFLASHresultEnum.ALL_OK)
+                                success = WriteBlock(BlockBytes,  BlockSize,  totalProcessedBytes, worker);
+                                if (success == eFLASHresultEnum.ALL_OK)
                                 {//если данные успешно записаны в RAM буфер делаем попытку записи их во FLASH память TFT панели
                                     int _crc = CRC16(BlockBytes, 0, BlockSize);
                                     success = WrVer_TFTFLASH4096(0, Flashaddr, BlockSize, _crc, Efl_DEV.fld_TFTboard);
@@ -570,7 +570,9 @@ namespace ExtHubComm
                         }
                         totalProcessedBytes += BlockSize;
                         Flashaddr += BlockSize;
-                        int currentProcentFile = (int)((totalProcessedBytes / fileSize) * 100);
+                        int currentProcentFile = (int)(((double)totalProcessedBytes / fileSize) * 100);
+                        if (currentProcentFile > 100)
+                            currentProcentFile = 100;
 
                         if (currentProcentFile >= procentFile + 5)
                         {
