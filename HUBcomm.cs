@@ -592,6 +592,46 @@ namespace ExtHubComm
         }
 
 
+
+        public int[] GetNumbersFromFile(string filePath)
+        {
+            // извлечение из файла числовых данных в массив
+            string fileContent = File.ReadAllText(filePath);
+            List<int> numbers = new List<int>();
+
+            string currentNumber = "";
+
+            // Проход по всем символам файла
+            foreach (char c in fileContent)
+            {
+                // Если текущий символ цифра, добавляем его к числу
+                if (char.IsDigit(c))
+                {
+                    currentNumber += c;
+                }
+                else
+                {
+                    // Если мы встретили не цифру и число накопилось, добавляем его в список
+                    if (currentNumber != "")
+                    {
+                        numbers.Add(int.Parse(currentNumber));
+                        currentNumber = ""; // Сбрасываем строку для следующего числа
+                    }
+                }
+            }
+
+            // Добавляем последнее число, если оно есть
+            if (currentNumber != "")
+            {
+                numbers.Add(int.Parse(currentNumber));
+            }
+
+            // Возвращаем массив чисел
+            return numbers.ToArray();
+        }
+
+
+
         #endregion
 
 

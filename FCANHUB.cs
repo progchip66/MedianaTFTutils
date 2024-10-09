@@ -1224,14 +1224,28 @@ foreach (TabPage tabPage in tabControl1.TabPages)
                     int NumMENU = 0; ;
 
                     int FLASHwrFileStartAdr = CANHUB.StartFLASHadrFlowPro;
-                    string[] MENUfilenames = GRAF_FILES.Init_WRtoFLASHfiles(Properties.Settings.Default.FolderGRAF, "MENU");//получаем список файлов директории c изображениями меню
+                    string DIR_FlowPro = Properties.Settings.Default.FolderGRAF;
+                    string[] MENUfilenames = GRAF_FILES.Init_WRtoFLASHfiles(DIR_FlowPro, "MENU");//получаем список файлов директории c изображениями меню
+                    
+                    string MENUfileFLASHadr = DIR_FlowPro + "\\DOC\\defAdrMENU.txt";
                     int MENUfilecount = MENUfilenames.Length;
+                    int[] MENUfilesSize = CANHUB.GetNumbersFromFile(MENUfileFLASHadr);
+                    string s = "";
 
                     while (NumMENU < MENUfilecount)
                     {
                         int proFiles = ((NumMENU + 1) * 100) / MENUfilecount;//нормализованный счётчик прогрессбара количества файлов
-                        string s = MENUfilenames[NumMENU];
+                        string MENU_FULLfilename = MENUfilenames[NumMENU];
                         pPbarCount = 0;
+
+                        FileInfo MENUfileInfo = new FileInfo(MENU_FULLfilename);
+                        long fileSizeInBytes = MENUfileInfo.Length;
+                        string MENUfilename = MENUfileInfo.Name;
+                        int MENUalignFileLen = fcreater.RESjpg.GetAlignVol((int)fileSizeInBytes, CANHUB.FLASHalign, 1);//получаем выравненную длину файла, в данном случае с увеличением
+
+                        WRpro.ReportProgress(proFiles, MENUfilename);
+
+
                         CANHUB.fileDataFLASH = fcreater.RESjpg.GetDataFromFile(s, CANHUB.FLASHalign);//считываем файл выравниваем файл по размеру FLASH сектора и считываем дополняя 0xff
                         int sStart = s.LastIndexOf("\\") + 1;
                         int sEnd = s.LastIndexOf(".");
