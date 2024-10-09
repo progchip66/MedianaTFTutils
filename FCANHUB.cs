@@ -1229,12 +1229,12 @@ foreach (TabPage tabPage in tabControl1.TabPages)
                     
                     string MENUfileFLASHadr = DIR_FlowPro + "\\DOC\\defAdrMENU.txt";
                     int MENUfilecount = MENUfilenames.Length;
-                    int[] MENUfilesSize = CANHUB.GetNumbersFromFile(MENUfileFLASHadr);
+                    int[] MENUfilesStartAdr = CANHUB.GetNumbersFromFile(MENUfileFLASHadr);
                     string s = "";
 
                     while (NumMENU < MENUfilecount)
                     {
-                        int proFiles = ((NumMENU + 1) * 100) / MENUfilecount;//нормализованный счётчик прогрессбара количества файлов
+                        int proMenuFiles = ((NumMENU + 1) * 100) / MENUfilecount;//нормализованный счётчик прогрессбара количества файлов
                         string MENU_FULLfilename = MENUfilenames[NumMENU];
                         pPbarCount = 0;
 
@@ -1243,8 +1243,12 @@ foreach (TabPage tabPage in tabControl1.TabPages)
                         string MENUfilename = MENUfileInfo.Name;
                         int MENUalignFileLen = fcreater.RESjpg.GetAlignVol((int)fileSizeInBytes, CANHUB.FLASHalign, 1);//получаем выравненную длину файла, в данном случае с увеличением
 
-                        WRpro.ReportProgress(proFiles, MENUfilename);
+                        WRpro.ReportProgress(proMenuFiles, MENUfilename);
 
+                        //НОВЫЙ КОД ЗАПИСИ изображения меню ИЗ ФАЙЛА!!!
+                        CANHUB.WritePict(MENUfilenames[NumMENU], MENUfilesStartAdr[NumMENU], WRpro);
+
+/*
 
                         CANHUB.fileDataFLASH = fcreater.RESjpg.GetDataFromFile(s, CANHUB.FLASHalign);//считываем файл выравниваем файл по размеру FLASH сектора и считываем дополняя 0xff
                         int sStart = s.LastIndexOf("\\") + 1;
@@ -1314,7 +1318,7 @@ foreach (TabPage tabPage in tabControl1.TabPages)
                                 WRpro.ReportProgress(pPbarCount);
                             }
                         }
-
+                        */
 
                         if (CANHUB.DirFlowPro == "MENU")
                         {//отображение загруженной картики меню на TFT панели
@@ -1324,6 +1328,7 @@ foreach (TabPage tabPage in tabControl1.TabPages)
                             num_Menu[4] = Convert.ToByte(j & 0xff);
                             num_Menu[5] = Convert.ToByte((j >> 8) & 0xff);
                             CANHUB.CommSendAnsv(ECommand.cmd_TFTmenu, Efl_DEV.fld_TFTboard, num_Menu, 0, 1000);
+
                         }
                         if (OneFileCount > 0)
                         {
@@ -1409,7 +1414,7 @@ foreach (TabPage tabPage in tabControl1.TabPages)
                             comPICT[5] = Convert.ToByte((NumPICT >> 8) & 0xff);
   //		public void CommSendAnsv(ECommand command, Efl_DEV _RecDev = Efl_DEV.fld_none, byte[] data = null, byte SubCom = 0, int TimeOutStartAnsv = 1000, int TimeOutNextByte = 100)
 
-                            CANHUB.CommSendAnsv(ECommand.cmd_TFTmenu, Efl_DEV.fld_TFTboard, comPICT, 0, 1000);// Субкоманда оказалась равна нулю, надо вставить субкоманду!!!
+                            CANHUB.CommSendAnsv(ECommand.cmd_TFTmenu, Efl_DEV.fld_TFTboard, comPICT, 0, 1000);// команда отображение картинки
                             NumPICT++;
                         }
                         NumFile++;
