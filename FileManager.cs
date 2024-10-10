@@ -470,6 +470,47 @@ namespace FileCreater
         public string[] FONTfileNames;
 
 
+        public  bool CheckFileExist(string filename, string startDIR, string endSUBDIR)
+        {
+
+            // Проверка существует ли файл
+            if (!File.Exists(filename))
+            {
+                MessageBox.Show("Файл не существует!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+
+            // Проверка, находится ли файл в поддиректории "MENU"
+            string menuDirectory = Path.Combine(startDIR, endSUBDIR)+"\\";
+            if (!filename.StartsWith(menuDirectory, StringComparison.OrdinalIgnoreCase))
+            {
+                MessageBox.Show("Файл не находится в поддиректории "+endSUBDIR+"!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+
+            // Если все проверки пройдены, возвращаем true
+            return true;
+        }
+
+        public  int GetFileOrder(string filePath)
+        {
+            // Получаем директорию из полного имени файла
+            string directoryPath = Path.GetDirectoryName(filePath);
+
+            // Получаем имя файла
+            string fileName = Path.GetFileName(filePath);
+
+            // Получаем список всех файлов в директории и сортируем их в алфавитном порядке
+            var files = Directory.GetFiles(directoryPath).Select(Path.GetFileName).OrderBy(f => f).ToList();
+
+            // Находим порядковый номер файла
+            int fileIndex = files.IndexOf(fileName);
+
+            return fileIndex;  // Возвращаем порядковый номер файла
+        }
+
+
+
         public int GetAdrInsertFileToFlash(string CATGrafDir, string FullFileName, int StartadrFLASHmenu)
         {
 
@@ -516,6 +557,9 @@ namespace FileCreater
             {
                 throw new Exception("Директория MENU не существует");
             }
+
+ //           string[] MENUfilenames = Init_WRtoFLASHfiles(DIR_FlowPro, "MENU");//получаем список файлов директории c изображениями меню
+
 
             int AlignFileLen = 0;
             int curTFTFLASHadr = GetAlignVol(StartadrFLASHmenu, sizeTFTFLASHalign, 1);//на всякий пожарный проводим выравнивание стартового адреса

@@ -128,6 +128,7 @@ namespace ExtHubComm
 
         public int enProAddOneMenuFile = 0;
         public string OneFileName="";
+        public int OneFileNum = 0;
 
         public int maxAttempt = 3;//максимальное количество попыток записи
         public int countAttempt = 0;//cчётчик попыток записи

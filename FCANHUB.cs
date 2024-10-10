@@ -973,12 +973,6 @@ foreach (TabPage tabPage in tabControl1.TabPages)
             dataGridTimers.DataSource = tableTimer;
             dataGridTimers.AllowUserToAddRows = false;
 
-
-
-            
-
-
-
         }
 
 
@@ -1069,34 +1063,36 @@ foreach (TabPage tabPage in tabControl1.TabPages)
         {
 
         }
-
+        //c:\Projects\WaterMassProd1\NEWAKVAimage\MENU\000_zagruz.jpg
         private void button2_Click(object sender, EventArgs e)
         {//запись одного файла по заданному адресу
-            try
-            {
+
                 CANHUB.enProFontPict = 0;
                 CANHUB.enProMenu = 0;
                 CANHUB.enProFontPict = 0;
                 CANHUB.enProAddOneMenuFile = 0;
-                CANHUB.StartFLASHadrFlowPro = GRAF_FILES.GetAdrInsertFileToFlash(tBgrafDIR.Text, tBNameOneFile.Text, CANHUB.StartFLASHadr);
-                if (CANHUB.StartFLASHadrFlowPro > 0)
-                {
-                    CANHUB.enProAddOneMenuFile = 1;
-                    CANHUB.OneFileName = tBNameOneFile.Text;
 
-                    
-                    EnDisComponent(false);
-                    WRpro.RunWorkerAsync();
-                }
+                string filename = tBNameOneFile.Text;
+                string DIR_FlowPro = Properties.Settings.Default.FolderGRAF;//директория;
+                if (!GRAF_FILES.CheckFileExist(filename, DIR_FlowPro, "MENU"))
+                    return;//файл либо путь к нему указан не правильно
+                CANHUB.OneFileName = filename;//имя файла подлежит записи
+
+            try
+            {
+
+                CANHUB.enProAddOneMenuFile = 1;//Флаг перезаписи одного файла
+                CANHUB.OneFileNum = GRAF_FILES.GetFileOrder(filename);
+                EnDisComponent(false);
+                WRpro.RunWorkerAsync();
             }
             catch (Exception ex)
             {
                 EnDisComponent(true);
                 tabControl1.Enabled = true;
-                MessageBox.Show(ex.Message, "Ошибка записи файла", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(ex.Message, "Ошибка инициализации цикла", MessageBoxButtons.OK, MessageBoxIcon.Error);
 
             }
-
         }
 
 
@@ -1104,102 +1100,52 @@ foreach (TabPage tabPage in tabControl1.TabPages)
 
         private void WRpro_DoWork(object sender, DoWorkEventArgs e)
         {
+            int PbarDataLen=0;
             int OneFileCount = 0;
             e.Result = 0;
             e.Result = "Все операции выполнены успешно";
             EMemPRO statMemPRO = EMemPRO.eopmpro_setpar;
             int NumFile = 0;
+            string DIR_FlowPro = Properties.Settings.Default.FolderGRAF;
+            string MENUfileFLASHadr = DIR_FlowPro + "\\DOC\\defAdrMENU.txt";
+            int[] MENUfilesStartAdr = CANHUB.GetNumbersFromFile(MENUfileFLASHadr);//формируем массив длин файлов на основе файла описания
+
+            string[] MENUfilenames = GRAF_FILES.Init_WRtoFLASHfiles(DIR_FlowPro, "MENU");//получаем список файлов директории c изображениями меню
+            Array.Sort(MENUfilenames);
+            int MENUfilecount = MENUfilenames.Length;
+            
+
+
             if (CANHUB.enProAddOneMenuFile > 0)
             {//перезапись/дозапись одного графического файла в TFT FLASH память 
                 CANHUB.enProMenu = 0;
                 CANHUB.enProFontPict = 0;
-                CANHUB.enProAddOneMenuFile = 0;
+                CANHUB.enProAddOneMenuFile = 1;
 
                 try
                 {
                     CANHUB.Up1Doun0adrFLASH = 1;
-                    CANHUB.enProMenu = 0;
                     int pPbarCount = 0;
 
-                    int FLASHwrFileStartAdr = CANHUB.StartFLASHadrFlowPro;
-                    CANHUB.fileDataFLASH = fcreater.RESjpg.GetDataFromFile(CANHUB.OneFileName, CANHUB.FLASHalign);//считываем файл выравниваем файл по размеру FLASH сектора и считываем дополняя 0xff
-                    int _proCRC16 = CANHUB.CRC16(CANHUB.fileDataFLASH, 0, CANHUB.fileDataFLASH.Length);// подсчитываем CRC усего файла
-                    CANHUB.InitFlowPro(0, CANHUB.fileDataFLASH.Length, ETypeMem.etmem_GPURAM, 4, _proCRC16, Efl_DEV.fld_TFTboard, 0, ETypeMem.etmem_TFTFLASH, FLASHwrFileStartAdr, CANHUB.Up1Doun0adrFLASH);
+                    //НОВЫЙ КОД ЗАПИСИ изображения меню ИЗ ФАЙЛА!!!
+                    CANHUB.WritePict(MENUfilenames[CANHUB.OneFileNum], MENUfilesStartAdr[CANHUB.OneFileNum], WRpro);
 
-                    int dPbarDataLen = CANHUB.FlowProRAMtoMEM.Length / 100;
-                    int PbarDataLen = 0;
-
-                    statMemPRO = EMemPRO.eopmpro_wrGRAM;
-                    CANHUB.countAttempt = 3;//производим по три попытки записи
-                    while (CANHUB.FlowProRAMtoMEM.Counter < CANHUB.FlowProRAMtoMEM.Length)
-                    {
-                        CANHUB.countAttempt++;
-                        // 3 попытки записи очередного блока данных(до 254 байт из очередной команды) присланных в GRAM
-                        statMemPRO = CANHUB.StepDataSendFlowPro(3,CANHUB.fileDataFLASH, Efl_DEV.fld_TFTboard);
-
-                        if (PbarDataLen < CANHUB.FlowProRAMtoMEM.Counter)
-                        {
-                            PbarDataLen += dPbarDataLen;
-                            if (pPbarCount < 100)
-                                pPbarCount++;
-                            WRpro.ReportProgress(pPbarCount);//worker.ReportProgress(procent, Sreport);
-
-                        }
-
-                        if (statMemPRO != EMemPRO.eopmpro_wrGRAM)
-                        {//процесс записи в промежуточный буфер GRAM закончен
-                            if (statMemPRO == EMemPRO.eopmpro_wrGRAMerr)
-                            {//необходимо инициализировать повторную попытку записи
-                                throw new Exception("Write to GPU " + Convert.ToString(CANHUB.FlowProRAMtoMEM.Counter) + " from " + Convert.ToString(CANHUB.FlowProRAMtoMEM.Length)
-                                      + " bytes. Error " + CANHUB.GetSringtEnumEMemPRO(CANHUB.FlowProRAMtoMEM.Fpro));
-                            }
-                            if (statMemPRO == EMemPRO.eopmpro_ready)
-                            { //данные в GRAM готовы для записи в TFT FLASH память
-                                statMemPRO = CANHUB.WrTFTFLASHFlowPro(Efl_DEV.fld_TFTboard);//Запись в TFTFLASH
-                                if (statMemPRO == EMemPRO.eopmpro_errBufCRC)//записанные в промежуточный буфер(например GRAM) данные имеют неверный CRC )
-                                {//данные некорректно считаны из PC, необходимо повторить попытку
-                                    if (CANHUB.countAttempt++ > CANHUB.maxAttempt)
-                                    {//если количество ошибок превышает максимальное значение вызываем исключение
-                                        throw new Exception(" Ошибка записи из GRAM в TFTFLASH номер: " + CANHUB.GetSringtEnumEMemPRO(CANHUB.FlowProRAMtoMEM.Fpro));
-                                    }
-                                    continue;//вернёмся к началу цикла и повторим
-                                }
-                                if (statMemPRO > EMemPRO.eopmpro_errStart)
-                                {//критическая ошибка записи в TFTFLASH, вызываем исключение и прерываем процесс
-                                    throw new Exception("Error " + CANHUB.GetSringtEnumEMemPRO(CANHUB.FlowProRAMtoMEM.Fpro) + "write to TFT FLASH");
-                                }
-
-                            }
-
-                            if (WRpro.CancellationPending)
-                            {//остановка работы по нажатию кнопки останова в приложении
-                                e.Cancel = true;
-                                return;
-                            }
-                        }
-                        else
-                        if (CANHUB.FlowProRAMtoMEM.Counter * 100 / CANHUB.FlowProRAMtoMEM.Length > pPbarCount)
-                        {
-                            pPbarCount = CANHUB.FlowProRAMtoMEM.Counter * 100 / CANHUB.FlowProRAMtoMEM.Length;
-                            WRpro.ReportProgress(pPbarCount);
-                        }
+                    if (WRpro.CancellationPending)
+                    {//остановка работы по нажатию кнопки останова в приложении
+                        e.Cancel = true;
+                        return;
                     }
 
-
-                    {//отображение загруженной картики меню на TFT панели
+                    //отображение загруженной картинки меню на TFT панели
                      //CommSendAnsv(ECommand command, Efl_DEV _RecDev = Efl_DEV.fld_none, byte[] data = null, byte SubCom = 0, int TimeOutStartAnsv = 500, int TimeOutNextByte = 100)
                         int j = GRAF_FILES.NumMenuOneMenuFile;
                         byte[] numMenu = { 0, 0, 0, 0, 0, 0, 0, 0 };
                         numMenu[4] = Convert.ToByte(j & 0xff);
                         numMenu[5] = Convert.ToByte((j >> 8) & 0xff);
                         CANHUB.CommSendAnsv(ECommand.cmd_TFTmenu, Efl_DEV.fld_TFTboard, numMenu, 0, 1000);
-                    }
-                    if (OneFileCount > 0)
-                    {
+
                         e.Result = "Файл  успешно записан в TFT FLASH память";
                         return;//в режиме записи одного файла один файл записан
-                    }
-
 
                 }
                 catch (Exception ex)
@@ -1215,7 +1161,7 @@ foreach (TabPage tabPage in tabControl1.TabPages)
             {//запись заставок меню
                 try
                 {
-                    
+
 
                     CANHUB.Up1Doun0adrFLASH = 1;
                     CANHUB.enProMenu = 0;
@@ -1224,13 +1170,6 @@ foreach (TabPage tabPage in tabControl1.TabPages)
                     int NumMENU = 0; ;
 
                     int FLASHwrFileStartAdr = CANHUB.StartFLASHadrFlowPro;
-                    string DIR_FlowPro = Properties.Settings.Default.FolderGRAF;
-                    string[] MENUfilenames = GRAF_FILES.Init_WRtoFLASHfiles(DIR_FlowPro, "MENU");//получаем список файлов директории c изображениями меню
-                    
-                    string MENUfileFLASHadr = DIR_FlowPro + "\\DOC\\defAdrMENU.txt";
-                    int MENUfilecount = MENUfilenames.Length;
-                    int[] MENUfilesStartAdr = CANHUB.GetNumbersFromFile(MENUfileFLASHadr);
-                    string s = "";
 
                     while (NumMENU < MENUfilecount)
                     {
@@ -1248,77 +1187,6 @@ foreach (TabPage tabPage in tabControl1.TabPages)
                         //НОВЫЙ КОД ЗАПИСИ изображения меню ИЗ ФАЙЛА!!!
                         CANHUB.WritePict(MENUfilenames[NumMENU], MENUfilesStartAdr[NumMENU], WRpro);
 
-/*
-
-                        CANHUB.fileDataFLASH = fcreater.RESjpg.GetDataFromFile(s, CANHUB.FLASHalign);//считываем файл выравниваем файл по размеру FLASH сектора и считываем дополняя 0xff
-                        int sStart = s.LastIndexOf("\\") + 1;
-                        int sEnd = s.LastIndexOf(".");
-                        string filename = s;
-                        filename = (filename.Substring(sStart, sEnd - sStart));
-                        WRpro.ReportProgress(proFiles, Path.GetFileName(filename));
-
-                        int _proCRC16 = CANHUB.CRC16(CANHUB.fileDataFLASH, 0, CANHUB.fileDataFLASH.Length);// подсчитываем CRC усего файла
-
-                        CANHUB.InitFlowPro(0, CANHUB.fileDataFLASH.Length, ETypeMem.etmem_GPURAM, 4, _proCRC16, Efl_DEV.fld_TFTboard, 0, ETypeMem.etmem_TFTFLASH, FLASHwrFileStartAdr, CANHUB.Up1Doun0adrFLASH);
-
-                        int dPbarDataLen = CANHUB.FlowProRAMtoMEM.Length / 100;
-                        int PbarDataLen = 0;
-
-                        statMemPRO = EMemPRO.eopmpro_wrGRAM;
-                        CANHUB.countAttempt = -1;
-                        while (CANHUB.FlowProRAMtoMEM.Counter < CANHUB.FlowProRAMtoMEM.Length)
-                        {
-                            CANHUB.countAttempt++;
-                            statMemPRO = CANHUB.StepDataSendFlowPro(3,CANHUB.fileDataFLASH, Efl_DEV.fld_TFTboard);
-
-                            if (PbarDataLen < CANHUB.FlowProRAMtoMEM.Counter)
-                            {
-                                PbarDataLen += dPbarDataLen;
-                                if (pPbarCount < 100)
-                                    pPbarCount++;
-                                WRpro.ReportProgress(pPbarCount);//worker.ReportProgress(procent, Sreport);
-
-                            }
-
-                            if (statMemPRO != EMemPRO.eopmpro_wrGRAM)
-                            {//процесс записи в GRAM закончен
-                                if (statMemPRO >= EMemPRO.eopmpro_errStart)
-                                {//необходимо инициализировать повторную попытку записи
-                                    throw new Exception("Write to GPU " + Convert.ToString(CANHUB.FlowProRAMtoMEM.Counter) + " from " + Convert.ToString(CANHUB.FlowProRAMtoMEM.Length)
-                                          + " bytes. Error " + CANHUB.GetSringtEnumEMemPRO(CANHUB.FlowProRAMtoMEM.Fpro));
-                                }
-                                if (statMemPRO == EMemPRO.eopmpro_ready)
-                                { //данные в GRAM готовы для записи в TFT FLASH память
-                                    statMemPRO = CANHUB.WrTFTFLASHFlowPro(Efl_DEV.fld_TFTboard);//Запись в TFTFLASH
-                                    if (statMemPRO == EMemPRO.eopmpro_errBufCRC)//записанные в промежуточный буфер(например GRAM) данные имеют неверный CRC )
-                                    {//данные некорректно считаны из PC, необходимо повторить попытку
-                                        if (CANHUB.countAttempt++ > CANHUB.maxAttempt)
-                                        {//если количество ошибок превышает максимальное значение вызываем исключение
-                                            throw new Exception(" Ошибка записи из GRAM в TFTFLASH номер: " + CANHUB.GetSringtEnumEMemPRO(CANHUB.FlowProRAMtoMEM.Fpro));
-                                        }
-                                        continue;//вернёмся к началу цикла и повторим
-                                    }
-                                    if (statMemPRO > EMemPRO.eopmpro_errStart)
-                                    {//критическая ошибка записи в TFTFLASH, вызываем исключение и прерываем процесс
-                                        throw new Exception("Error " + CANHUB.GetSringtEnumEMemPRO(CANHUB.FlowProRAMtoMEM.Fpro) + "write to TFT FLASH");
-                                    }
-
-                                }
-
-                                if (WRpro.CancellationPending)
-                                {//остановка работы по нажатию кнопки останова в приложении
-                                    e.Cancel = true;
-                                    return;
-                                }
-                            }
-                            else
-                            if (CANHUB.FlowProRAMtoMEM.Counter * 100 / CANHUB.FlowProRAMtoMEM.Length > pPbarCount)
-                            {
-                                pPbarCount = CANHUB.FlowProRAMtoMEM.Counter * 100 / CANHUB.FlowProRAMtoMEM.Length;
-                                WRpro.ReportProgress(pPbarCount);
-                            }
-                        }
-                        */
 
                         if (CANHUB.DirFlowPro == "MENU")
                         {//отображение загруженной картики меню на TFT панели
