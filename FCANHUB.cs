@@ -1551,13 +1551,18 @@ foreach (TabPage tabPage in tabControl1.TabPages)
         private void buttestSw_Click(object sender, EventArgs e)
         {
             
-
             try
             {
 
                 //	public enum Efl_DEV { fld_PC = 0, fld_HUB, fld_MainBoard, fld_TFTboard, fld_FEUdetect, fld_none = 0x0f };//тип устройства
-                if (CANHUB.ChangeDEVExhRejWork(ERejWork.ervTFT_master, Efl_DEV.fld_TFTboard) == ERejWork.ervNewSetOK)
-                    MessageBox.Show("Режим работы изменён успешно", "Установлен режим \"ervTFT_master\"", MessageBoxButtons.OK, MessageBoxIcon.Information); ;
+                if (CANHUB.ChangeDEVExhRejWork(ERejWork.evrTFTcalibr, Efl_DEV.fld_TFTboard) == ERejWork.ervNewSetOK)
+                {
+                    DialogResult result = MessageBox.Show("Запуск калибровки TFT панели", "Дождитесь окончания калибровки панели и нажмите на кнопку ОК", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    if (result == DialogResult.OK)
+                    {
+                       // funk(); // Вызов функции funk() после нажатия OK
+                    }
+                }
 
             }
             catch (Exception)

@@ -822,11 +822,11 @@
             // 
             // buttestSw
             // 
-            this.buttestSw.Location = new System.Drawing.Point(68, 272);
+            this.buttestSw.Location = new System.Drawing.Point(581, 152);
             this.buttestSw.Name = "buttestSw";
-            this.buttestSw.Size = new System.Drawing.Size(110, 33);
+            this.buttestSw.Size = new System.Drawing.Size(283, 33);
             this.buttestSw.TabIndex = 33;
-            this.buttestSw.Text = "buttestSw";
+            this.buttestSw.Text = "Запустить калибровку TFT панели";
             this.buttestSw.UseVisualStyleBackColor = true;
             this.buttestSw.Click += new System.EventHandler(this.buttestSw_Click);
             // 
