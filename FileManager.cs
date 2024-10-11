@@ -5,6 +5,7 @@ using System.Text;
 using System.IO;
 using System.Windows.Forms;
 
+
 namespace FileCreater
 {
 
@@ -460,7 +461,8 @@ namespace FileCreater
     class SGRAF_FILES : TResurser
 
     {
-        private  int  const_sizeTFTFLASHalign = 4096;
+        public  int  const_sizeTFTFLASHalign = 4096;
+        public int const_AddLenFileSize = 16384;
 
         public int NumMenuOneMenuFile=0;
         public int sizeTFTFLASHalign { get { return const_sizeTFTFLASHalign; } }
@@ -602,8 +604,8 @@ namespace FileCreater
 
 
 
-        public void Init_ArrFLASHaddr_MENU(string CATGrafDir, int StartFLASHadr, int sizeFLASHalign = 4096)
-        {
+        public void Init_ArrFLASHaddr_MENU(string CATGrafDir, int StartFLASHadr,  int sizeFLASHalign, int AddLenFileSize)
+        {//создаёт файл адресов файлов меню во FLASH памяти
             string GrafDir = CATGrafDir;
 
             if (!Directory.Exists(GrafDir + "\\DOC"))
@@ -614,7 +616,7 @@ namespace FileCreater
             if (Directory.Exists(GrafDir))
             {
                 string[] dirs = Directory.GetDirectories(GrafDir);
-                foreach (string s in dirs)
+                foreach (string s in dirs)//cчитываем название всех файлов меню из директории
                 {
                     if (s.EndsWith("MENU"))
                     {
@@ -622,13 +624,15 @@ namespace FileCreater
                     }
                 }
 
+                int[] MenuFileAdr = new int[dirs.Length];
+
                 Array.Sort(MENUfileNames, StringComparer.CurrentCultureIgnoreCase);
 
                 List<string> adrMenuFLASH = new List<string>();
 
                 int FLASHadr = GetAlignVol(StartFLASHadr, sizeFLASHalign, 1);//на всякий пожарный проводим выравнивание стартового адреса
                 if (StartFLASHadr != FLASHadr)
-                {
+                {//проверка на выравнивание стартового адреса
                     throw new Exception("Стартовый адрес не выравнен на значение   " + Convert.ToString(sizeFLASHalign));
                 }
                 int Adr = StartFLASHadr;
@@ -637,7 +641,7 @@ namespace FileCreater
                 string s10tmp = "unsigned int FLASHadrMENU[] = { ";
                 int ipos = 0;
                 foreach (string s in MENUfileNames)
-                {
+                {//создание текстового файла со стартовыми адресами в  List<string> adrMenuFLASH
                     FileInfo fileInfo = new FileInfo(s);
                     if ((++ipos)== MENUfileNames.Length)
                     {
@@ -659,8 +663,8 @@ namespace FileCreater
                     }
                         
                     int len = Convert.ToInt32(fileInfo.Length);
-                    Adr = Adr + GetAlignVol(len, sizeFLASHalign, 1);
-                    
+                    Adr = Adr + GetAlignVol(len, sizeFLASHalign, 1)+ AddLenFileSize;//добавляем к предудущему адресу новый выравненный адрес плюс страховочную добавку на доработку рисунка в AddLenFileSize=16384 байт 
+
 
                 }
                

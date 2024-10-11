@@ -1394,7 +1394,7 @@ foreach (TabPage tabPage in tabControl1.TabPages)
         public int FLASHalign { get { return FM.FLASHalign; } }
         public int RAMalign { get { return FM.RAMalign; } } */
 
-                GRAF_FILES.Init_ArrFLASHaddr_MENU(Properties.Settings.Default.FolderGRAF, CANHUB.StartFLASHadr);
+                GRAF_FILES.Init_ArrFLASHaddr_MENU(Properties.Settings.Default.FolderGRAF, CANHUB.StartFLASHadr, GRAF_FILES.const_sizeTFTFLASHalign, GRAF_FILES.const_AddLenFileSize);
                 GRAF_FILES.Init_FONTE_PICT(Properties.Settings.Default.FolderGRAF, CANHUB.StartFLASHadr, CANHUB.adrBASEMenuGPUpict);
 
  //               GRAF_FILES.Init_MENU_enum(Properties.Settings.Default.FolderGRAF, 0x100000);//load filenames
