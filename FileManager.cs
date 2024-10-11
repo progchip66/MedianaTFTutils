@@ -470,7 +470,8 @@ namespace FileCreater
         public string[] MENUfileNames;
         public string[] PICTfileNames;
         public string[] FONTfileNames;
-
+//oldStopExtExhData служит для сохранения состояния прежнего флага обмена данными перед отключением его в ходе процесса записи и восстановления по окончанию процесса в прежнее состояние
+        public bool oldStopExtExhData=false;//если флаг установлен - обмен данными запрещён(например во время процесса записи данных во FLASH TFT панели)
 
         public  bool CheckFileExist(string filename, string startDIR, string endSUBDIR)
         {

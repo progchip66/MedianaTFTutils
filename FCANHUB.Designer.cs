@@ -87,6 +87,13 @@
             this.dataGridTimers = new System.Windows.Forms.DataGridView();
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
             this.tP_TFT_WR_RD = new System.Windows.Forms.TabPage();
+            this.gBtestWRgraf = new System.Windows.Forms.GroupBox();
+            this.lbNum_BAD = new System.Windows.Forms.Label();
+            this.lbNumGOOD = new System.Windows.Forms.Label();
+            this.lbCountBad = new System.Windows.Forms.Label();
+            this.lbCountGood = new System.Windows.Forms.Label();
+            this.bStopTestWrPict = new System.Windows.Forms.Button();
+            this.bStartTestWrPict = new System.Windows.Forms.Button();
             this.cBLoadPict = new System.Windows.Forms.CheckBox();
             this.buttestSw = new System.Windows.Forms.Button();
             this.cBoxEnMess = new System.Windows.Forms.CheckBox();
@@ -99,13 +106,6 @@
             this.bCOMselect = new System.Windows.Forms.Button();
             this.bfindPort = new System.Windows.Forms.Button();
             this.WRpro = new System.ComponentModel.BackgroundWorker();
-            this.gBtestWRgraf = new System.Windows.Forms.GroupBox();
-            this.bStartTestWrPict = new System.Windows.Forms.Button();
-            this.bStopTestWrPict = new System.Windows.Forms.Button();
-            this.lbCountGood = new System.Windows.Forms.Label();
-            this.lbCountBad = new System.Windows.Forms.Label();
-            this.lbNumGOOD = new System.Windows.Forms.Label();
-            this.lbNum_BAD = new System.Windows.Forms.Label();
             this.tabControl1.SuspendLayout();
             this.tabPagePack.SuspendLayout();
             this.statusStrip1.SuspendLayout();
@@ -738,14 +738,85 @@
             this.tP_TFT_WR_RD.UseVisualStyleBackColor = true;
             this.tP_TFT_WR_RD.Click += new System.EventHandler(this.tP_TFT_WR_RD_Click);
             // 
+            // gBtestWRgraf
+            // 
+            this.gBtestWRgraf.Controls.Add(this.lbNum_BAD);
+            this.gBtestWRgraf.Controls.Add(this.lbNumGOOD);
+            this.gBtestWRgraf.Controls.Add(this.lbCountBad);
+            this.gBtestWRgraf.Controls.Add(this.lbCountGood);
+            this.gBtestWRgraf.Controls.Add(this.bStopTestWrPict);
+            this.gBtestWRgraf.Controls.Add(this.bStartTestWrPict);
+            this.gBtestWRgraf.Location = new System.Drawing.Point(581, 13);
+            this.gBtestWRgraf.Name = "gBtestWRgraf";
+            this.gBtestWRgraf.Size = new System.Drawing.Size(283, 132);
+            this.gBtestWRgraf.TabIndex = 35;
+            this.gBtestWRgraf.TabStop = false;
+            this.gBtestWRgraf.Text = "Тест записи графики в память панели";
+            // 
+            // lbNum_BAD
+            // 
+            this.lbNum_BAD.AutoSize = true;
+            this.lbNum_BAD.Location = new System.Drawing.Point(180, 94);
+            this.lbNum_BAD.Name = "lbNum_BAD";
+            this.lbNum_BAD.Size = new System.Drawing.Size(13, 13);
+            this.lbNum_BAD.TabIndex = 5;
+            this.lbNum_BAD.Text = "0";
+            // 
+            // lbNumGOOD
+            // 
+            this.lbNumGOOD.AutoSize = true;
+            this.lbNumGOOD.Location = new System.Drawing.Point(58, 95);
+            this.lbNumGOOD.Name = "lbNumGOOD";
+            this.lbNumGOOD.Size = new System.Drawing.Size(13, 13);
+            this.lbNumGOOD.TabIndex = 4;
+            this.lbNumGOOD.Text = "0";
+            // 
+            // lbCountBad
+            // 
+            this.lbCountBad.AutoSize = true;
+            this.lbCountBad.Location = new System.Drawing.Point(164, 67);
+            this.lbCountBad.Name = "lbCountBad";
+            this.lbCountBad.Size = new System.Drawing.Size(54, 13);
+            this.lbCountBad.TabIndex = 3;
+            this.lbCountBad.Text = "CountBad";
+            // 
+            // lbCountGood
+            // 
+            this.lbCountGood.AutoSize = true;
+            this.lbCountGood.Location = new System.Drawing.Point(36, 67);
+            this.lbCountGood.Name = "lbCountGood";
+            this.lbCountGood.Size = new System.Drawing.Size(61, 13);
+            this.lbCountGood.TabIndex = 2;
+            this.lbCountGood.Text = "CountGood";
+            // 
+            // bStopTestWrPict
+            // 
+            this.bStopTestWrPict.Location = new System.Drawing.Point(138, 32);
+            this.bStopTestWrPict.Name = "bStopTestWrPict";
+            this.bStopTestWrPict.Size = new System.Drawing.Size(107, 23);
+            this.bStopTestWrPict.TabIndex = 1;
+            this.bStopTestWrPict.Text = "StopTestWrPict";
+            this.bStopTestWrPict.UseVisualStyleBackColor = true;
+            this.bStopTestWrPict.Click += new System.EventHandler(this.bStopTestWrPict_Click);
+            // 
+            // bStartTestWrPict
+            // 
+            this.bStartTestWrPict.Location = new System.Drawing.Point(18, 32);
+            this.bStartTestWrPict.Name = "bStartTestWrPict";
+            this.bStartTestWrPict.Size = new System.Drawing.Size(101, 23);
+            this.bStartTestWrPict.TabIndex = 0;
+            this.bStartTestWrPict.Text = "StartTestWrPict";
+            this.bStartTestWrPict.UseVisualStyleBackColor = true;
+            this.bStartTestWrPict.Click += new System.EventHandler(this.bStartTestWrPict_Click);
+            // 
             // cBLoadPict
             // 
             this.cBLoadPict.AutoSize = true;
             this.cBLoadPict.Location = new System.Drawing.Point(20, 209);
             this.cBLoadPict.Name = "cBLoadPict";
-            this.cBLoadPict.Size = new System.Drawing.Size(123, 17);
+            this.cBLoadPict.Size = new System.Drawing.Size(114, 17);
             this.cBLoadPict.TabIndex = 34;
-            this.cBLoadPict.Text = "Rej LoadPict Enable";
+            this.cBLoadPict.Text = "StopExhTFTBoard";
             this.cBLoadPict.UseVisualStyleBackColor = true;
             this.cBLoadPict.CheckedChanged += new System.EventHandler(this.cBLoadPict_CheckedChanged);
             // 
@@ -853,77 +924,6 @@
             this.WRpro.DoWork += new System.ComponentModel.DoWorkEventHandler(this.WRpro_DoWork);
             this.WRpro.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.WRpro_ProgressChanged);
             this.WRpro.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.WRpro_RunWorkerCompleted);
-            // 
-            // gBtestWRgraf
-            // 
-            this.gBtestWRgraf.Controls.Add(this.lbNum_BAD);
-            this.gBtestWRgraf.Controls.Add(this.lbNumGOOD);
-            this.gBtestWRgraf.Controls.Add(this.lbCountBad);
-            this.gBtestWRgraf.Controls.Add(this.lbCountGood);
-            this.gBtestWRgraf.Controls.Add(this.bStopTestWrPict);
-            this.gBtestWRgraf.Controls.Add(this.bStartTestWrPict);
-            this.gBtestWRgraf.Location = new System.Drawing.Point(581, 13);
-            this.gBtestWRgraf.Name = "gBtestWRgraf";
-            this.gBtestWRgraf.Size = new System.Drawing.Size(283, 132);
-            this.gBtestWRgraf.TabIndex = 35;
-            this.gBtestWRgraf.TabStop = false;
-            this.gBtestWRgraf.Text = "Тест записи графики в память панели";
-            // 
-            // bStartTestWrPict
-            // 
-            this.bStartTestWrPict.Location = new System.Drawing.Point(18, 32);
-            this.bStartTestWrPict.Name = "bStartTestWrPict";
-            this.bStartTestWrPict.Size = new System.Drawing.Size(101, 23);
-            this.bStartTestWrPict.TabIndex = 0;
-            this.bStartTestWrPict.Text = "StartTestWrPict";
-            this.bStartTestWrPict.UseVisualStyleBackColor = true;
-            this.bStartTestWrPict.Click += new System.EventHandler(this.bStartTestWrPict_Click);
-            // 
-            // bStopTestWrPict
-            // 
-            this.bStopTestWrPict.Location = new System.Drawing.Point(138, 32);
-            this.bStopTestWrPict.Name = "bStopTestWrPict";
-            this.bStopTestWrPict.Size = new System.Drawing.Size(107, 23);
-            this.bStopTestWrPict.TabIndex = 1;
-            this.bStopTestWrPict.Text = "StopTestWrPict";
-            this.bStopTestWrPict.UseVisualStyleBackColor = true;
-            this.bStopTestWrPict.Click += new System.EventHandler(this.bStopTestWrPict_Click);
-            // 
-            // lbCountGood
-            // 
-            this.lbCountGood.AutoSize = true;
-            this.lbCountGood.Location = new System.Drawing.Point(36, 67);
-            this.lbCountGood.Name = "lbCountGood";
-            this.lbCountGood.Size = new System.Drawing.Size(61, 13);
-            this.lbCountGood.TabIndex = 2;
-            this.lbCountGood.Text = "CountGood";
-            // 
-            // lbCountBad
-            // 
-            this.lbCountBad.AutoSize = true;
-            this.lbCountBad.Location = new System.Drawing.Point(164, 67);
-            this.lbCountBad.Name = "lbCountBad";
-            this.lbCountBad.Size = new System.Drawing.Size(54, 13);
-            this.lbCountBad.TabIndex = 3;
-            this.lbCountBad.Text = "CountBad";
-            // 
-            // lbNumGOOD
-            // 
-            this.lbNumGOOD.AutoSize = true;
-            this.lbNumGOOD.Location = new System.Drawing.Point(58, 95);
-            this.lbNumGOOD.Name = "lbNumGOOD";
-            this.lbNumGOOD.Size = new System.Drawing.Size(13, 13);
-            this.lbNumGOOD.TabIndex = 4;
-            this.lbNumGOOD.Text = "0";
-            // 
-            // lbNum_BAD
-            // 
-            this.lbNum_BAD.AutoSize = true;
-            this.lbNum_BAD.Location = new System.Drawing.Point(180, 94);
-            this.lbNum_BAD.Name = "lbNum_BAD";
-            this.lbNum_BAD.Size = new System.Drawing.Size(13, 13);
-            this.lbNum_BAD.TabIndex = 5;
-            this.lbNum_BAD.Text = "0";
             // 
             // FormHUB
             // 

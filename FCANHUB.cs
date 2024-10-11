@@ -88,7 +88,8 @@ namespace TFTprog
                 Thread.Sleep(50);
                 SLprocess.Text = "";
                 SLfileName.Text = "";
-                
+                cBLoadPict.Checked = GRAF_FILES.oldStopExtExhData;
+                       
             }
             else
             {
@@ -96,11 +97,13 @@ namespace TFTprog
                 PBwrFilePro.Value = 0;
                 SLprocess.Text = "";
                 SLfileName.Text = "";
+                GRAF_FILES.oldStopExtExhData = cBLoadPict.Checked;
+                cBLoadPict.Checked = false;
+                cBLoadPict.Checked = true;
             }
             groupBox2.Enabled = En;
-
         }
-        //public enum Efl_DEV { fld_PC = 0, fld_HUB, fld_MainBoard, fld_TFTboard, fld_FEUdetect, fld_none = 0x0f };//тип устройства
+        //public enum Efl_DEV { fld_PC = 0, fld_HUB, fld_MainBoard, fld_TFTboard, fld_FEUdetect, fld_none = 0x0f };//тип устройства Ошибка в
 
         public string TryOpenDev(BoardVer Dev, Efl_DEV DevType,bool ShowMess)
         {//public enum Efl_DEV { fld_PC = 0, fld_HUB, fld_MainBoard, fld_TFTboard, fld_FEUdetect, fld_none = 0x0f };//тип устройства
@@ -998,9 +1001,9 @@ foreach (TabPage tabPage in tabControl1.TabPages)
                 
                 CANHUB.StartFLASHadrFlowPro = CANHUB.StartFLASHadr;
 
-
-
                 EnDisComponent(false);
+
+                
                 WRpro.RunWorkerAsync();
             }
             catch (Exception ex)
@@ -1082,7 +1085,7 @@ foreach (TabPage tabPage in tabControl1.TabPages)
             {
 
                 CANHUB.enProAddOneMenuFile = 1;//Флаг перезаписи одного файла
-                CANHUB.OneFileNum = GRAF_FILES.GetFileOrder(filename);
+                CANHUB.OneFileNum = GRAF_FILES.GetFileOrder(filename);//определяем порядковый номер файла в директории
                 EnDisComponent(false);
                 WRpro.RunWorkerAsync();
             }
@@ -1114,8 +1117,6 @@ foreach (TabPage tabPage in tabControl1.TabPages)
             Array.Sort(MENUfilenames);
             int MENUfilecount = MENUfilenames.Length;
             
-
-
             if (CANHUB.enProAddOneMenuFile > 0)
             {//перезапись/дозапись одного графического файла в TFT FLASH память 
                 CANHUB.enProMenu = 0;
@@ -1124,6 +1125,21 @@ foreach (TabPage tabPage in tabControl1.TabPages)
 
                 try
                 {
+
+                    //определяем длину файла
+                    string MENU_FULLfilename = MENUfilenames[CANHUB.OneFileNum];
+                    FileInfo MENUfileInfo = new FileInfo(MENU_FULLfilename);
+                    long fileSizeInBytes = MENUfileInfo.Length;
+                    if (CANHUB.OneFileNum< (MENUfilesStartAdr.Length-1))
+                    {//только если файл не последний в списке делаем проверку не наезжает ли новый записываемый файл на начало следующего
+                        if (fileSizeInBytes>(MENUfilesStartAdr[CANHUB.OneFileNum+1]- MENUfilesStartAdr[CANHUB.OneFileNum]))
+                        {
+                            MessageBox.Show("Длина файла слишком велика для перезаписи, необходимо создание новых заголовочных структур файлов и полная перезапись всего меню, либо дозапись в конец под другим именем", "Ошибка записи файла",
+                                   MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            e.Result = null;
+                        }
+                    }
+                    
                     CANHUB.Up1Doun0adrFLASH = 1;
                     int pPbarCount = 0;
 
