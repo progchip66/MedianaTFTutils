@@ -87,6 +87,7 @@
             this.dataGridTimers = new System.Windows.Forms.DataGridView();
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
             this.tP_TFT_WR_RD = new System.Windows.Forms.TabPage();
+            this.textBox1 = new System.Windows.Forms.TextBox();
             this.gBtestWRgraf = new System.Windows.Forms.GroupBox();
             this.lbNum_BAD = new System.Windows.Forms.Label();
             this.lbNumGOOD = new System.Windows.Forms.Label();
@@ -105,8 +106,9 @@
             this.listComPort = new System.Windows.Forms.ListBox();
             this.bCOMselect = new System.Windows.Forms.Button();
             this.bfindPort = new System.Windows.Forms.Button();
+            this.tabPage1 = new System.Windows.Forms.TabPage();
             this.WRpro = new System.ComponentModel.BackgroundWorker();
-            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.lBrejak = new System.Windows.Forms.ListBox();
             this.tabControl1.SuspendLayout();
             this.tabPagePack.SuspendLayout();
             this.statusStrip1.SuspendLayout();
@@ -120,6 +122,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.tP_TFT_WR_RD.SuspendLayout();
             this.gBtestWRgraf.SuspendLayout();
+            this.tabPage1.SuspendLayout();
             this.SuspendLayout();
             // 
             // lHEX2
@@ -187,6 +190,7 @@
             this.tabControl1.Controls.Add(this.tabPagePack);
             this.tabControl1.Controls.Add(this.tabPageBTAddr);
             this.tabControl1.Controls.Add(this.tP_TFT_WR_RD);
+            this.tabControl1.Controls.Add(this.tabPage1);
             this.tabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControl1.Location = new System.Drawing.Point(0, 0);
             this.tabControl1.Name = "tabControl1";
@@ -740,6 +744,13 @@
             this.tP_TFT_WR_RD.UseVisualStyleBackColor = true;
             this.tP_TFT_WR_RD.Click += new System.EventHandler(this.tP_TFT_WR_RD_Click);
             // 
+            // textBox1
+            // 
+            this.textBox1.Location = new System.Drawing.Point(652, 325);
+            this.textBox1.Name = "textBox1";
+            this.textBox1.Size = new System.Drawing.Size(174, 20);
+            this.textBox1.TabIndex = 36;
+            // 
             // gBtestWRgraf
             // 
             this.gBtestWRgraf.Controls.Add(this.lbNum_BAD);
@@ -919,6 +930,17 @@
             this.bfindPort.UseVisualStyleBackColor = true;
             this.bfindPort.Click += new System.EventHandler(this.bfindPort_Click_1);
             // 
+            // tabPage1
+            // 
+            this.tabPage1.Controls.Add(this.lBrejak);
+            this.tabPage1.Location = new System.Drawing.Point(4, 22);
+            this.tabPage1.Name = "tabPage1";
+            this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage1.Size = new System.Drawing.Size(1019, 624);
+            this.tabPage1.TabIndex = 3;
+            this.tabPage1.Text = "Тест Режимов Работы";
+            this.tabPage1.UseVisualStyleBackColor = true;
+            // 
             // WRpro
             // 
             this.WRpro.WorkerReportsProgress = true;
@@ -927,12 +949,14 @@
             this.WRpro.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.WRpro_ProgressChanged);
             this.WRpro.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.WRpro_RunWorkerCompleted);
             // 
-            // textBox1
+            // lBrejak
             // 
-            this.textBox1.Location = new System.Drawing.Point(652, 325);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(174, 20);
-            this.textBox1.TabIndex = 36;
+            this.lBrejak.FormattingEnabled = true;
+            this.lBrejak.Location = new System.Drawing.Point(898, 6);
+            this.lBrejak.Name = "lBrejak";
+            this.lBrejak.Size = new System.Drawing.Size(118, 420);
+            this.lBrejak.TabIndex = 0;
+            this.lBrejak.DoubleClick += new System.EventHandler(this.lBrejak_DoubleClick);
             // 
             // FormHUB
             // 
@@ -965,6 +989,7 @@
             this.tP_TFT_WR_RD.PerformLayout();
             this.gBtestWRgraf.ResumeLayout(false);
             this.gBtestWRgraf.PerformLayout();
+            this.tabPage1.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -1049,6 +1074,8 @@
         private System.Windows.Forms.Button bStopTestWrPict;
         private System.Windows.Forms.Button bStartTestWrPict;
         private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.TabPage tabPage1;
+        private System.Windows.Forms.ListBox lBrejak;
     }
 }
 

@@ -14,6 +14,7 @@ using UART;
 using RS485;
 using COMMAND;
 using ExtHubComm;
+using TESTAKVA;
 
 
 namespace TFTprog
@@ -24,7 +25,7 @@ namespace TFTprog
         TFileManager fcreater = new TFileManager();
         SCANHUB CANHUB = new SCANHUB();
         SGRAF_FILES GRAF_FILES = new SGRAF_FILES();
-        
+        SWORKAKVATEST SWORKAKVATEST = new SWORKAKVATEST();
 
 
         public void LoadDefaultSetting()
@@ -278,6 +279,7 @@ namespace TFTprog
         {
             InitializeComponent();
             tabControl1.SelectedIndex = 2;
+            SWORKAKVATEST.UpdateListtBoxRejak(lBrejak);
             /*
 // активизация вкладки по имени
 foreach (TabPage tabPage in tabControl1.TabPages)
@@ -1673,10 +1675,23 @@ foreach (TabPage tabPage in tabControl1.TabPages)
             {
                 cancellationTokenSource.Cancel();
             }
+        }
 
 
 
-    }
+
+        private void lBrejak_DoubleClick(object sender, EventArgs e)
+        {
+            try
+            {
+                SWORKAKVATEST.selectedMode = SWORKAKVATEST.SetRejakFromListBox((ListBox)sender);
+                //добавить сюда код по выделению столбца таблицы
+            }
+            catch (ArgumentException ex)
+            {
+                MessageBox.Show(ex.Message, "Ошибка выбора режима ", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
 
         #endregion
 
