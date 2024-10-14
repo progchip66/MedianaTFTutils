@@ -4,31 +4,17 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Data;
+using TESTAKVA;
 
 namespace TFTprog
 {
 
-    public enum ErejAKVA
-    {
-
-    rejak_NULL = 0,
-    rejak_Wait   	= 		1,//ожидание
-	rejak_Wash  	 = 		2,//промывка
-	rejak_Fabric   	= 		3,//производство
-	rejak_prepWash	= 		4,//промывка преподготовки
-	rejak_newWash  	= 		5,//промывка новых мембран
-	rejak_Damage   	= 		6,//Авария
-	rejak_Sanitar   = 		7,//санитарная обработка
-	rejak_FirstStart  = 	8,//первое включение
-	rejak_speedWash  = 		9,//быстрая промывка
-
-	rejak_Stop		=		10,
-	rejak_none		=		0xff,
-    };
 
 
-    //    структура для хранения параметров - min,Vol, max
-    public struct SminmaxPar
+
+
+        //    структура для хранения параметров - min,Vol, max
+        public struct SminmaxPar
     {
         private float _min;
         private float _vol;

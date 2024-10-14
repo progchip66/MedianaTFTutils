@@ -1,4 +1,4 @@
-﻿namespace TFTprog.Properties {
+﻿﻿namespace TFTprog.Properties {
     
     
     // Этот класс позволяет обрабатывать определенные события в классе параметров:

@@ -106,6 +106,7 @@
             this.bCOMselect = new System.Windows.Forms.Button();
             this.bfindPort = new System.Windows.Forms.Button();
             this.WRpro = new System.ComponentModel.BackgroundWorker();
+            this.textBox1 = new System.Windows.Forms.TextBox();
             this.tabControl1.SuspendLayout();
             this.tabPagePack.SuspendLayout();
             this.statusStrip1.SuspendLayout();
@@ -717,6 +718,7 @@
             // 
             // tP_TFT_WR_RD
             // 
+            this.tP_TFT_WR_RD.Controls.Add(this.textBox1);
             this.tP_TFT_WR_RD.Controls.Add(this.gBtestWRgraf);
             this.tP_TFT_WR_RD.Controls.Add(this.cBLoadPict);
             this.tP_TFT_WR_RD.Controls.Add(this.buttestSw);
@@ -925,6 +927,13 @@
             this.WRpro.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.WRpro_ProgressChanged);
             this.WRpro.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.WRpro_RunWorkerCompleted);
             // 
+            // textBox1
+            // 
+            this.textBox1.Location = new System.Drawing.Point(652, 325);
+            this.textBox1.Name = "textBox1";
+            this.textBox1.Size = new System.Drawing.Size(174, 20);
+            this.textBox1.TabIndex = 36;
+            // 
             // FormHUB
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1039,6 +1048,7 @@
         private System.Windows.Forms.Label lbCountGood;
         private System.Windows.Forms.Button bStopTestWrPict;
         private System.Windows.Forms.Button bStartTestWrPict;
+        private System.Windows.Forms.TextBox textBox1;
     }
 }
 
