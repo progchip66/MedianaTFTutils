@@ -280,6 +280,18 @@ namespace TFTprog
             InitializeComponent();
             tabControl1.SelectedIndex = 2;
             SWORKAKVATEST.UpdateListtBoxRejak(lBrejak);
+            this.Text = "DrawConfig  " + Properties.Settings.Default.Version;
+            LBoxInterface.Items.Clear();
+            LoadDefaultSetting();
+            //инициализируем структуру с параметрами для отображения ParamsGridView
+            SWORKAKVATEST.initParamsGridView(SWORKAKVATEST.GVstruct);
+            //инициализируем и форматируем таблицу dGparam на основе структуры ParamsGridView
+            SWORKAKVATEST.ApplyGridViewParams(dGparam, SWORKAKVATEST.GVstruct);
+            // Отрисовка таблицы dGparam
+            //public void DrawAKVAtable(DataGridView AKVAparGridView, int x, int y, int L, int H, int L1, int widthleftCol, int Vcol, int Numrow)
+
+
+
             /*
 // активизация вкладки по имени
 foreach (TabPage tabPage in tabControl1.TabPages)
@@ -290,13 +302,26 @@ foreach (TabPage tabPage in tabControl1.TabPages)
         break;
     }
 }
+
+                    public int X { get; set; }//координала X левого верхнего угла
+        public int Y { get; set; }//координала Y левого верхнего угла
+        public int Width { get; set; }//ширина всех колонок, кроме левой
+        public int Height { get; set; }//высота всех строк
+        public int L1 { get; set; }//номер колонки которая отображается следующей за зафиксированной нулевой
+        public int WidthLeftCol { get; set; }//ширина крайне левой колонки
+        public int Vcol { get; set; }//количество колонок, которые должны умещаться в промежутке видимой зоны от крайне левой зафиксированной колонки до крайне правой
+
+        public GridViewParams(int _x, int _y, int _width, int _height, int _L1, int _widthLeftCol, int _vcol)
              */
 
 
-            this.Text = "DrawConfig  " + Properties.Settings.Default.Version;
-            LBoxInterface.Items.Clear();
-            LoadDefaultSetting();
-            //         CANHUB.GetOpenComport(Properties.Settings.Default.COMportName, Properties.Settings.Default.COMportBaud, false);
+
+
+
+
+
+
+
             if (CANHUB.IsPortOpen(listComPort.Items))
             {
                 Scan_and_OpenHUBTFTCOMport(Properties.Settings.Default.COMportName, Properties.Settings.Default.COMportBaud, cBoxEnMess.Checked);
@@ -1693,9 +1718,13 @@ foreach (TabPage tabPage in tabControl1.TabPages)
             }
         }
 
+
         #endregion
 
-
+        private void button4_Click(object sender, EventArgs e)
+        {
+           // SWORKAKVATEST.DrawAKVAtable(dGparam,  int x, int y, int L, int H, int L1, int widthleftCol, int Vcol);
+        }
     }
 
 

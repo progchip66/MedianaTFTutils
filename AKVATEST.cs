@@ -11,6 +11,7 @@ using UART;
 using RS485;
 using TFTprog;
 using System.IO;
+using System.Drawing;
 
 namespace TESTAKVA
 {
@@ -101,17 +102,45 @@ namespace TESTAKVA
         SAKVApar AKVApar;
         ErejAKVA rejAKVA;
 
-
-
     }
+
+    public struct GridViewParams
+    {
+        public int numCol { get; set; }//общее количество колонок в таблице
+        public int numRow { get; set; }//общее количество строк в таблице
+        public int X { get; set; }//координата X левого верхнего угла
+        public int Y { get; set; }//координата Y левого верхнего угла
+        public int Width { get; set; }//ширина всех колонок, кроме левой
+        public int Height { get; set; }//высота всех строк
+        public int L1 { get; set; }//номер колонки которая отображается следующей за зафиксированной нулевой
+        public int WidthLeftCol { get; set; }//ширина крайне левой колонки
+        public int Vcol { get; set; }//количество колонок, которые должны умещаться в промежутке видимой зоны от крайне левой зафиксированной колонки до крайне правой
+    }
+    
 
     public class SWORKAKVATEST
     {
+        public GridViewParams GVstruct;
+
         public ErejAKVA selectedMode = ErejAKVA.rejak_Stop;
 
 
 
+        private static readonly string[] rejheaders = { "Wait", "Wash", "Fabric", "prepWash", "newWash", "Damage", "Sanitar", "FirstStart", "speedWash", "Stop",
+                         "WaitRazd", "WashRazd", "FabricRazd", "prepWash1", "prepWash2", "prepWash3", "prepWash4",
+                         "newWash1", "newWash2", "Sanitar1", "Sanitar2", "Sanitar3", "Sanitar4", "Sanitar5", "Sanitar6",
+                         "Sanitar7", "Sanitar8", "FirstStart1", "FirstStart2", "FirstStart3", "FirstStart4" };
+        private static string[] rowHeaders = { "Rej", "FM[0]", "FM[1]", "FM[2]", "PT[0]", "PT[1]", "QT[0]", "QT[1]", "QT[2]",
+                            "InONOFF", "InESC", "InPressRazd", "InFlowMeters" };
+ 
+        public  void initSWORKAKVATEST(DataGridView gridView)
+        {//Инициализация параметров 
+         //инициализация структуры  GridViewParams GVstruct;
 
+        }
+
+
+        #region DateTime
         // Константы для расчётов
         private const int SecondsInMinute = 60;
         private const int SecondsInHour = 3600;
@@ -184,50 +213,188 @@ namespace TESTAKVA
             Console.WriteLine("Секунды с 01.01.2000 для текущего времени: " + sec);
         }
 
+        #endregion
 
-        public  void DrawAKVAtable(DataGridView AKVAparGridView, int x, int y, int L, int H, int L1, int widthleftCol, int Vcol)
-        {
-            // Устанавливаем содержимое первой строки (заголовки столбцов)
-            string[] headers = { "Wait", "Wash", "Fabric", "prepWash", "newWash", "Damage", "Sanitar", "FirstStart", "speedWash", "Stop",
-                         "WaitRazd", "WashRazd", "FabricRazd", "prepWash1", "prepWash2", "prepWash3", "prepWash4",
-                         "newWash1", "newWash2", "Sanitar1", "Sanitar2", "Sanitar3", "Sanitar4", "Sanitar5", "Sanitar6",
-                         "Sanitar7", "Sanitar8", "FirstStart1", "FirstStart2", "FirstStart3", "FirstStart4" };
+        /*
+            public struct GridViewParams
+            {
+                public int numCol { get; set; }//общее количество колонок в таблице
+                public int numRow { get; set; }//общее количество строк в таблице
+                public int X { get; set; }//координала X левого верхнего угла
+                public int Y { get; set; }//координала Y левого верхнего угла
+                public int Width { get; set; }//ширина всех колонок, кроме левой
+                public int Height { get; set; }//высота всех строк
+                public int L1 { get; set; }//номер колонки которая отображается следующей за зафиксированной нулевой
+                public int WidthLeftCol { get; set; }//ширина крайне левой колонки
+                public int Vcol { get; set; }//количество колонок, которые должны умещаться в промежутке видимой зоны от крайне левой зафиксированной колонки до крайне правой
+            }
+
+                        dGparam.Location.X,
+                dGparam.Location.Y,
+                dGparam.Size.Width,
+                dGparam.Size.Height,
+
+         */
+        public void initParamsGridView(GridViewParams GVstr)
+        {//начальная инициализация структуры GVstruct содержащей параметры таблицы
+
+            GVstr.numCol = rejheaders.Length + 1;//общее количество колонок в таблице
+            GVstr.numRow = rowHeaders.Length + 1;//общее количество строк в таблице
+            GVstr.L1 = 1;//номер колонки которая отображается следующей за зафиксированной нулевой
+            GVstr.WidthLeftCol = 75;  // //ширина крайне левой колонки
+            GVstr.Vcol = 7;           //количество колонок, которые должны умещаться в промежутке видимой зоны от крайне левой зафиксированной колонки до крайне правой
+
+        }
+
+
+
+        void AdjustRowHeights(DataGridView grid)
+        {//подстройка высоты строк для их корректного отображения
+            // Убедимся, что у нас есть необходимость в горизонтальном скролле
+            bool horizontalScrollRequired = grid.Columns.GetColumnsWidth(DataGridViewElementStates.Visible) > grid.ClientSize.Width;
+
+            // Устанавливаем ширину столбцов, если это необходимо
+            if (horizontalScrollRequired)
+            {
+                grid.HorizontalScrollingOffset = 0; // Обновляем положение скролла, если требуется
+            }
+
+            // Получаем высоту видимой области таблицы (включая скроллбар)
+            int visibleHeight = grid.ClientSize.Height;
+
+            // Проверяем, виден ли горизонтальный скроллбар, используя Controls
+            if (grid.Controls.OfType<HScrollBar>().FirstOrDefault()?.Visible == true)
+            {
+                // Получаем высоту горизонтального скроллбара, если он виден
+                visibleHeight -= SystemInformation.HorizontalScrollBarHeight;
+            }
+
+            // Количество строк
+            int rowCount = grid.RowCount;
+
+            // Учитываем высоту разделителей между строками
+            int totalDividerHeight = (rowCount - 1) * grid.RowTemplate.DividerHeight;
+
+            // Вычитаем высоту всех разделителей из общей высоты
+            visibleHeight -= totalDividerHeight;
+
+            // Вычисляем базовую высоту строки
+            int baseRowHeight = visibleHeight / rowCount;
+
+            // Вычисляем остаток высоты, который нужно добавить к первой строке
+            int extraHeight = visibleHeight % rowCount;
+
+            // Устанавливаем высоту для всех строк одинаково
+            for (int i = 0; i < rowCount; i++)
+            {
+                grid.Rows[i].Height = baseRowHeight;
+            }
+
+            // Прибавляем остаток к высоте первой строки
+            if (rowCount > 0)
+            {
+                grid.Rows[0].Height += extraHeight;
+            }
+
+            // Перерисовка DataGridView для применения изменений
+            grid.Refresh();
+        }
+
+
+
+
+        public void ApplyGridViewParams(DataGridView  gridView, GridViewParams gridParams)
+        {//gridView - сама таблица, gridParams - структура параметров таблицы
+           /* Старый обратный код пока не уничтожаю, просто закомментировал
+            // Установка позиции компонента (верхний левый угол)
+            gridView.Location = new Point(gridParams.X, gridParams.Y);
+            // Установка размеров компонента (ширина и высота)
+            gridView.Size = new Size(gridParams.Width, gridParams.Height);
+
+            // Чтение текущей позиции компонента (верхний левый угол)
+            gridParams.X = gridView.Location.X;
+            gridParams.Y = gridView.Location.Y;
+           */
+            // Чтение текущих размеров компонента в структуру (ширина и высота)
+            gridParams.Width = gridView.Size.Width;
+            gridParams.Height = gridView.Size.Height;
+
+            // Настройка первой фиксированной колонки (ширина крайней левой колонки)
+            if (gridView.Columns.Count > 0)
+            {
+                gridView.Columns[0].Width = gridParams.WidthLeftCol;
+            }
+
+            // Настройка видимых колонок (если нужно вручную настроить количество видимых колонок)
+            for (int i = 1; i < Math.Min(gridView.Columns.Count, gridParams.Vcol); i++)
+            {
+                // Устанавливаем ширину каждой видимой колонки (кроме первой фиксированной)
+                gridView.Columns[i].Width = (gridParams.Width - gridParams.WidthLeftCol) / gridParams.Vcol;
+            }
+
+            // Настройка для номера колонки, следующей за первой фиксированной (если требуется)
+            gridView.FirstDisplayedScrollingColumnIndex = gridParams.L1;
+        }
+
+
+        public void DrawAKVAtable(DataGridView AKVAparGridView, GridViewParams gridParams)
+        {//отрисовка таблицы на основе параметров GridViewParams
+            // Устанавливаем локальную переменную равную текущему количеству строк в таблице
+            int Numrow = rowHeaders.Length;
+
+
+
+            // Проверяем количество столбцов и корректируем, если необходимо
+            if (AKVAparGridView.ColumnCount < gridParams.numRow)
+            {
+                // Добавляем недостающие столбцы
+                for (int i = AKVAparGridView.ColumnCount; i < gridParams.numRow; i++)
+                {
+                    AKVAparGridView.Columns.Add($"Column{i}", $"Header {i}");
+                }
+            }
+            else if (AKVAparGridView.ColumnCount > gridParams.numRow)
+            {
+                // Удаляем лишние столбцы
+                for (int i = AKVAparGridView.ColumnCount - 1; i >= gridParams.numRow; i--)
+                {
+                    AKVAparGridView.Columns.RemoveAt(i);
+                }
+            }
 
             // Задаём размеры и расположение таблицы
-            AKVAparGridView.Location = new System.Drawing.Point(x, y);
+            // Не надо метять эти параметры!         AKVAparGridView.Location = new System.Drawing.Point(x, y);
 
-            // Настраиваем полосу прокрутки
+            // Разрешаем отображение полосы прокрутки
             AKVAparGridView.ScrollBars = ScrollBars.Horizontal;
 
-            // Задаём параметры высоты и ширины таблицы
-            AKVAparGridView.Size = new System.Drawing.Size(L, H - SystemInformation.HorizontalScrollBarHeight); // Учтём высоту скроллбара
 
-            // Устанавливаем количество строк и столбцов
-            AKVAparGridView.RowCount = 13;
-            AKVAparGridView.ColumnCount = headers.Length; // Общее количество столбцов, но будет видно только Vcol
+            // Устанавливаем количество строк
+            if (AKVAparGridView.RowCount != Numrow)
+            {
+                AKVAparGridView.RowCount = Numrow;
+            }
 
             // Настраиваем ширину столбцов
-            AKVAparGridView.Columns[0].Width = widthleftCol; // Левый столбец фиксированной ширины
-            int remainingWidth = L - widthleftCol;
-            int columnWidth = remainingWidth / Vcol; // Ширина видимых столбцов
+            AKVAparGridView.Columns[0].Width = gridParams.WidthLeftCol; // Левый столбец фиксированной ширины
+            int remainingWidth = AKVAparGridView.ClientSize.Width - gridParams.WidthLeftCol;
+            int columnWidth = remainingWidth / gridParams.numCol; // Ширина видимых столбцов
 
             for (int i = 1; i < AKVAparGridView.ColumnCount; i++)
             {
                 AKVAparGridView.Columns[i].Width = columnWidth;
             }
 
-
-
+            // Устанавливаем заголовки столбцов
             for (int i = 1; i < AKVAparGridView.ColumnCount; i++)
             {
-                AKVAparGridView.Columns[i].HeaderText = headers[i - 1];
+                AKVAparGridView.Columns[i].HeaderText = rowHeaders[i - 1];
             }
 
-            // Устанавливаем содержимое нулевого столбца
-            string[] rowHeaders = { "Rej", "FM[0]", "FM[1]", "FM[2]", "PT[0]", "PT[1]", "QT[0]", "QT[1]", "QT[2]",
-                            "InONOFF", "InESC", "InPressRazd", "InFlowMeters" };
+            // Устанавливаем содержимое нулевого столбца (заголовки строк)
 
-            for (int i = 0; i < AKVAparGridView.RowCount; i++)
+
+            for (int i = 0; i < Math.Min(Numrow, rowHeaders.Length); i++)
             {
                 AKVAparGridView.Rows[i].Cells[0].Value = rowHeaders[i];
             }
@@ -250,13 +417,22 @@ namespace TESTAKVA
                 }
             }
 
-            // Включаем горизонтальный скроллинг
-            AKVAparGridView.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.None;
-            AKVAparGridView.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.None;
-            AKVAparGridView.AllowUserToResizeColumns = false;
-            AKVAparGridView.AllowUserToResizeRows = false;
-            AKVAparGridView.ScrollBars = ScrollBars.Horizontal;
+            AdjustRowHeights(AKVAparGridView);
+
         }
+
+
+        /*
+                    // Включаем горизонтальный скроллинг
+                    AKVAparGridView.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.None;
+                    AKVAparGridView.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.None;
+                    AKVAparGridView.AllowUserToResizeColumns = false;
+                    AKVAparGridView.AllowUserToResizeRows = false;
+                    AKVAparGridView.ScrollBars = ScrollBars.Horizontal;
+        */
+
+
+
 
         public void saveAKVAparTable(string fileName, DataGridView AKVAparGridView)
         {
@@ -303,6 +479,57 @@ namespace TESTAKVA
                 }
             }
         }
+
+        #region ListBoxRejak
+
+        public void UpdateListtBoxRejak(ListBox lBox)
+        {
+            // Очищаем старое содержимое ListBox
+            lBox.Items.Clear();
+
+            // Массив строк, которые будут добавлены в ListBox
+            string[] modes = new string[]
+            {
+                "Wait",
+                "Wash",
+                "Fabric",
+                "prepWash",
+                "newWash",
+                "Damage",
+                "Sanitar",
+                "FirstStart",
+                "speedWash",
+                "Stop",
+                "WaitRazd",
+                "WashRazd",
+                "FabricRazd",
+                "prepWashSteep1",
+                "prepWashSteep2",
+                "prepWashSteep3",
+                "prepWashSteep4",
+                "prepnewWashSteep1",
+                "prepnewWashSteep2",
+                "SanitarSteep1",
+                "SanitarSteep2",
+                "SanitarSteep3",
+                "SanitarSteep4",
+                "SanitarSteep5",
+                "SanitarSteep6",
+                "SanitarSteep7",
+                "SanitarSteep8",
+                "FirstStartSteep1",
+                "FirstStatrSteep2",
+                "FirstStartSteep3",
+                "FirstStatrSteep4"
+            };
+
+            // Добавляем строки в ListBox
+            foreach (string mode in modes)
+            {
+                lBox.Items.Add(mode);
+            }
+        }
+
 
         public ErejAKVA SetRejakFromListBox(ListBox listBox)
         {
@@ -404,58 +631,12 @@ namespace TESTAKVA
             }
         }
 
+        #endregion
 
 
 
 
 
-        public void UpdateListtBoxRejak(ListBox lBox)
-        {
-            // Очищаем старое содержимое ListBox
-            lBox.Items.Clear();
-
-            // Массив строк, которые будут добавлены в ListBox
-            string[] modes = new string[]
-            {
-                "Wait",
-                "Wash",
-                "Fabric",
-                "prepWash",
-                "newWash",
-                "Damage",
-                "Sanitar",
-                "FirstStart",
-                "speedWash",
-                "Stop",
-                "WaitRazd",
-                "WashRazd",
-                "FabricRazd",
-                "prepWashSteep1",
-                "prepWashSteep2",
-                "prepWashSteep3",
-                "prepWashSteep4",
-                "prepnewWashSteep1",
-                "prepnewWashSteep2",
-                "SanitarSteep1",
-                "SanitarSteep2",
-                "SanitarSteep3",
-                "SanitarSteep4",
-                "SanitarSteep5",
-                "SanitarSteep6",
-                "SanitarSteep7",
-                "SanitarSteep8",
-                "FirstStartSteep1",
-                "FirstStatrSteep2",
-                "FirstStartSteep3",
-                "FirstStatrSteep4"
-            };
-
-            // Добавляем строки в ListBox
-            foreach (string mode in modes)
-            {
-                lBox.Items.Add(mode);
-            }
-        }
 
 
 
@@ -465,3 +646,5 @@ namespace TESTAKVA
 
     }
 }
+
+

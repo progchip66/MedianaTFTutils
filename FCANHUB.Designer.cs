@@ -107,8 +107,10 @@
             this.bCOMselect = new System.Windows.Forms.Button();
             this.bfindPort = new System.Windows.Forms.Button();
             this.tabPage1 = new System.Windows.Forms.TabPage();
-            this.WRpro = new System.ComponentModel.BackgroundWorker();
             this.lBrejak = new System.Windows.Forms.ListBox();
+            this.WRpro = new System.ComponentModel.BackgroundWorker();
+            this.dGparam = new System.Windows.Forms.DataGridView();
+            this.button4 = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
             this.tabPagePack.SuspendLayout();
             this.statusStrip1.SuspendLayout();
@@ -123,6 +125,7 @@
             this.tP_TFT_WR_RD.SuspendLayout();
             this.gBtestWRgraf.SuspendLayout();
             this.tabPage1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dGparam)).BeginInit();
             this.SuspendLayout();
             // 
             // lHEX2
@@ -932,6 +935,8 @@
             // 
             // tabPage1
             // 
+            this.tabPage1.Controls.Add(this.button4);
+            this.tabPage1.Controls.Add(this.dGparam);
             this.tabPage1.Controls.Add(this.lBrejak);
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
@@ -941,14 +946,6 @@
             this.tabPage1.Text = "Тест Режимов Работы";
             this.tabPage1.UseVisualStyleBackColor = true;
             // 
-            // WRpro
-            // 
-            this.WRpro.WorkerReportsProgress = true;
-            this.WRpro.WorkerSupportsCancellation = true;
-            this.WRpro.DoWork += new System.ComponentModel.DoWorkEventHandler(this.WRpro_DoWork);
-            this.WRpro.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.WRpro_ProgressChanged);
-            this.WRpro.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.WRpro_RunWorkerCompleted);
-            // 
             // lBrejak
             // 
             this.lBrejak.FormattingEnabled = true;
@@ -957,6 +954,32 @@
             this.lBrejak.Size = new System.Drawing.Size(118, 420);
             this.lBrejak.TabIndex = 0;
             this.lBrejak.DoubleClick += new System.EventHandler(this.lBrejak_DoubleClick);
+            // 
+            // WRpro
+            // 
+            this.WRpro.WorkerReportsProgress = true;
+            this.WRpro.WorkerSupportsCancellation = true;
+            this.WRpro.DoWork += new System.ComponentModel.DoWorkEventHandler(this.WRpro_DoWork);
+            this.WRpro.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.WRpro_ProgressChanged);
+            this.WRpro.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.WRpro_RunWorkerCompleted);
+            // 
+            // dGparam
+            // 
+            this.dGparam.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dGparam.Location = new System.Drawing.Point(8, 6);
+            this.dGparam.Name = "dGparam";
+            this.dGparam.Size = new System.Drawing.Size(884, 420);
+            this.dGparam.TabIndex = 1;
+            // 
+            // button4
+            // 
+            this.button4.Location = new System.Drawing.Point(111, 475);
+            this.button4.Name = "button4";
+            this.button4.Size = new System.Drawing.Size(114, 23);
+            this.button4.TabIndex = 2;
+            this.button4.Text = "button4";
+            this.button4.UseVisualStyleBackColor = true;
+            this.button4.Click += new System.EventHandler(this.button4_Click);
             // 
             // FormHUB
             // 
@@ -990,6 +1013,7 @@
             this.gBtestWRgraf.ResumeLayout(false);
             this.gBtestWRgraf.PerformLayout();
             this.tabPage1.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.dGparam)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -1076,6 +1100,8 @@
         private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.TabPage tabPage1;
         private System.Windows.Forms.ListBox lBrejak;
+        private System.Windows.Forms.DataGridView dGparam;
+        private System.Windows.Forms.Button button4;
     }
 }
 
