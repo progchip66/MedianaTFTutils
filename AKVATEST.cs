@@ -408,23 +408,6 @@ namespace TESTAKVA
                 AKVAparGridView.RowCount = Numrow;
             }
 
-/*
-            // Настраиваем ширину столбцов
-            AKVAparGridView.Columns[0].Width = gridParams.WidthLeftCol; // Левый столбец фиксированной ширины
-            int remainingWidth = AKVAparGridView.ClientSize.Width - gridParams.WidthLeftCol;
-            int columnWidth = remainingWidth / gridParams.ViewCol; // Ширина видимых столбцов
-
-            for (int i = 1; i < AKVAparGridView.ColumnCount; i++)
-            {
-                AKVAparGridView.Columns[i].Width = columnWidth;
-            }
-
-            // Устанавливаем заголовки столбцов
-            for (int i = 1; i < AKVAparGridView.ColumnCount; i++)
-            {
-                AKVAparGridView.Columns[i].HeaderText = rejheaders[i-1];
-            }
-*/
             // Устанавливаем содержимое нулевого столбца (заголовки строк)
 
 
@@ -457,14 +440,72 @@ namespace TESTAKVA
         }
 
 
-        /*
-                    // Включаем горизонтальный скроллинг
-                    AKVAparGridView.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.None;
-                    AKVAparGridView.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.None;
-                    AKVAparGridView.AllowUserToResizeColumns = false;
-                    AKVAparGridView.AllowUserToResizeRows = false;
-                    AKVAparGridView.ScrollBars = ScrollBars.Horizontal;
-        */
+        // Метод для выделения колонки по индексу
+        public void SelectColumn(DataGridView DGV, int columnIndex)
+        {
+
+            // Очистим все предыдущие выделения
+            DGV.ClearSelection();
+
+            // Убедимся, что индекс колонки допустимый
+            if (columnIndex >= 0 && columnIndex < DGV.Columns.Count)
+            {
+                // Получим прямоугольник колонки для проверки её видимости
+                Rectangle columnRect = DGV.GetColumnDisplayRectangle(columnIndex, true);
+
+                // Если ширина прямоугольника равна 0, это значит, что колонка скрыта
+                if (columnRect.Width == 0)
+                {
+                    // Если колонка скрыта, установим прокрутку на эту колонку
+                    DGV.FirstDisplayedScrollingColumnIndex = columnIndex;
+                }
+                else
+                {
+                    // Проверка, находится ли колонка в видимой области
+                    if (columnRect.Right > DGV.DisplayRectangle.Right || columnRect.Left < 0)
+                    {
+                        // Если колонка не видима, прокручиваем к ней
+                        DGV.FirstDisplayedScrollingColumnIndex = columnIndex;
+                    }
+                }
+
+                // Программно выделим всю колонку вместе с заголовком
+                DGV.Columns[columnIndex].Selected = true;
+            }
+            else
+            {
+                MessageBox.Show("Неправильный индекс колонки.");
+            }
+
+
+            /*            // Очистим все предыдущие выделения
+                        DGV.ClearSelection();
+
+                        // Убедимся, что индекс колонки допустимый
+                        if (columnIndex >= 0 && columnIndex < DGV.Columns.Count)
+                        {
+                            // Проверим, находится ли колонка в видимой области
+                             Rectangle columnRect = DGV.GetColumnDisplayRectangle(columnIndex, true);
+
+                            if (columnRect.Right > DGV.DisplayRectangle.Right)
+                            {
+                                // Прокручиваем влево, если колонка выходит за пределы видимой области
+                                DGV.FirstDisplayedScrollingColumnIndex = columnIndex;
+                            }
+                            else if (columnRect.Left < 0)
+                            {
+                                // Прокручиваем вправо, если колонка находится слева видимой области
+                                DGV.FirstDisplayedScrollingColumnIndex = columnIndex;
+                            }
+
+                            // Программно выделим всю колонку вместе с заголовком
+                            DGV.Columns[columnIndex].Selected = true;
+                        }
+                        else
+                        {
+                            MessageBox.Show("Неправильный индекс колонки.");
+                        }*/
+        }
 
 
 

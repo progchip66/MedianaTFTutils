@@ -107,10 +107,10 @@
             this.bCOMselect = new System.Windows.Forms.Button();
             this.bfindPort = new System.Windows.Forms.Button();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.button4 = new System.Windows.Forms.Button();
+            this.dGparam = new System.Windows.Forms.DataGridView();
             this.lBrejak = new System.Windows.Forms.ListBox();
             this.WRpro = new System.ComponentModel.BackgroundWorker();
-            this.dGparam = new System.Windows.Forms.DataGridView();
-            this.button4 = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
             this.tabPagePack.SuspendLayout();
             this.statusStrip1.SuspendLayout();
@@ -946,31 +946,6 @@
             this.tabPage1.Text = "Тест Режимов Работы";
             this.tabPage1.UseVisualStyleBackColor = true;
             // 
-            // lBrejak
-            // 
-            this.lBrejak.FormattingEnabled = true;
-            this.lBrejak.Location = new System.Drawing.Point(898, 6);
-            this.lBrejak.Name = "lBrejak";
-            this.lBrejak.Size = new System.Drawing.Size(118, 420);
-            this.lBrejak.TabIndex = 0;
-            this.lBrejak.DoubleClick += new System.EventHandler(this.lBrejak_DoubleClick);
-            // 
-            // WRpro
-            // 
-            this.WRpro.WorkerReportsProgress = true;
-            this.WRpro.WorkerSupportsCancellation = true;
-            this.WRpro.DoWork += new System.ComponentModel.DoWorkEventHandler(this.WRpro_DoWork);
-            this.WRpro.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.WRpro_ProgressChanged);
-            this.WRpro.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.WRpro_RunWorkerCompleted);
-            // 
-            // dGparam
-            // 
-            this.dGparam.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dGparam.Location = new System.Drawing.Point(8, 6);
-            this.dGparam.Name = "dGparam";
-            this.dGparam.Size = new System.Drawing.Size(884, 420);
-            this.dGparam.TabIndex = 1;
-            // 
             // button4
             // 
             this.button4.Location = new System.Drawing.Point(111, 475);
@@ -980,6 +955,32 @@
             this.button4.Text = "button4";
             this.button4.UseVisualStyleBackColor = true;
             this.button4.Click += new System.EventHandler(this.button4_Click);
+            // 
+            // dGparam
+            // 
+            this.dGparam.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dGparam.Location = new System.Drawing.Point(8, 6);
+            this.dGparam.Name = "dGparam";
+            this.dGparam.Size = new System.Drawing.Size(884, 420);
+            this.dGparam.TabIndex = 1;
+            // 
+            // lBrejak
+            // 
+            this.lBrejak.FormattingEnabled = true;
+            this.lBrejak.Location = new System.Drawing.Point(898, 6);
+            this.lBrejak.Name = "lBrejak";
+            this.lBrejak.Size = new System.Drawing.Size(118, 420);
+            this.lBrejak.TabIndex = 0;
+            this.lBrejak.SelectedIndexChanged += new System.EventHandler(this.lBrejak_SelectedIndexChanged);
+            this.lBrejak.DoubleClick += new System.EventHandler(this.lBrejak_DoubleClick);
+            // 
+            // WRpro
+            // 
+            this.WRpro.WorkerReportsProgress = true;
+            this.WRpro.WorkerSupportsCancellation = true;
+            this.WRpro.DoWork += new System.ComponentModel.DoWorkEventHandler(this.WRpro_DoWork);
+            this.WRpro.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.WRpro_ProgressChanged);
+            this.WRpro.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.WRpro_RunWorkerCompleted);
             // 
             // FormHUB
             // 

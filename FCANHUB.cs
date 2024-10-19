@@ -278,6 +278,9 @@ namespace TFTprog
         public FormHUB()
         {
             InitializeComponent();
+
+
+
             tabControl1.SelectedIndex = 2;
             WORKAKVATEST.UpdateListtBoxRejak(lBrejak);
             this.Text = "DrawConfig  " + Properties.Settings.Default.Version;
@@ -292,7 +295,18 @@ namespace TFTprog
 
            WORKAKVATEST.SetHeaders(dGparam, WORKAKVATEST.rejheaders, WORKAKVATEST.rowHeaders, WORKAKVATEST.GVstruct.WidthLeftCol, WORKAKVATEST.GVstruct.numCol, WORKAKVATEST.GVstruct.ViewCol);
            WORKAKVATEST.AdjustRowHeights(dGparam);
-         //   WORKAKVATEST.DrawAKVAtable(dGparam, WORKAKVATEST.GVstruct);
+
+            // Устанавливаем режим сортировки для всех столбцов
+            foreach (DataGridViewColumn column in dGparam.Columns)
+            {
+                column.SortMode = DataGridViewColumnSortMode.NotSortable;
+            }
+
+            // Устанавливаем режим выделения колонок с заголовком
+            dGparam.SelectionMode = DataGridViewSelectionMode.ColumnHeaderSelect;
+
+
+            //   WORKAKVATEST.DrawAKVAtable(dGparam, WORKAKVATEST.GVstruct);
 
 
             /*
@@ -1713,7 +1727,21 @@ foreach (TabPage tabPage in tabControl1.TabPages)
             try
             {
                 WORKAKVATEST.selectedMode = WORKAKVATEST.SetRejakFromListBox((ListBox)sender);
+                WORKAKVATEST.SelectColumn(dGparam, lBrejak.SelectedIndex);
+                /*
                 //добавить сюда код по выделению столбца таблицы
+                // Очистим все предыдущие выделения
+                dGparam.ClearSelection();
+                // Убедимся, что индекс колонки допустимый
+                if (lBrejak.SelectedIndex >= 0 && lBrejak.SelectedIndex < dGparam.Columns.Count)
+                {
+                    // Программно выделим всю колонку
+                    dataGridView1.Columns[lBrejak.SelectedIndex].Selected = true;
+                }
+
+                dGparam.ClearSelection(); // очищаем предыдущее выделение
+                if (lBrejak.SelectedIndex>=0)
+                dGparam.Columns[lBrejak.SelectedIndex].Selected = true; // выделяем нужную колонку*/
             }
             catch (ArgumentException ex)
             {
@@ -1727,6 +1755,11 @@ foreach (TabPage tabPage in tabControl1.TabPages)
         private void button4_Click(object sender, EventArgs e)
         {
            
+        }
+
+        private void lBrejak_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
         }
     }
 
