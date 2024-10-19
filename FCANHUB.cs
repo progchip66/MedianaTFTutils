@@ -25,7 +25,7 @@ namespace TFTprog
         TFileManager fcreater = new TFileManager();
         SCANHUB CANHUB = new SCANHUB();
         SGRAF_FILES GRAF_FILES = new SGRAF_FILES();
-        SWORKAKVATEST SWORKAKVATEST = new SWORKAKVATEST();
+        SWORKAKVATEST WORKAKVATEST = new SWORKAKVATEST();
 
 
         public void LoadDefaultSetting()
@@ -117,7 +117,7 @@ namespace TFTprog
                     switch (DevType)
                     {
                         case Efl_DEV.fld_HUB:
-                            MessageBox.Show("Определено устройство - USB HUB", "USB HUB успешно подключен подключен", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            MessageBox.Show("Определено устройство - USB HUB", "USB HUB успешно подключен", MessageBoxButtons.OK, MessageBoxIcon.Information);
                             break;
                         case Efl_DEV.fld_MainBoard:
                             MessageBox.Show("Определено устройство - Main Board", "Плата PLC контроллера", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -279,17 +279,20 @@ namespace TFTprog
         {
             InitializeComponent();
             tabControl1.SelectedIndex = 2;
-            SWORKAKVATEST.UpdateListtBoxRejak(lBrejak);
+            WORKAKVATEST.UpdateListtBoxRejak(lBrejak);
             this.Text = "DrawConfig  " + Properties.Settings.Default.Version;
             LBoxInterface.Items.Clear();
             LoadDefaultSetting();
             //инициализируем структуру с параметрами для отображения ParamsGridView
-            SWORKAKVATEST.initParamsGridView(SWORKAKVATEST.GVstruct);
+            WORKAKVATEST.GVstruct = WORKAKVATEST.initParamsGridView( WORKAKVATEST.GVstruct);
             //инициализируем и форматируем таблицу dGparam на основе структуры ParamsGridView
-            SWORKAKVATEST.ApplyGridViewParams(dGparam, SWORKAKVATEST.GVstruct);
+            WORKAKVATEST.GVstruct = WORKAKVATEST.ApplyGridViewParams(dGparam, WORKAKVATEST.GVstruct);
             // Отрисовка таблицы dGparam
-            //public void DrawAKVAtable(DataGridView AKVAparGridView, int x, int y, int L, int H, int L1, int widthleftCol, int Vcol, int Numrow)
+             
 
+           WORKAKVATEST.SetHeaders(dGparam, WORKAKVATEST.rejheaders, WORKAKVATEST.rowHeaders, WORKAKVATEST.GVstruct.WidthLeftCol, WORKAKVATEST.GVstruct.numCol, WORKAKVATEST.GVstruct.ViewCol);
+           WORKAKVATEST.AdjustRowHeights(dGparam);
+         //   WORKAKVATEST.DrawAKVAtable(dGparam, WORKAKVATEST.GVstruct);
 
 
             /*
@@ -1709,7 +1712,7 @@ foreach (TabPage tabPage in tabControl1.TabPages)
         {
             try
             {
-                SWORKAKVATEST.selectedMode = SWORKAKVATEST.SetRejakFromListBox((ListBox)sender);
+                WORKAKVATEST.selectedMode = WORKAKVATEST.SetRejakFromListBox((ListBox)sender);
                 //добавить сюда код по выделению столбца таблицы
             }
             catch (ArgumentException ex)
@@ -1723,7 +1726,7 @@ foreach (TabPage tabPage in tabControl1.TabPages)
 
         private void button4_Click(object sender, EventArgs e)
         {
-           // SWORKAKVATEST.DrawAKVAtable(dGparam,  int x, int y, int L, int H, int L1, int widthleftCol, int Vcol);
+           
         }
     }
 
