@@ -291,8 +291,6 @@ namespace TFTprog
             //инициализируем и форматируем таблицу dGparam на основе структуры ParamsGridView
             WORKAKVATEST.GVstruct = WORKAKVATEST.ApplyGridViewParams(dGparam, WORKAKVATEST.GVstruct);
             // Отрисовка таблицы dGparam
-             
-
            WORKAKVATEST.SetHeaders(dGparam, WORKAKVATEST.rejheaders, WORKAKVATEST.rowHeaders, WORKAKVATEST.GVstruct.WidthLeftCol, WORKAKVATEST.GVstruct.numCol, WORKAKVATEST.GVstruct.ViewCol);
            WORKAKVATEST.AdjustRowHeights(dGparam);
 
@@ -304,6 +302,10 @@ namespace TFTprog
 
             // Устанавливаем режим выделения колонок с заголовком
             dGparam.SelectionMode = DataGridViewSelectionMode.ColumnHeaderSelect;
+
+
+            //Инициализируем таблицу с таймерами
+            WORKAKVATEST.FormatTimersGridView(dGtimers,120,30);
 
 
             //   WORKAKVATEST.DrawAKVAtable(dGparam, WORKAKVATEST.GVstruct);
@@ -1758,6 +1760,16 @@ foreach (TabPage tabPage in tabControl1.TabPages)
         }
 
         private void lBrejak_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void b_newPARfilename_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void b_PARtableLoad_Click(object sender, EventArgs e)
         {
 
         }

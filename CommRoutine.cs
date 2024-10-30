@@ -69,6 +69,7 @@ namespace COMMAND
 	public enum ECommand
 	{
 		cmd_abort = 0x00,
+		cmd_ReadyRead = 0x01,//команда разрешающая передачу данных от других устройств в качестве мастера
 
 		cmd_wr_connect = 0x10,
 		cmd_wr_wakeUp = 0x11,
@@ -95,21 +96,26 @@ namespace COMMAND
 		cmd_wrFLASH = 0x49,
 		cmd_rdFLASH = 0x4A,
 		cmd_startboot = 0x50,
-		cmd_startTftCalibr = 0x53,//
+
 		cmd_get_Ver = 0x54,//команда считывания версии программного и аппаратного обеспечения.
+
 		cmd_RWpredef_Conf = 0x55,//передача содержания предустановленных значений конфигурации и запись/чтение конфигурации в RAM
 		cmd_RWconf_FLASH = 0x56,//запись/чтение существующей конфигурации из RAM по заданному адресу во FLASH
-		cmd_StructParams = 0x57,//Команда обмена структурой параметров.
-		cmd_Rejim = 0x58,//установка режима работы и общения с внешними платами
-		cmd_Events = 0x59,//чтение/запись событий
+		cmd_ExhParams = 0x57,//Команда обмена параметрами передаёт текущий режим работы, в ответ получает структуру AKVAPAR
+		cmd_Rejim = 0x58,//установка режима работы
+
+
+
+		cmd_Change_rejak = 0x59,//команда принудительной смены режима работы
 
 		cmd_8byte = 0x5A,//установка режима работы и настроек
 		cmd_TFTmenu = 0x5B,//вывод меню на TFT панели
 
-		cmd_GetAKVAparFromPC = 0x60,//PC как мастер считывает структуру допустимых параметров
-		cmd_SendAKVAparToPC = 0x61, //PC как мастер Записывает структуру допустимых параметров
-
+		cmd_SetRTCDateTime = 0x5C,//Установка нового системного времени и даты путём отправки в плату управления
+		cmd_extTimers = 0x5D,//Установка нового системного времени и даты путём отправки в плату управления
 		cmd_USER = 0x70,
+		cmd_TimeAccelerat = 0x71,
+		cmd_MaxminAKVAparMCUtoPC = 0x72,
 
 		cmd_rd_flow = 0x81,
 
@@ -119,8 +125,10 @@ namespace COMMAND
 		cmd_get_ADC = 0x94,
 		cmd_rd_str = 0x95,
 
+
 		cmd_test = 0xfe,
 		cmd_none = 0xff,
+
 	};
 
 

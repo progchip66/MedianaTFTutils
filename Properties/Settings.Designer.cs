@@ -202,5 +202,17 @@ namespace TFTprog.Properties {
                 this["EnServMess"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string ParamFileName {
+            get {
+                return ((string)(this["ParamFileName"]));
+            }
+            set {
+                this["ParamFileName"] = value;
+            }
+        }
     }
 }

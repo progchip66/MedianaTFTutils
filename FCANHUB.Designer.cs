@@ -107,10 +107,16 @@
             this.bCOMselect = new System.Windows.Forms.Button();
             this.bfindPort = new System.Windows.Forms.Button();
             this.tabPage1 = new System.Windows.Forms.TabPage();
-            this.button4 = new System.Windows.Forms.Button();
+            this.b_newPARfilename = new System.Windows.Forms.Button();
+            this.b_PARtableSave = new System.Windows.Forms.Button();
+            this.b_PARtableLoad = new System.Windows.Forms.Button();
+            this.tB_PARfileMan = new System.Windows.Forms.TextBox();
             this.dGparam = new System.Windows.Forms.DataGridView();
             this.lBrejak = new System.Windows.Forms.ListBox();
             this.WRpro = new System.ComponentModel.BackgroundWorker();
+            this.lbFT0minusFT1 = new System.Windows.Forms.Label();
+            this.lbFT1divFT0mult100 = new System.Windows.Forms.Label();
+            this.dGtimers = new System.Windows.Forms.DataGridView();
             this.tabControl1.SuspendLayout();
             this.tabPagePack.SuspendLayout();
             this.statusStrip1.SuspendLayout();
@@ -126,6 +132,7 @@
             this.gBtestWRgraf.SuspendLayout();
             this.tabPage1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dGparam)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dGtimers)).BeginInit();
             this.SuspendLayout();
             // 
             // lHEX2
@@ -198,7 +205,7 @@
             this.tabControl1.Location = new System.Drawing.Point(0, 0);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(1027, 650);
+            this.tabControl1.Size = new System.Drawing.Size(1027, 691);
             this.tabControl1.SizeMode = System.Windows.Forms.TabSizeMode.FillToRight;
             this.tabControl1.TabIndex = 17;
             // 
@@ -536,7 +543,6 @@
             this.bGRAFdir.Name = "bGRAFdir";
             this.bGRAFdir.Size = new System.Drawing.Size(99, 24);
             this.bGRAFdir.TabIndex = 11;
-            this.bGRAFdir.Text = "SELECT";
             this.bGRAFdir.UseVisualStyleBackColor = true;
             this.bGRAFdir.Click += new System.EventHandler(this.bGRAFdir_Click);
             // 
@@ -710,9 +716,9 @@
             // dataGridTimers
             // 
             this.dataGridTimers.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridTimers.Location = new System.Drawing.Point(8, 398);
+            this.dataGridTimers.Location = new System.Drawing.Point(8, 380);
             this.dataGridTimers.Name = "dataGridTimers";
-            this.dataGridTimers.Size = new System.Drawing.Size(645, 136);
+            this.dataGridTimers.Size = new System.Drawing.Size(645, 86);
             this.dataGridTimers.TabIndex = 1;
             // 
             // dataGridView1
@@ -935,41 +941,73 @@
             // 
             // tabPage1
             // 
-            this.tabPage1.Controls.Add(this.button4);
+            this.tabPage1.Controls.Add(this.dGtimers);
+            this.tabPage1.Controls.Add(this.b_PARtableLoad);
+            this.tabPage1.Controls.Add(this.b_PARtableSave);
+            this.tabPage1.Controls.Add(this.b_newPARfilename);
+            this.tabPage1.Controls.Add(this.lbFT1divFT0mult100);
+            this.tabPage1.Controls.Add(this.lbFT0minusFT1);
+            this.tabPage1.Controls.Add(this.tB_PARfileMan);
             this.tabPage1.Controls.Add(this.dGparam);
             this.tabPage1.Controls.Add(this.lBrejak);
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(1019, 624);
+            this.tabPage1.Size = new System.Drawing.Size(1019, 665);
             this.tabPage1.TabIndex = 3;
             this.tabPage1.Text = "Тест Режимов Работы";
             this.tabPage1.UseVisualStyleBackColor = true;
             // 
-            // button4
+            // b_newPARfilename
             // 
-            this.button4.Location = new System.Drawing.Point(111, 475);
-            this.button4.Name = "button4";
-            this.button4.Size = new System.Drawing.Size(114, 23);
-            this.button4.TabIndex = 2;
-            this.button4.Text = "button4";
-            this.button4.UseVisualStyleBackColor = true;
-            this.button4.Click += new System.EventHandler(this.button4_Click);
+            this.b_newPARfilename.Location = new System.Drawing.Point(801, 637);
+            this.b_newPARfilename.Name = "b_newPARfilename";
+            this.b_newPARfilename.Size = new System.Drawing.Size(91, 23);
+            this.b_newPARfilename.TabIndex = 3;
+            this.b_newPARfilename.Text = "Выбор файла";
+            this.b_newPARfilename.UseVisualStyleBackColor = true;
+            this.b_newPARfilename.Click += new System.EventHandler(this.b_newPARfilename_Click);
+            // 
+            // b_PARtableSave
+            // 
+            this.b_PARtableSave.Location = new System.Drawing.Point(654, 637);
+            this.b_PARtableSave.Name = "b_PARtableSave";
+            this.b_PARtableSave.Size = new System.Drawing.Size(130, 23);
+            this.b_PARtableSave.TabIndex = 2;
+            this.b_PARtableSave.Text = "Сохранить параметры";
+            this.b_PARtableSave.UseVisualStyleBackColor = true;
+            // 
+            // b_PARtableLoad
+            // 
+            this.b_PARtableLoad.Location = new System.Drawing.Point(521, 637);
+            this.b_PARtableLoad.Name = "b_PARtableLoad";
+            this.b_PARtableLoad.Size = new System.Drawing.Size(127, 23);
+            this.b_PARtableLoad.TabIndex = 1;
+            this.b_PARtableLoad.Text = "Загрузить параметры";
+            this.b_PARtableLoad.UseVisualStyleBackColor = true;
+            this.b_PARtableLoad.Click += new System.EventHandler(this.b_PARtableLoad_Click);
+            // 
+            // tB_PARfileMan
+            // 
+            this.tB_PARfileMan.Location = new System.Drawing.Point(-4, 637);
+            this.tB_PARfileMan.Name = "tB_PARfileMan";
+            this.tB_PARfileMan.Size = new System.Drawing.Size(497, 20);
+            this.tB_PARfileMan.TabIndex = 0;
             // 
             // dGparam
             // 
             this.dGparam.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dGparam.Location = new System.Drawing.Point(8, 6);
             this.dGparam.Name = "dGparam";
-            this.dGparam.Size = new System.Drawing.Size(884, 420);
+            this.dGparam.Size = new System.Drawing.Size(776, 345);
             this.dGparam.TabIndex = 1;
             // 
             // lBrejak
             // 
             this.lBrejak.FormattingEnabled = true;
-            this.lBrejak.Location = new System.Drawing.Point(898, 6);
+            this.lBrejak.Location = new System.Drawing.Point(884, 6);
             this.lBrejak.Name = "lBrejak";
-            this.lBrejak.Size = new System.Drawing.Size(118, 420);
+            this.lBrejak.Size = new System.Drawing.Size(132, 420);
             this.lBrejak.TabIndex = 0;
             this.lBrejak.SelectedIndexChanged += new System.EventHandler(this.lBrejak_SelectedIndexChanged);
             this.lBrejak.DoubleClick += new System.EventHandler(this.lBrejak_DoubleClick);
@@ -982,11 +1020,37 @@
             this.WRpro.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.WRpro_ProgressChanged);
             this.WRpro.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.WRpro_RunWorkerCompleted);
             // 
+            // lbFT0minusFT1
+            // 
+            this.lbFT0minusFT1.AutoSize = true;
+            this.lbFT0minusFT1.Location = new System.Drawing.Point(895, 459);
+            this.lbFT0minusFT1.Name = "lbFT0minusFT1";
+            this.lbFT0minusFT1.Size = new System.Drawing.Size(60, 13);
+            this.lbFT0minusFT1.TabIndex = 3;
+            this.lbFT0minusFT1.Text = "FT0-FT1 = ";
+            // 
+            // lbFT1divFT0mult100
+            // 
+            this.lbFT1divFT0mult100.AutoSize = true;
+            this.lbFT1divFT0mult100.Location = new System.Drawing.Point(895, 481);
+            this.lbFT1divFT0mult100.Name = "lbFT1divFT0mult100";
+            this.lbFT1divFT0mult100.Size = new System.Drawing.Size(84, 13);
+            this.lbFT1divFT0mult100.TabIndex = 4;
+            this.lbFT1divFT0mult100.Text = "FT1/FT0*100 = ";
+            // 
+            // dGtimers
+            // 
+            this.dGtimers.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dGtimers.Location = new System.Drawing.Point(8, 368);
+            this.dGtimers.Name = "dGtimers";
+            this.dGtimers.Size = new System.Drawing.Size(776, 126);
+            this.dGtimers.TabIndex = 5;
+            // 
             // FormHUB
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1027, 650);
+            this.ClientSize = new System.Drawing.Size(1027, 691);
             this.Controls.Add(this.tabControl1);
             this.Name = "FormHUB";
             this.Text = "RIVERDI GRAF FILES MAKER";
@@ -1014,7 +1078,9 @@
             this.gBtestWRgraf.ResumeLayout(false);
             this.gBtestWRgraf.PerformLayout();
             this.tabPage1.ResumeLayout(false);
+            this.tabPage1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dGparam)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dGtimers)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -1102,7 +1168,13 @@
         private System.Windows.Forms.TabPage tabPage1;
         private System.Windows.Forms.ListBox lBrejak;
         private System.Windows.Forms.DataGridView dGparam;
-        private System.Windows.Forms.Button button4;
+        private System.Windows.Forms.Button b_newPARfilename;
+        private System.Windows.Forms.Button b_PARtableSave;
+        private System.Windows.Forms.Button b_PARtableLoad;
+        private System.Windows.Forms.TextBox tB_PARfileMan;
+        private System.Windows.Forms.Label lbFT1divFT0mult100;
+        private System.Windows.Forms.Label lbFT0minusFT1;
+        private System.Windows.Forms.DataGridView dGtimers;
     }
 }
 

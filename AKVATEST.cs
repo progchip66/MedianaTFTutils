@@ -12,6 +12,7 @@ using RS485;
 using TFTprog;
 using System.IO;
 using System.Drawing;
+using System.Runtime.InteropServices;
 
 namespace TESTAKVA
 {
@@ -96,13 +97,7 @@ namespace TESTAKVA
         public uint TimeStampSec { get; set; }
     }
 
-    class AKVATEST
-    {
 
-        SAKVApar AKVApar;
-        ErejAKVA rejAKVA;
-
-    }
 
     public struct GridViewParams
     {
@@ -116,7 +111,8 @@ namespace TESTAKVA
         public int WidthLeftCol { get; set; }//ширина крайне левой колонки
         public int ViewCol { get; set; }//количество колонок, которые должны умещаться в промежутке видимой зоны от крайне левой зафиксированной колонки до крайне правой
     }
-    
+
+
 
     public class SWORKAKVATEST
     {
@@ -137,6 +133,219 @@ namespace TESTAKVA
          //инициализация структуры  GridViewParams GVstruct;
 
         }
+
+
+        #region Timers
+        public enum ErejTimer : uint
+        {
+            rejt_off = 0x00U,
+            rejt_on = 0x01U,
+            rejt_over = 0x02U
+        }
+
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        public struct SATIMER
+        {
+            public ErejTimer Rej;
+            public uint CountSec;
+            public uint LastStamp_mSec;
+            public uint MaxCountSec;
+            public uint DamageSec;
+        }
+
+
+            private const int ArraySize = 8;
+            public SATIMER[] T = new SATIMER[ArraySize];
+
+            public void FromByteArray(byte[] data)
+            {//преобразования из массива байт в структуру
+                if (data.Length != Marshal.SizeOf(typeof(SATIMER)) * ArraySize)
+                    throw new ArgumentException("Invalid data length");
+
+                for (int i = 0; i < ArraySize; i++)
+                {
+                    int offset = i * Marshal.SizeOf(typeof(SATIMER));
+                    IntPtr ptr = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(SATIMER)));
+                    Marshal.Copy(data, offset, ptr, Marshal.SizeOf(typeof(SATIMER)));
+                    T[i] = (SATIMER)Marshal.PtrToStructure(ptr, typeof(SATIMER));
+                    Marshal.FreeHGlobal(ptr);
+                }
+            }
+
+        доработать с помощью этого универсального форматёра следующую таблицу
+        public void FormatTimersGridView(DataGridView dataGridView, int rowHeaderWidth, int columnHeaderHeight, string[] rowHeaders, string[] columnHeaders)
+        {
+            int rowCount = rowHeaders.Length;
+            int columnCount = columnHeaders.Length;
+
+            // Настройка DataGridView
+            dataGridView.ScrollBars = ScrollBars.None; // Отключение полос прокрутки
+            dataGridView.AllowUserToAddRows = false;  // Отключение возможности добавления новой строки
+
+            // Очистка столбцов и строк
+            dataGridView.Columns.Clear();
+            dataGridView.Rows.Clear();
+
+            // Установка размеров заголовков с учетом остатков
+            int totalWidth = dataGridView.ClientSize.Width;
+            int totalHeight = dataGridView.ClientSize.Height;
+
+            // Вычисление остатков
+            int widthRemainder = (totalWidth - rowHeaderWidth) % columnCount;
+            int heightRemainder = (totalHeight - columnHeaderHeight) % rowCount;
+
+            // Увеличение размеров заголовков на остатки
+            dataGridView.RowHeadersWidth = rowHeaderWidth + widthRemainder;
+            dataGridView.ColumnHeadersHeight = columnHeaderHeight + heightRemainder;
+
+            // Установка столбцов
+            for (int i = 0; i < columnCount; i++)
+            {
+                dataGridView.Columns.Add($"C{i}", columnHeaders[i]);
+            }
+
+            // Добавление строк и установка заголовков строк
+            for (int i = 0; i < rowCount; i++)
+            {
+                dataGridView.Rows.Add();
+                dataGridView.Rows[i].HeaderCell.Value = rowHeaders[i];
+            }
+
+            // Вычисление ширины столбцов и высоты строк
+            int columnWidth = (totalWidth - dataGridView.RowHeadersWidth) / columnCount;
+            int rowHeight = (totalHeight - dataGridView.ColumnHeadersHeight) / rowCount;
+
+            // Установка ширины столбцов
+            foreach (DataGridViewColumn column in dataGridView.Columns)
+            {
+                column.Width = columnWidth;
+            }
+
+            // Установка высоты строк
+            foreach (DataGridViewRow row in dataGridView.Rows)
+            {
+                row.Height = rowHeight;
+            }
+
+            // Включение отображения заголовков строк
+            dataGridView.RowHeadersVisible = true;
+        }
+
+
+
+
+
+        public void FormatTimersGridView(DataGridView dataGridView, int rowHeaderWidth, int columnHeaderHeight)
+        {
+            // Заголовки строк
+            string[] rowHeaders = { "Rej", "CountSec", "LastStamp_mSec", "MaxCountSec", "DamageSec" };
+            int rowCount = rowHeaders.Length;
+
+            // Настройка DataGridView
+            dataGridView.ScrollBars = ScrollBars.None; // Отключение полос прокрутки
+            dataGridView.AllowUserToAddRows = false;  // Отключение возможности добавления новой строки
+
+            // Очистка столбцов и строк
+            dataGridView.Columns.Clear();
+            dataGridView.Rows.Clear();
+
+            // Установка размеров заголовков с учетом остатков
+            int totalWidth = dataGridView.ClientSize.Width;
+            int totalHeight = dataGridView.ClientSize.Height;
+
+      //      int verticalBorderThickness = 1;
+      //      int horizontalBorderThickness = 1;
+            int columnDividerWidth = 0;
+            int rowDividerHeight = 0;
+
+            // Вычисление остатков
+            int widthRemainder = (totalWidth - rowHeaderWidth - columnDividerWidth * ArraySize) % ArraySize;
+            int heightRemainder = (totalHeight - columnHeaderHeight - rowDividerHeight * rowCount) % rowCount;
+
+            // Увеличение размеров заголовков на остатки
+            dataGridView.RowHeadersWidth = rowHeaderWidth + widthRemainder;
+            dataGridView.ColumnHeadersHeight = columnHeaderHeight + heightRemainder;
+
+            // Установка столбцов
+            for (int i = 0; i < ArraySize; i++)
+            {
+                dataGridView.Columns.Add($"T{i}", $"T{i}");
+            }
+
+            // Добавление строк и установка заголовков строк
+            for (int i = 0; i < rowCount; i++)
+            {
+                dataGridView.Rows.Add();
+                dataGridView.Rows[i].HeaderCell.Value = rowHeaders[i];
+            }
+
+            // Вычисление ширины столбцов и высоты строк
+            int columnWidth = (totalWidth - dataGridView.RowHeadersWidth - columnDividerWidth * ArraySize) / ArraySize;
+            int rowHeight = (totalHeight - dataGridView.ColumnHeadersHeight - rowDividerHeight * rowCount) / rowCount;
+
+            // Установка ширины столбцов
+            foreach (DataGridViewColumn column in dataGridView.Columns)
+            {
+                column.Width = columnWidth;
+            }
+
+            // Установка высоты строк
+            foreach (DataGridViewRow row in dataGridView.Rows)
+            {
+                row.Height = rowHeight;
+            }
+
+            // Включение отображения заголовков строк
+            dataGridView.RowHeadersVisible = true;
+        }
+
+
+
+
+
+
+
+
+
+        public void DisplayInDataGridView(DataGridView dataGridView)
+            {
+                //Запись должна проводиться только в нередактируемую ячейку и только если её значение изменилось.
+                // Заполняем таблицу данными из SATIMER[]
+                for (int i = 0; i < ArraySize; i++)
+                {
+                    // Проверяем каждую ячейку перед записью
+                    UpdateCellIfChanged(dataGridView.Rows[0].Cells[i + 1], T[i].Rej);
+                    UpdateCellIfChanged(dataGridView.Rows[1].Cells[i + 1], T[i].CountSec);
+                    UpdateCellIfChanged(dataGridView.Rows[2].Cells[i + 1], T[i].LastStamp_mSec);
+                    UpdateCellIfChanged(dataGridView.Rows[3].Cells[i + 1], T[i].MaxCountSec);
+                    UpdateCellIfChanged(dataGridView.Rows[4].Cells[i + 1], T[i].DamageSec);
+                }
+            }
+
+            public void UpdateCellIfChanged(DataGridViewCell cell, object newValue)
+            {
+                // Проверяем, что ячейка нередактируемая и новое значение отличается от текущего
+                if (!cell.ReadOnly && !Equals(cell.Value, newValue))
+                {
+                    cell.Value = newValue;
+                }
+            }
+
+            public void UpdateFromDataGridView(DataGridView dataGridView)
+            {// считывание всех данных из таблицы
+                for (int i = 0; i < ArraySize; i++)
+                {
+                    T[i].Rej = (ErejTimer)Enum.Parse(typeof(ErejTimer), dataGridView.Rows[0].Cells[i + 1].Value.ToString());
+                    T[i].CountSec = uint.Parse(dataGridView.Rows[1].Cells[i + 1].Value.ToString());
+                    T[i].LastStamp_mSec = uint.Parse(dataGridView.Rows[2].Cells[i + 1].Value.ToString());
+                    T[i].MaxCountSec = uint.Parse(dataGridView.Rows[3].Cells[i + 1].Value.ToString());
+                    T[i].DamageSec = uint.Parse(dataGridView.Rows[4].Cells[i + 1].Value.ToString());
+                }
+            }
+
+
+        #endregion
+
 
 
         #region DateTime

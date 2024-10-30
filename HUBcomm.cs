@@ -219,7 +219,7 @@ namespace ExtHubComm
 
         public void GetAKVAparFromMainBoard()
         {//формируем параметры из считанного массива
-            CommSendAnsv(ECommand.cmd_SendAKVAparToPC, Efl_DEV.fld_MainBoard);
+            CommSendAnsv(ECommand.cmd_MaxminAKVAparMCUtoPC, Efl_DEV.fld_MainBoard);
             MinmaxParams.getParamsFromArr(RxBuff);
 
         }
