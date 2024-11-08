@@ -24,6 +24,7 @@ namespace TFTprog
     {
         TFileManager fcreater = new TFileManager();
         SCANHUB CANHUB = new SCANHUB();
+        
         SGRAF_FILES GRAF_FILES = new SGRAF_FILES();
         SWORKAKVATEST WORKAKVATEST = new SWORKAKVATEST();
 
@@ -278,9 +279,6 @@ namespace TFTprog
         public FormHUB()
         {
             InitializeComponent();
-
-
-
             tabControl1.SelectedIndex = 2;
             WORKAKVATEST.UpdateListtBoxRejak(lBrejak);
             this.Text = "DrawConfig  " + Properties.Settings.Default.Version;
@@ -303,9 +301,14 @@ namespace TFTprog
             // Устанавливаем режим выделения колонок с заголовком
             dGparam.SelectionMode = DataGridViewSelectionMode.ColumnHeaderSelect;
 
-
             //Инициализируем таблицу с таймерами
-            WORKAKVATEST.FormatTimersGridView(dGtimers,120,30);
+            WORKAKVATEST.FormatSimplGridView(dGtimers, 120, 30, new string[]{ "Rej", "CountSec", "LastStamp_mSec", "MaxCountSec", "DamageSec" }, WORKAKVATEST.GetTextHead(0, 7));
+
+
+            
+  //          string[] TimersRowHeaders = { "Rej", "CountSec", "LastStamp_mSec", "MaxCountSec", "DamageSec" };
+
+  //          WORKAKVATEST.FormatTimersGridView(dGtimers,120,30);
 
 
             //   WORKAKVATEST.DrawAKVAtable(dGparam, WORKAKVATEST.GVstruct);
@@ -727,7 +730,7 @@ foreach (TabPage tabPage in tabControl1.TabPages)
             {
                 MessageBox.Show("Не выделен ни один порт", "Выделите порт", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
-
+            
 
             if (CANHUB.GetOpenComport(itemText, Properties.Settings.Default.COMportBaud, false))
             {// пытаемся соединиться с устройством посредством выделенного порта
@@ -1204,8 +1207,7 @@ foreach (TabPage tabPage in tabControl1.TabPages)
                         byte[] numMenu = { 0, 0, 0, 0, 0, 0, 0, 0 };
                         numMenu[4] = Convert.ToByte(j & 0xff);
                         numMenu[5] = Convert.ToByte((j >> 8) & 0xff);
-                        CANHUB.CommSendAnsv(ECommand.cmd_TFTmenu, Efl_DEV.fld_TFTboard, numMenu, 0, 1000);
-
+                        CANHUB.CommSendAnsv(ECommand.cmd_TFTmenu, Efl_DEV.fld_TFTboard, numMenu, 1000);
                         e.Result = "Файл  успешно записан в TFT FLASH память";
                         return;//в режиме записи одного файла один файл записан
 
@@ -1257,7 +1259,7 @@ foreach (TabPage tabPage in tabControl1.TabPages)
                             byte[] num_Menu = { 0, 0, 0, 0, 0, 0, 0, 0 };
                             num_Menu[4] = Convert.ToByte(j & 0xff);
                             num_Menu[5] = Convert.ToByte((j >> 8) & 0xff);
-                            CANHUB.CommSendAnsv(ECommand.cmd_TFTmenu, Efl_DEV.fld_TFTboard, num_Menu, 0, 1000);
+                            CANHUB.CommSendAnsv(ECommand.cmd_TFTmenu, Efl_DEV.fld_TFTboard, num_Menu,  1000);
 
                         }
                         if (OneFileCount > 0)
@@ -1344,7 +1346,7 @@ foreach (TabPage tabPage in tabControl1.TabPages)
                             comPICT[5] = Convert.ToByte((NumPICT >> 8) & 0xff);
   //		public void CommSendAnsv(ECommand command, Efl_DEV _RecDev = Efl_DEV.fld_none, byte[] data = null, byte SubCom = 0, int TimeOutStartAnsv = 1000, int TimeOutNextByte = 100)
 
-                            CANHUB.CommSendAnsv(ECommand.cmd_TFTmenu, Efl_DEV.fld_TFTboard, comPICT, 0, 1000);// команда отображение картинки
+                            CANHUB.CommSendAnsv(ECommand.cmd_TFTmenu, Efl_DEV.fld_TFTboard, comPICT,  1000);// команда отображение картинки
                             NumPICT++;
                         }
                         NumFile++;

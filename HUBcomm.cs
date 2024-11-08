@@ -168,7 +168,7 @@ namespace ExtHubComm
 
         public string GetVerDev(BoardVer Dev, Efl_DEV DevType)
         {
-            CommSendAnsv(ECommand.cmd_get_Ver, DevType);
+            CommSendAnsv(ECommand.cmd_get_Ver, DevType,null,500);
             switch (DevType)
             {
                 case Efl_DEV.fld_HUB:
@@ -192,7 +192,7 @@ namespace ExtHubComm
             byte[] comm_data = new byte[4] { 0, 0, 0, 0 };
             comm_data[0]= Convert.ToByte(REJ);
             //CommSendAnsv(ECommand command, Efl_DEV _RecDev = Efl_DEV.fld_none, byte[] data = null, byte SubCom = 0, int TimeOutStartAnsv = 500, int TimeOutNextByte = 100)
-            CommSendAnsv(ECommand.cmd_Rejim, DevType, comm_data,0,1500);
+            CommSendAnsv(ECommand.cmd_Rejim, DevType, comm_data,1500);
             return (ERejWork)(RxBuff[0]);
         }
 
@@ -209,7 +209,7 @@ namespace ExtHubComm
         public void TestPictureWrite(int num, Efl_DEV DevType)
         {
             byte[] bTest = GenerateByteArray(num);
-            CommSendAnsv(ECommand.cmd_test, DevType, bTest, 0, 1500);
+            CommSendAnsv(ECommand.cmd_test, DevType, bTest,  1500);
             Thread.Sleep(50);
         }
         
@@ -366,7 +366,7 @@ namespace ExtHubComm
         {
             byte[] comm_data = new byte[1];
             comm_data[0] = Convert.ToByte( EMemPRO.eopmpro_wrTFTFLASH);
-            CommSendAnsv(ECommand.cmd_WR_flowMem, _RecDev, comm_data,0,2500);
+            CommSendAnsv(ECommand.cmd_WR_flowMem, _RecDev, comm_data,2500);
             return (EMemPRO)(RxBuff[0]);
         }
 
@@ -399,7 +399,7 @@ namespace ExtHubComm
                 // Копируем данные из массива data в массив sendData (только первые 252 байта, если их больше)
                 Array.Copy(data, 0, sendData, 2, dataSize);
 
-                CommSendAnsv(ECommand.cmd_wr_RAM4096buf, _RecDev, sendData, 0, 500);
+                CommSendAnsv(ECommand.cmd_wr_RAM4096buf, _RecDev, sendData, 500);
             
             }
             catch (Exception)
@@ -424,7 +424,7 @@ namespace ExtHubComm
                 Array.Copy(BitConverter.GetBytes(length_data), 0, sendData, 8, 4);
                 // Помещаем два младших байта _CRC через Array.Copy
                 Array.Copy(BitConverter.GetBytes(_CRC), 0, sendData, 12, 2);
-                CommSendAnsv(ECommand.cmd_wrver_TFTFLASH4096, _RecDev, sendData, 0, 1000);
+                CommSendAnsv(ECommand.cmd_wrver_TFTFLASH4096, _RecDev, sendData,  1000);
                 return (eFLASHresultEnum)(RxBuff[0]);//если равен нулю, процедура записи-верификации прошла успешно
             }
             catch (Exception)

@@ -564,7 +564,7 @@ namespace COMMAND
 
 
 
-		public void CommSendAnsv(ECommand command, Efl_DEV _RecDev = Efl_DEV.fld_none, byte[] data = null, byte SubCom = 0, int TimeOutStartAnsv = 1000, int TimeOutNextByte = 100)
+		public void CommSendAnsv(ECommand command, Efl_DEV _RecDev = Efl_DEV.fld_none, byte[] data = null, int TimeOutStartAnsv = 50)
 		{//команда отправляет данные и принимает отклик, при этом заполняет Структуры хеадеров как приёма, так и ответа
 		 //ВНИМАНИЕ!!!! БЕРЁТ ДЛИНУ ДАННЫХ ИЗ МАССИВА data - ЕГО ДЛИНА ДОЛЖНА БЫТЬ РАВНА ДЛИНЕ ДАННЫХ, ТАМ НЕ ДОЛЖНО БЫТЬ ЛИШНИХ ЭЛЕМЕНТОВ!!!
 			RtsEnable = true;
@@ -576,15 +576,21 @@ namespace COMMAND
 			}
 			else
 				TxHeadCom.DataLength = data.Length;
-			TxHeadCom.subCom.data = SubCom;
-			CommSendFromHeader(data, TxHeadCom.DataLength);//отправка данных команды
-			RtsEnable = false;
+			TxHeadCom.subCom.data = 0;
+			int tmpLen = 0;
+			if (data != null)
+				tmpLen = data.Length;
+			byte[] datasend = GetCommFromHeader( data, tmpLen);//формируем посылку для отправки команды
 
-			byte[] bytes = ReadCommand(6, TimeOutStartAnsv, TimeOutNextByte);//отправляем и принимаем расширенную команду с нашего хаба для работы с адресуемыми устройствами
+			byte[] bytesAnsv = SendCommand(datasend, TimeOutStartAnsv);//отправка данных команды и приём ответа с переключением RTS
+
+			if (!check0CRC16(bytesAnsv, bytesAnsv.Length))
+				throw new Exception("Ошибка контрольной суммы при чтении данных");
+
 
 			//считывание полученных данных во внутреннюю структуру устройства
-			RxHeadCom.getFromCommandArr(bytes);
-			Array.Copy(bytes,4, RxBuff,0,bytes.Length-6);
+			RxHeadCom.getFromCommandArr(bytesAnsv);
+			Array.Copy(bytesAnsv, 4, RxBuff,0, bytesAnsv.Length-6);
 			GetIntPar();
 
 		}
@@ -652,7 +658,26 @@ namespace COMMAND
 			RtsEnable = false;
 		}
 
-			public int  CommSendFromHeader(byte[] data,int dataLength)
+
+		public byte[] GetCommFromHeader(byte[] data, int dataLength)
+		{//отправка команды на основе существующего Header
+			RtsEnable = true;
+			TxHeadCom.DataLength = dataLength;
+			byte[] tmpb = TxHeadCom.getHeaderbytes();
+			Array.Copy(tmpb, Outbuf, 4);
+			if (data != null)
+				Array.Copy(data, 0, Outbuf, 4, TxHeadCom.DataLength);
+
+			int _crc = CRC16(Outbuf, 0, Convert.ToUInt16(dataLength + 4));
+			Outbuf[dataLength + 4] = (byte)(_crc & 0xff);
+			Outbuf[dataLength + 5] = (byte)((_crc >> 8) & 0xff);
+			byte[] result = new byte[dataLength + 6];
+			Array.Copy(Outbuf, result, dataLength + 6);
+			return result;
+		}
+
+
+		public int  CommSendFromHeader(byte[] data,int dataLength)
         {//отправка команды на основе существующего Header
 			int ret = 0;
 			RtsEnable = true;

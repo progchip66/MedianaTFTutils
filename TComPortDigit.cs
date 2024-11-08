@@ -19,6 +19,16 @@ namespace UART
 		RS485
 	}
 
+	public class DataReceivedEventArgs : EventArgs
+	{
+		public byte[] Data { get; }
+
+		public DataReceivedEventArgs(byte[] data)
+		{
+			Data = data;
+		}
+	}
+
 
 	public class TComPortDigit : SerialPort
     {
@@ -109,7 +119,255 @@ namespace UART
 			get { return _outComDataLen; }
 		}
 
-		public int WriteToUART(byte[] buff, int countByte )
+		#region NewSerialCode
+
+		private readonly Mutex receivingMutex = new Mutex();
+		private readonly Queue<byte> tempBuffer = new Queue<byte>();
+
+		public event EventHandler<DataReceivedEventArgs> DataReceivedEvent;
+
+		//public TComPortDigit(string portName, int baudRate)
+		public TComPortDigit()
+		{
+
+
+			// Запускаем фоновый поток для приёма данных
+			new Thread(SlaveReceiveLoop) { IsBackground = true }.Start();
+		}
+
+
+		private void SlaveReceiveLoop()
+		{
+			while (true)
+			{
+				int expectedLength = 0;
+				int previousCount = 0;
+				int unchangedCountDuration = 0;
+				bool mutexAcquired = false;
+
+				try
+				{
+					// Ожидаем открытия соединения
+					while (!IsOpen)
+						Thread.Sleep(10);
+
+					// Захватываем мьютекс и устанавливаем флаг
+					receivingMutex.WaitOne();
+					mutexAcquired = true;
+
+					List<byte> receivedData = new List<byte>();
+					expectedLength = 0;
+					previousCount = 0;
+					unchangedCountDuration = 0;
+
+					while ((true)&& (IsOpen))
+					{
+						int bytesToRead = BytesToRead;
+						if (bytesToRead > 0)
+						{
+							byte[] buffer = new byte[bytesToRead];
+							Read(buffer, 0, bytesToRead);
+
+							foreach (var b in buffer)
+							{
+								tempBuffer.Enqueue(b);
+							}
+
+							if (receivedData.Count == 0 && tempBuffer.Count > 0)
+							{
+								expectedLength = tempBuffer.Peek();
+							}
+
+							while (tempBuffer.Count > 0 && receivedData.Count < expectedLength)
+							{
+								receivedData.Add(tempBuffer.Dequeue());
+							}
+
+							if (receivedData.Count == expectedLength)
+							{
+								// Успешное чтение пакета данных
+								DataReceivedEvent?.Invoke(this, new DataReceivedEventArgs(receivedData.ToArray()));
+								break;
+							}
+							else if (receivedData.Count > expectedLength)
+							{
+								throw new InvalidOperationException("Превышен ожидаемый размер данных.");
+							}
+						}
+
+						// Проверяем отсутствие новых байтов
+						if (receivedData.Count > 0)
+						{
+							if (receivedData.Count == previousCount)
+							{
+								unchangedCountDuration += 10;
+							}
+							else
+							{
+								unchangedCountDuration = 0;
+							}
+
+							previousCount = receivedData.Count;
+
+							if (unchangedCountDuration >= 10)
+							{
+								receivedData.Clear();
+								tempBuffer.Clear();
+								unchangedCountDuration = 0;
+								previousCount = 0;
+								throw new TimeoutException("Тайм-аут между байтами. Сброс приёма данных.");
+							}
+						}
+
+						// Временное освобождение мьютекса и ожидание
+						receivingMutex.ReleaseMutex();
+						mutexAcquired = false;
+						Thread.Sleep(10);
+						receivingMutex.WaitOne();
+						mutexAcquired = true;
+					}
+				}
+				catch (Exception ex)
+				{
+					DisplayMessage($"Ошибка при приёме: {ex.Message}");
+				}
+				finally
+				{
+					if (mutexAcquired)
+					{
+						receivingMutex.ReleaseMutex();
+					}
+				}
+			}
+		}
+
+
+
+		public byte[] SendCommand(byte[] data,  int startTimeoutMs = 50)
+		{
+			receivingMutex.WaitOne(); //приостанавливаем выполнение команды отправки-приёма до получения мьютекса
+
+
+			try
+			{//isReceiving - флаг приёма по UART в фоновом режиме
+
+
+				if (!IsOpen)
+				{
+					throw new InvalidOperationException("Serial port is not open.");
+				}
+
+				// Перевести линию RTS в активное состояние
+				RtsEnable = true;
+
+
+				string Pname = PortName;
+				int bbbb = BaudRate;
+				int elapsedTime = 0;
+
+
+				// Отправка данных
+				Write(data, 0, data.Length);
+				// Ожидание завершения отправки данных
+				BaseStream.Flush();
+				RtsEnable = false;
+
+
+				if (startTimeoutMs > 0)
+				{//если за startTimeoutMs так и не поступил первый байт ответа приём заканчивается с ошибкой 
+					List<byte> response = new List<byte>();//создаётся список List
+					int expectedLength = 0;
+					int curLen = 0;
+					
+					int interval = 10;
+					byte[] buffer = new byte[256+6];
+					while (elapsedTime <= startTimeoutMs)
+					{
+
+						if ((BytesToRead > 0) && (expectedLength == 0))
+						{//первое считывание из UART
+							curLen = BytesToRead;
+							Read(buffer, 0, curLen);
+							expectedLength = buffer[0]+6;//извлекаем ожидаемую длину посылки
+							if (curLen >= expectedLength)
+                            {//вся посылка считана с первого раза полностью!
+								byte[] res_buf = new byte[expectedLength];
+								Array.Copy(buffer, res_buf, expectedLength);
+								return res_buf;
+							}								
+								 
+						}
+						else
+						{//последующие считывания из UART
+							if (BytesToRead > 0)
+                            {//считываем только если пришли новые данные
+								int addLen = BytesToRead;
+								if ((curLen + addLen) >= expectedLength)
+								{//последнее считывание в UART нужное, либо даже большее количество данных!
+									addLen = expectedLength - curLen;
+									Read(buffer, curLen, addLen);
+									byte[] ResultArray = new byte[expectedLength];
+									Array.Copy(buffer, ResultArray, expectedLength);
+									return ResultArray;//все данные считаны удачно
+								}
+								else
+								{//дочитываем очередной пакет данных
+									Read(buffer, curLen, addLen);
+									curLen += addLen;
+								}
+							}
+						}
+						Thread.Sleep(interval);
+						elapsedTime += interval;
+					}
+
+					throw new TimeoutException("Тайм-аут при получении ответа на команду.");
+					}
+					else
+					{
+						return new byte[0];
+					}
+
+			}
+			catch (Exception ex)
+			{
+				DisplayMessage($"Ошибка отправки команды: {ex.Message}");
+				//return Array.Empty<byte>();
+				return new byte[0];
+			}
+			finally
+			{
+
+				receivingMutex.ReleaseMutex();//данные отправлены и считаны, освобождаем мьютекс
+			}
+		}
+
+
+		private void DisplayMessage(string message)
+		{
+			// Здесь можно использовать MessageBox, если вызывать DisplayMessage в основном потоке,
+			// или сделать логирование в текстовый файл, если это фоновый поток
+			MessageBox.Show(message);
+		}
+
+
+
+	#endregion
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	public int WriteToUART(byte[] buff, int countByte )
 		{
 
 

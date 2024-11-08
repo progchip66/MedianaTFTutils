@@ -107,16 +107,16 @@
             this.bCOMselect = new System.Windows.Forms.Button();
             this.bfindPort = new System.Windows.Forms.Button();
             this.tabPage1 = new System.Windows.Forms.TabPage();
-            this.b_newPARfilename = new System.Windows.Forms.Button();
-            this.b_PARtableSave = new System.Windows.Forms.Button();
+            this.dGtimers = new System.Windows.Forms.DataGridView();
             this.b_PARtableLoad = new System.Windows.Forms.Button();
+            this.b_PARtableSave = new System.Windows.Forms.Button();
+            this.b_newPARfilename = new System.Windows.Forms.Button();
+            this.lbFT1divFT0mult100 = new System.Windows.Forms.Label();
+            this.lbFT0minusFT1 = new System.Windows.Forms.Label();
             this.tB_PARfileMan = new System.Windows.Forms.TextBox();
             this.dGparam = new System.Windows.Forms.DataGridView();
             this.lBrejak = new System.Windows.Forms.ListBox();
             this.WRpro = new System.ComponentModel.BackgroundWorker();
-            this.lbFT0minusFT1 = new System.Windows.Forms.Label();
-            this.lbFT1divFT0mult100 = new System.Windows.Forms.Label();
-            this.dGtimers = new System.Windows.Forms.DataGridView();
             this.tabControl1.SuspendLayout();
             this.tabPagePack.SuspendLayout();
             this.statusStrip1.SuspendLayout();
@@ -131,8 +131,8 @@
             this.tP_TFT_WR_RD.SuspendLayout();
             this.gBtestWRgraf.SuspendLayout();
             this.tabPage1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dGparam)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dGtimers)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dGparam)).BeginInit();
             this.SuspendLayout();
             // 
             // lHEX2
@@ -226,7 +226,7 @@
             this.tabPagePack.Location = new System.Drawing.Point(4, 22);
             this.tabPagePack.Name = "tabPagePack";
             this.tabPagePack.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPagePack.Size = new System.Drawing.Size(1019, 624);
+            this.tabPagePack.Size = new System.Drawing.Size(1019, 665);
             this.tabPagePack.TabIndex = 0;
             this.tabPagePack.Text = "Запись изображений";
             this.tabPagePack.UseVisualStyleBackColor = true;
@@ -248,7 +248,7 @@
             this.PBFileToMem,
             this.SLfileName,
             this.PBwrFilePro});
-            this.statusStrip1.Location = new System.Drawing.Point(3, 595);
+            this.statusStrip1.Location = new System.Drawing.Point(3, 636);
             this.statusStrip1.Name = "statusStrip1";
             this.statusStrip1.Size = new System.Drawing.Size(1009, 22);
             this.statusStrip1.TabIndex = 23;
@@ -571,7 +571,7 @@
             this.tabPageBTAddr.Location = new System.Drawing.Point(4, 22);
             this.tabPageBTAddr.Name = "tabPageBTAddr";
             this.tabPageBTAddr.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageBTAddr.Size = new System.Drawing.Size(1019, 624);
+            this.tabPageBTAddr.Size = new System.Drawing.Size(1019, 665);
             this.tabPageBTAddr.TabIndex = 1;
             this.tabPageBTAddr.Text = "Тест";
             this.tabPageBTAddr.UseVisualStyleBackColor = true;
@@ -747,7 +747,7 @@
             this.tP_TFT_WR_RD.Location = new System.Drawing.Point(4, 22);
             this.tP_TFT_WR_RD.Name = "tP_TFT_WR_RD";
             this.tP_TFT_WR_RD.Padding = new System.Windows.Forms.Padding(3);
-            this.tP_TFT_WR_RD.Size = new System.Drawing.Size(1019, 624);
+            this.tP_TFT_WR_RD.Size = new System.Drawing.Size(1019, 665);
             this.tP_TFT_WR_RD.TabIndex = 2;
             this.tP_TFT_WR_RD.Text = "Настройки";
             this.tP_TFT_WR_RD.UseVisualStyleBackColor = true;
@@ -958,24 +958,13 @@
             this.tabPage1.Text = "Тест Режимов Работы";
             this.tabPage1.UseVisualStyleBackColor = true;
             // 
-            // b_newPARfilename
+            // dGtimers
             // 
-            this.b_newPARfilename.Location = new System.Drawing.Point(801, 637);
-            this.b_newPARfilename.Name = "b_newPARfilename";
-            this.b_newPARfilename.Size = new System.Drawing.Size(91, 23);
-            this.b_newPARfilename.TabIndex = 3;
-            this.b_newPARfilename.Text = "Выбор файла";
-            this.b_newPARfilename.UseVisualStyleBackColor = true;
-            this.b_newPARfilename.Click += new System.EventHandler(this.b_newPARfilename_Click);
-            // 
-            // b_PARtableSave
-            // 
-            this.b_PARtableSave.Location = new System.Drawing.Point(654, 637);
-            this.b_PARtableSave.Name = "b_PARtableSave";
-            this.b_PARtableSave.Size = new System.Drawing.Size(130, 23);
-            this.b_PARtableSave.TabIndex = 2;
-            this.b_PARtableSave.Text = "Сохранить параметры";
-            this.b_PARtableSave.UseVisualStyleBackColor = true;
+            this.dGtimers.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dGtimers.Location = new System.Drawing.Point(8, 368);
+            this.dGtimers.Name = "dGtimers";
+            this.dGtimers.Size = new System.Drawing.Size(776, 126);
+            this.dGtimers.TabIndex = 5;
             // 
             // b_PARtableLoad
             // 
@@ -986,6 +975,43 @@
             this.b_PARtableLoad.Text = "Загрузить параметры";
             this.b_PARtableLoad.UseVisualStyleBackColor = true;
             this.b_PARtableLoad.Click += new System.EventHandler(this.b_PARtableLoad_Click);
+            // 
+            // b_PARtableSave
+            // 
+            this.b_PARtableSave.Location = new System.Drawing.Point(654, 637);
+            this.b_PARtableSave.Name = "b_PARtableSave";
+            this.b_PARtableSave.Size = new System.Drawing.Size(130, 23);
+            this.b_PARtableSave.TabIndex = 2;
+            this.b_PARtableSave.Text = "Сохранить параметры";
+            this.b_PARtableSave.UseVisualStyleBackColor = true;
+            // 
+            // b_newPARfilename
+            // 
+            this.b_newPARfilename.Location = new System.Drawing.Point(801, 637);
+            this.b_newPARfilename.Name = "b_newPARfilename";
+            this.b_newPARfilename.Size = new System.Drawing.Size(91, 23);
+            this.b_newPARfilename.TabIndex = 3;
+            this.b_newPARfilename.Text = "Выбор файла";
+            this.b_newPARfilename.UseVisualStyleBackColor = true;
+            this.b_newPARfilename.Click += new System.EventHandler(this.b_newPARfilename_Click);
+            // 
+            // lbFT1divFT0mult100
+            // 
+            this.lbFT1divFT0mult100.AutoSize = true;
+            this.lbFT1divFT0mult100.Location = new System.Drawing.Point(895, 481);
+            this.lbFT1divFT0mult100.Name = "lbFT1divFT0mult100";
+            this.lbFT1divFT0mult100.Size = new System.Drawing.Size(84, 13);
+            this.lbFT1divFT0mult100.TabIndex = 4;
+            this.lbFT1divFT0mult100.Text = "FT1/FT0*100 = ";
+            // 
+            // lbFT0minusFT1
+            // 
+            this.lbFT0minusFT1.AutoSize = true;
+            this.lbFT0minusFT1.Location = new System.Drawing.Point(895, 459);
+            this.lbFT0minusFT1.Name = "lbFT0minusFT1";
+            this.lbFT0minusFT1.Size = new System.Drawing.Size(60, 13);
+            this.lbFT0minusFT1.TabIndex = 3;
+            this.lbFT0minusFT1.Text = "FT0-FT1 = ";
             // 
             // tB_PARfileMan
             // 
@@ -1020,32 +1046,6 @@
             this.WRpro.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.WRpro_ProgressChanged);
             this.WRpro.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.WRpro_RunWorkerCompleted);
             // 
-            // lbFT0minusFT1
-            // 
-            this.lbFT0minusFT1.AutoSize = true;
-            this.lbFT0minusFT1.Location = new System.Drawing.Point(895, 459);
-            this.lbFT0minusFT1.Name = "lbFT0minusFT1";
-            this.lbFT0minusFT1.Size = new System.Drawing.Size(60, 13);
-            this.lbFT0minusFT1.TabIndex = 3;
-            this.lbFT0minusFT1.Text = "FT0-FT1 = ";
-            // 
-            // lbFT1divFT0mult100
-            // 
-            this.lbFT1divFT0mult100.AutoSize = true;
-            this.lbFT1divFT0mult100.Location = new System.Drawing.Point(895, 481);
-            this.lbFT1divFT0mult100.Name = "lbFT1divFT0mult100";
-            this.lbFT1divFT0mult100.Size = new System.Drawing.Size(84, 13);
-            this.lbFT1divFT0mult100.TabIndex = 4;
-            this.lbFT1divFT0mult100.Text = "FT1/FT0*100 = ";
-            // 
-            // dGtimers
-            // 
-            this.dGtimers.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dGtimers.Location = new System.Drawing.Point(8, 368);
-            this.dGtimers.Name = "dGtimers";
-            this.dGtimers.Size = new System.Drawing.Size(776, 126);
-            this.dGtimers.TabIndex = 5;
-            // 
             // FormHUB
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1079,8 +1079,8 @@
             this.gBtestWRgraf.PerformLayout();
             this.tabPage1.ResumeLayout(false);
             this.tabPage1.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dGparam)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.dGtimers)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dGparam)).EndInit();
             this.ResumeLayout(false);
 
         }
