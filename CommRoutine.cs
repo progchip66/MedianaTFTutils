@@ -9,7 +9,7 @@ namespace COMMAND
 {
 
 
-
+	
 
 	public enum Efl_Head { flh_none = 0, flh_set, flh_send, flh_end, flh_stat };
 	public enum Efl_DEV { fld_PC = 0, fld_HUB, fld_MainBoard, fld_TFTboard, fld_FEUdetect, fld_none = 0x0f };//тип устройства
@@ -383,40 +383,7 @@ namespace COMMAND
 
 
 
-		public void ResetPro()
-        {
-			StartAddr = 0;
-			Length = 0;
-			AllignBytes = 0;
-			TypeMem = 0;
-			subCom.data = 0;
-		}
 
-
-
-	
-
-
-
-
-
-		public void GetStructFromBytes(byte[] BytesFromCOM)
-        {
-
-        }
-
-
-
-		public int NewSteep(int stepLength)
-		{//запускается каждый раз для отслеживания необходимости передачи данных
-			Counter+= stepLength;
-			if (Counter < Length)
-				return 1;
-			if (Counter == Length)
-				return 0;
-			else 
-				return -1;//error
-		}
 
 	}
 
@@ -432,7 +399,7 @@ namespace COMMAND
 
 
 		public const Efl_DEV ThisDEV = Efl_DEV.fld_PC;
-		public Efl_Head flowStat= Efl_Head.flh_none;
+		public Efl_Head flowStat = Efl_Head.flh_none;
 		//адреса полученные в результате приёма очередной команды
 		public Efl_DEV incomDEVsend = Efl_DEV.fld_none;
 		public Efl_DEV incomDEVrec = ThisDEV;
@@ -452,46 +419,44 @@ namespace COMMAND
 
 		//	public ECommand _RDCom = ECommand.cmd_none;
 		public ECommand WRCom = ECommand.cmd_none;
-		
+
 		public ERxBufStat RxBufStat = ERxBufStat.rxcom_none;
 
 
 
 		private byte[] _RxBuff = new byte[constMaxLenIO];
-		private UInt32[] _RxBuffuIntPar = new UInt32[constMaxLenIO/4];
+		private UInt32[] _RxBuffuIntPar = new UInt32[constMaxLenIO / 4];
 
 		private byte[] _TxBuff = new byte[constMaxLenIO];
 
 
-/*		public ERxBufStat ReadRxBuff(byte newbyte)
-        {//чтение очередного байта в буфер
+		/*		public ERxBufStat ReadRxBuff(byte newbyte)
+				{//чтение очередного байта в буфер
 
 
-			return rxcom_readpro
+					return rxcom_readpro
 
-		}*/
+				}*/
 
 
-		public byte[] RxBuff 
+		public byte[] RxBuff
 		{
 			get { return _RxBuff; }
 		}
 
 
 
-//		void CommandReconstructor(byte[] ComPortArr)
-	
 
 
-	void GetIntPar()
+		void GetIntPar()
 		{
 			UInt32 mult = 1;
-			int j=0;
+			int j = 0;
 			int IntArrCount = 0;
 			UInt32 UIntVol = 0;
-			for (int i=4; i< RxHeadCom.DataLength; i++)
-            {
-				UIntVol += Convert.ToUInt32(RxBuff[i + 4])*mult;
+			for (int i = 4; i < RxHeadCom.DataLength; i++)
+			{
+				UIntVol += Convert.ToUInt32(RxBuff[i + 4]) * mult;
 				if (j++ >= 3)
 				{
 					_RxBuffuIntPar[IntArrCount++] = UIntVol;
@@ -548,22 +513,6 @@ namespace COMMAND
 
 
 
-
-
-
-		public void AnsvHeaderConsturctor(int dataLengthAnsv, byte OptionSubcom=0)
-        {//создание заголовка для отправки в ответ на пришедшую команду
-			TxHeadCom.Comm = RxHeadCom.Comm;
-			TxHeadCom.Rec = RxHeadCom.Trans;
-			TxHeadCom.DataLength = dataLengthAnsv;
-			TxHeadCom.subCom.data = OptionSubcom;
-		}
-
-
-
-
-
-
 		public void CommSendAnsv(ECommand command, Efl_DEV _RecDev = Efl_DEV.fld_none, byte[] data = null, int TimeOutStartAnsv = 50)
 		{//команда отправляет данные и принимает отклик, при этом заполняет Структуры хеадеров как приёма, так и ответа
 		 //ВНИМАНИЕ!!!! БЕРЁТ ДЛИНУ ДАННЫХ ИЗ МАССИВА data - ЕГО ДЛИНА ДОЛЖНА БЫТЬ РАВНА ДЛИНЕ ДАННЫХ, ТАМ НЕ ДОЛЖНО БЫТЬ ЛИШНИХ ЭЛЕМЕНТОВ!!!
@@ -580,83 +529,20 @@ namespace COMMAND
 			int tmpLen = 0;
 			if (data != null)
 				tmpLen = data.Length;
-			byte[] datasend = GetCommFromHeader( data, tmpLen);//формируем посылку для отправки команды
+			byte[] datasend = GetCommFromHeader(data, tmpLen);//формируем посылку для отправки команды
 
 			byte[] bytesAnsv = SendCommand(datasend, TimeOutStartAnsv);//отправка данных команды и приём ответа с переключением RTS
 
+			if (bytesAnsv.Length == 0)
+				return;
 			if (!check0CRC16(bytesAnsv, bytesAnsv.Length))
 				throw new Exception("Ошибка контрольной суммы при чтении данных");
-
-
 			//считывание полученных данных во внутреннюю структуру устройства
 			RxHeadCom.getFromCommandArr(bytesAnsv);
-			Array.Copy(bytesAnsv, 4, RxBuff,0, bytesAnsv.Length-6);
+			Array.Copy(bytesAnsv, 4, RxBuff, 0, bytesAnsv.Length - 6);
 			GetIntPar();
-
 		}
 
-
-		public int tryCommSendAnsv(int attempt, ECommand command, Efl_DEV _RecDev = Efl_DEV.fld_none, byte[] data = null, byte SubCom = 0, int TimeOutStartAnsv = 1000, int TimeOutNextByte = 100)
-		{//команда выполняет attempt попыток в случае если нет ответа на первую попытку
-		 //ВНИМАНИЕ!!!! БЕРЁТ ДЛИНУ ДАННЫХ ИЗ МАССИВА data - ЕГО ДЛИНА ДОЛЖНА БЫТЬ РАВНА ДЛИНЕ ДАННЫХ, ТАМ НЕ ДОЛЖНО БЫТЬ ЛИШНИХ ЭЛЕМЕНТОВ!!!
-			RtsEnable = true;
-			TxHeadCom.Comm = command;
-			int attemptCount = 1;
-			while (attempt-- > 0)
-			{
-				try
-				{
-					TxHeadCom.Rec = _RecDev;
-					if (data == null)
-					{
-						TxHeadCom.DataLength = 0;
-					}
-					else
-						TxHeadCom.DataLength = data.Length;
-					TxHeadCom.subCom.data = SubCom;
-					CommSendFromHeader(data, TxHeadCom.DataLength);//отправка данных команды
-					RtsEnable = false;
-
-					byte[] bytes = ReadCommand(6, TimeOutStartAnsv, TimeOutNextByte);//отправляем и принимаем расширенную команду с нашего хаба для работы с адресуемыми устройствами
-
-					//считывание полученных данных во внутреннюю структуру устройства
-					RxHeadCom.getFromCommandArr(bytes);
-					Array.Copy(bytes, 4, RxBuff, 0, bytes.Length - 6);
-					GetIntPar();
-					return attemptCount;
-				}
-				catch (Exception)
-				{
-					attemptCount++;
-				}
-			}
-			return (attemptCount);
-		}
-
-
-		//Array.Copy(RxHeadCom.getHeaderbytes(),);
-		//Array.Copy(Inbuf, 4, RxBuff, 0, RxBuff.Length - 4);
-
-		public void CommSend_NO_ansv(ECommand command, Efl_DEV _RecDev = Efl_DEV.fld_none, byte[] data = null, byte SubCom = 0)
-		{//команда не подразумевает ответа, просто отправляет данные. Иногда бывают нужны и такие. Признак посылки не подразумевающий ответ находится в субкоманде
-		 //ВНИМАНИЕ!!!! БЕРЁТ ДЛИНУ ДАННЫХ ИЗ МАССИВА data - ЕГО ДЛИНА ДОЛЖНА БЫТЬ РАВНА ДЛИНЕ ДАННЫХ, ТАМ НЕ ДОЛЖНО БЫТЬ ЛИШНИХ ЭЛЕМЕНТОВ!!!
-
-			RtsEnable = true;
-
-			TxHeadCom.Comm = command;
-			TxHeadCom.Rec = _RecDev;
-			if (data == null)
-			{
-				TxHeadCom.DataLength = 0;
-			}
-			else
-				TxHeadCom.DataLength = data.Length;
-			TxHeadCom.subCom.data = SubCom;
-			TxHeadCom.subCom.fnoAnsv = 1;
-			CommSendFromHeader(data, TxHeadCom.DataLength);//отправка данных команды
-
-			RtsEnable = false;
-		}
 
 
 		public byte[] GetCommFromHeader(byte[] data, int dataLength)
@@ -677,98 +563,35 @@ namespace COMMAND
 		}
 
 
-		public int  CommSendFromHeader(byte[] data,int dataLength)
-        {//отправка команды на основе существующего Header
+		public int CommSendFromHeader(byte[] data, int dataLength)
+		{//отправка команды на основе существующего Header
 			int ret = 0;
 			RtsEnable = true;
 			TxHeadCom.DataLength = dataLength;
 			byte[] tmpb = TxHeadCom.getHeaderbytes();
 			Array.Copy(tmpb, Outbuf, 4);
-			if (data!=null)
-				Array.Copy(data,0, Outbuf, 4, TxHeadCom.DataLength);
+			if (data != null)
+				Array.Copy(data, 0, Outbuf, 4, TxHeadCom.DataLength);
 
-			int _crc = CRC16(Outbuf, 0, Convert.ToUInt16(dataLength+4));
-			Outbuf[dataLength+4] = (byte)(_crc & 0xff);
+			int _crc = CRC16(Outbuf, 0, Convert.ToUInt16(dataLength + 4));
+			Outbuf[dataLength + 4] = (byte)(_crc & 0xff);
 			Outbuf[dataLength + 5] = (byte)((_crc >> 8) & 0xff);
 
-			ret = WriteToUART(Outbuf, dataLength+6);
+			ret = WriteToUART(Outbuf, dataLength + 6);
 			RtsEnable = false;
 			return ret;
 		}
 
 
-		public byte[] CommSendAnsvOld(ECommand command, byte[] data = null, Efl_DEV RECDEV = Efl_DEV.fld_none)
+
+
+
+
+
+
+		public byte[] CommConstrDataIntPar(int NumInt, int par1 = 0, int par2 = 0, int par3 = 0, int par4 = 0, int par5 = 0, int par6 = 0, int par7 = 0, int par8 = 0)
 		{
-			//DiscardInBuffer();
-			//DiscardOutBuffer();
-			RtsEnable = true;
-			CommSenderOld(command, data, RECDEV);
-			RtsEnable = false;
-			if (RECDEV == Efl_DEV.fld_none)
-				return ReadCommand(LenServByte);//общение между двумя устройствами типа точка-точка
-			else
-				return ReadCommand(ExhLenServByte);//отправляем и принимаем расширенную команду с нашего хаба для работы с адресуемыми устройствами
-		}
-
-		public int CommSenderOld(ECommand command, byte[] data = null,  Efl_DEV _RecDev = Efl_DEV.fld_none, byte SubCom = 0)
-		{
-			ushort _crc;
-			int ret = 0;
-			RtsEnable = true;
-			int Len = 0;
-			if (data != null)
-				Len = data.Length;
-			//использует необязательные параметры, для этого установлено значение по умолчанию для данных
-			if (Len > 255)
-			{
-				throw new Exception("Длина данных команды более 255 =" + Convert.ToString(Len));
-			}
-
-			if (_RecDev == Efl_DEV.fld_none)
-			{//стандартный протокол для UART
-				byte[] Outbuf = new byte[Len + LenServByte];
-				Outbuf[0] = Convert.ToByte(Len & 0xff);
-				Outbuf[1] = Convert.ToByte(command);
-				for (int i = 0; i < Len; i++)
-					Outbuf[i + ExhLenServByte - 2] = data[i];
-				_crc = CRC16(Outbuf, 0, Convert.ToUInt16(Len+ LenServByte-2));
-				Outbuf[Len + 2] = Convert.ToByte(_crc & 0xff);
-				Outbuf[Len + 3] = Convert.ToByte((_crc >> 8) & 0xff);
-				_outComDataLen = Len;
-				WRCom = command;//		public ECommand WRCom = ECommand.cmd_none;
-				ret = WriteToUART(Outbuf, Len + LenServByte);
-				RtsEnable = false;
-				return ret;
-			}
-			else
-			{//расширенный протокол c адресом приёмника и передатчика
-
-				outcomDEVrec = _RecDev;
-
-				byte[] Outbuf = new byte[Len + ExhLenServByte];
-				Outbuf[0] = Convert.ToByte(Len & 0xff);
-				Outbuf[1] = (byte)(command);
-				Outbuf[2] = Convert.ToByte(_RecDev);//принимает всегда PC c адресом ноль
-				Outbuf[3] = SubCom;
-				for (int i = 0; i < Len; i++)
-					Outbuf[i + ExhLenServByte - 2] = data[i];
-				_crc = CRC16(Outbuf, 0, Convert.ToUInt16(Len+ ExhLenServByte-2));
-				Outbuf[Len + ExhLenServByte - 2] = (byte)(_crc & 0xff);
-				Outbuf[Len + ExhLenServByte - 1] = (byte)((_crc >> 8) & 0xff);
-				_outComDataLen = Len;
-				WRCom = command;//		public ECommand WRCom = ECommand.cmd_none;
-				ret = WriteToUART(Outbuf, Len + ExhLenServByte);
-				RtsEnable = false;
-				return ret;
-			}
-		}
-
-
-
-
-		public byte[] CommConstrDataIntPar( int NumInt, int par1=0, int par2 = 0, int par3 = 0, int par4 = 0, int par5 = 0, int par6 = 0, int par7 = 0, int par8 = 0)
-        {
-			if (NumInt>8)
+			if (NumInt > 8)
 				NumInt = 8;
 			if (NumInt > 0)
 			{
@@ -795,94 +618,5 @@ namespace COMMAND
 			//команда без параметров
 		}
 
-
-
-
-		/*
-				public byte[] CommSender(  ECommand command, int Len = 0, byte[] data = null)
-				{//не все команды требуют данных, некоторые могут извлекать их из переменных и свойств, поэтому массив данных data может и не присутствовать, как и Len.
-
-					if (Enum.IsDefined(typeof(ECommand), command))
-						return null;//не определено такой команды
-
-					switch (command)
-					{
-						case ECommand.cmd_get_Ver://Запрос команды от
-
-							break;
-
-						case ECommand.cmd_flow_Pro:
-
-							break;
-						default:// выше команды, которые требуют выполнения неких действий, а в дефаулте просто отправка данных
-							return CommConstructor(command, Len, data);
-					}
-
-					return null;//не определено такой команды
-				}
-
-				*/
-
 	}
-
-
-	/*
-private void InsertFloatDataIntoTable(byte[] data, DataTable table)
-{
-    int floatSizeInBytes = sizeof(float);
-    int totalFloats = data.Length / floatSizeInBytes;
-
-    if (totalFloats * floatSizeInBytes != data.Length)
-    {
-        throw new ArgumentException("Invalid data length for float values.");
-    }
-
-    for (int i = 0; i < totalFloats; i++)
-    {
-        byte[] floatBytes = new byte[floatSizeInBytes];
-        Array.Copy(data, i * floatSizeInBytes, floatBytes, 0, floatSizeInBytes);
-
-        float floatValue = BitConverter.ToSingle(floatBytes, 0);
-
-        // Assume the columns are already created in the same order as during extraction
-        DataColumn column = table.Columns[i % table.Columns.Count];
-
-        if (column.DataType == typeof(float))
-        {
-            DataRow row = table.Rows[i / table.Columns.Count];
-            row[column] = floatValue;
-        }
-        else
-        {
-            throw new ArgumentException("Column data type mismatch.");
-        }
-    }
-}
-Проверочная функция:
-
-csharp
-Copy code
-private byte[] ExtractAndInsertFloatData(DataTable originalTable)
-{
-    byte[] extractedData = ExtractFloatDataFromTable(originalTable);
-    
-    DataTable newTable = new DataTable();
-
-    // Assume the columns are already created in the same order as during extraction
-    foreach (DataColumn column in originalTable.Columns)
-    {
-        newTable.Columns.Add(column.ColumnName, column.DataType);
-    }
-
-    InsertFloatDataIntoTable(extractedData, newTable);
-
-    // Now newTable should contain the extracted data
-
-    // Optionally, you can compare the originalTable and newTable to verify the correctness
-
-    return extractedData;
-}
-	 */
-
-
 }

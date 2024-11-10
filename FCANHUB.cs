@@ -27,7 +27,7 @@ namespace TFTprog
         
         SGRAF_FILES GRAF_FILES = new SGRAF_FILES();
         SWORKAKVATEST WORKAKVATEST = new SWORKAKVATEST();
-
+        bool isInitComboSpeed = false;
 
         public void LoadDefaultSetting()
         {
@@ -279,6 +279,8 @@ namespace TFTprog
         public FormHUB()
         {
             InitializeComponent();
+
+            cBtimeSpeed.SelectedIndex = 0;
             tabControl1.SelectedIndex = 2;
             WORKAKVATEST.UpdateListtBoxRejak(lBrejak);
             this.Text = "DrawConfig  " + Properties.Settings.Default.Version;
@@ -1774,6 +1776,19 @@ foreach (TabPage tabPage in tabControl1.TabPages)
         private void b_PARtableLoad_Click(object sender, EventArgs e)
         {
 
+        }
+
+        private void cBtimeSpeed_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (isInitComboSpeed)
+            {
+                string selectedItem = cBtimeSpeed.SelectedItem.ToString();
+                CANHUB.SetSpeedFromStr(selectedItem);//команда изменения скорости работы таймеров
+            }
+            else
+            {
+                isInitComboSpeed = true;
+            }
         }
     }
 

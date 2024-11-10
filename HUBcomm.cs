@@ -185,6 +185,23 @@ namespace ExtHubComm
             }
         }
 
+        // Функция SetSpeedFromStr
+        public void SetSpeedFromStr(string xSpeed)
+        {
+            int ret=1;
+            // Удаление всех символов, кроме цифр
+            string numericString = new string(xSpeed.Where(char.IsDigit).ToArray());
+
+            // Преобразование в целое число
+            if (int.TryParse(numericString, out int result))
+            {
+                ret = result;
+            }
+            byte[] byteArray = BitConverter.GetBytes(ret);
+            CommSendAnsv(ECommand.cmd_TimeAccelerat, Efl_DEV.fld_MainBoard, byteArray, 500);
+        }
+
+
         //	public enum Efl_DEV { fld_PC = 0, fld_HUB, fld_MainBoard, fld_TFTboard, fld_FEUdetect, fld_none = 0x0f };//тип устройства
         public ERejWork ChangeDEVExhRejWork(ERejWork REJ, Efl_DEV DevType)
         {
@@ -296,71 +313,6 @@ namespace ExtHubComm
             return ret;
         }
 
-
-
-        //            byte[] Arrtmpb = CreatDataTestPro();
-        public void InitFlowPro(int StartWRAdr, int CountWrByte, ETypeMem DevTypeMem, int AllignBytes, int _proCRC, Efl_DEV _RecDev, int _fnoNeeddAnswer =0, ETypeMem _OptTypeMem = ETypeMem.etmem_none, int _OptExtAdr = 0x100000, int UpDownAdr=1)
-        {
-            //на первом шагу производим запись параметров для записи изображений во внешнюю FLASH
-            byte[] InitCommData = FlowProRAMtoMEM.InitPro(StartWRAdr, CountWrByte, _proCRC, DevTypeMem, AllignBytes,0, ETypeMem.etmem_TFTFLASH , _OptExtAdr);
-
-            CommSendAnsv(ECommand.cmd_START_flowMem, _RecDev, InitCommData);
-            FlowProRAMtoMEM.Fpro = (EMemPRO)RxBuff[0];
-            if (FlowProRAMtoMEM.Fpro !=  EMemPRO.eopmpro_wrGRAM)
-            {//если процесс в плате не перешёл в режим записи в GRAM генерируем ошибку
-                FlowProRAMtoMEM.Fpro = EMemPRO.eopmpro_errStart;
-                throw new Exception(" Ошибка инициализации процесса потоковой записи в память по адресу: " + Convert.ToString(StartWRAdr) + ", в команде cmd_WR_flowMem");
-            }
-
-
-        }
-
-
-
-        //для того, чтобы в процессе записи не происходило "зависаний" мыши и клавиатуры необходимо реализовать процесс отправки команды, а для этого выполнять запись "поблочно"
-
-        public EMemPRO StepDataSendFlowPro(int attempt, byte[] dataPack, Efl_DEV _RecDev)
-        {//возвращает количество байт, которые осталось записать до завершения процесса записи
-            //attempt - количество попыток записи в память
-
-            FlowProRAMtoMEM.FnoNeeddAnswer = 0;
-            int datalen = FlowProRAMtoMEM.max_commDatalen;
-            if (datalen > FlowProRAMtoMEM.Length - FlowProRAMtoMEM.Counter)
-                datalen = FlowProRAMtoMEM.Length - FlowProRAMtoMEM.Counter;
-            if (datalen <= 0)
-            {
-
-                return EMemPRO.eopmpro_ready;//в промежуточный буфер записано 4096 байт, либо все оставшиеся незаписанными байты файла, пора перезаписывать их во FLASH
-            }
-                
-            S_subComOp _subCom = new S_subComOp();
-            _subCom.WRflowPro = 1;
-            _subCom.fnoAnsv = 0;
-
-
-            byte[] comm_data = new byte[datalen];
-            Array.Copy(dataPack, FlowProRAMtoMEM.SourceFileAddr + FlowProRAMtoMEM.Counter, comm_data, 0, datalen);
-
-
-            if (tryCommSendAnsv(attempt, ECommand.cmd_WR_flowMem, _RecDev, comm_data, _subCom.data)>= attempt)
-            {//данная команда совершает attempt попыток записи, если все неудачные вызывает исключение
-                FlowProRAMtoMEM.Fpro = EMemPRO.eopmpro_wrGRAMerr;
-                throw new Exception(" В процессе записи в GRAM по адресу: " + Convert.ToString(FlowProRAMtoMEM.SourceFileAddr + FlowProRAMtoMEM.Counter) + " возникла ошибка " + Convert.ToString(FlowProRAMtoMEM.Fpro) + " в функции StepDataSendFlowPro");
-            }
-
-            FlowProRAMtoMEM.Fpro = (EMemPRO)(RxBuff[0]);//микроконтроллер возвращает статус операции записи
-
-            if (FlowProRAMtoMEM.Fpro == EMemPRO.eopmpro_wrGRAMerr)
-            {//если процесс в плате не перешёл в режим записи в GRAM вызываем прерывание
-                throw new Exception(" В процессе записи в GRAM по адресу: " + Convert.ToString(FlowProRAMtoMEM.SourceFileAddr + FlowProRAMtoMEM.Counter) + " возникла ошибка " + Convert.ToString(FlowProRAMtoMEM.Fpro)+ " в функции StepDataSendFlowPro");
-            }
-
-            FlowProRAMtoMEM.Counter += datalen;
-
-
-            return (FlowProRAMtoMEM.Fpro);
-
-        }
 
         public  EMemPRO WrTFTFLASHFlowPro( Efl_DEV _RecDev)
         {

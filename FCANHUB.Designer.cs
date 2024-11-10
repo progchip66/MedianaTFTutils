@@ -79,9 +79,6 @@
             this.bParamRead = new System.Windows.Forms.Button();
             this.labRej = new System.Windows.Forms.Label();
             this.gBtimeSpeed = new System.Windows.Forms.GroupBox();
-            this.rBtimex60 = new System.Windows.Forms.RadioButton();
-            this.rBtimex10 = new System.Windows.Forms.RadioButton();
-            this.rBtimex1 = new System.Windows.Forms.RadioButton();
             this.bParamWrite = new System.Windows.Forms.Button();
             this.cBrej = new System.Windows.Forms.ComboBox();
             this.dataGridTimers = new System.Windows.Forms.DataGridView();
@@ -117,6 +114,7 @@
             this.dGparam = new System.Windows.Forms.DataGridView();
             this.lBrejak = new System.Windows.Forms.ListBox();
             this.WRpro = new System.ComponentModel.BackgroundWorker();
+            this.cBtimeSpeed = new System.Windows.Forms.ComboBox();
             this.tabControl1.SuspendLayout();
             this.tabPagePack.SuspendLayout();
             this.statusStrip1.SuspendLayout();
@@ -641,47 +639,13 @@
             // 
             // gBtimeSpeed
             // 
-            this.gBtimeSpeed.Controls.Add(this.rBtimex60);
-            this.gBtimeSpeed.Controls.Add(this.rBtimex10);
-            this.gBtimeSpeed.Controls.Add(this.rBtimex1);
-            this.gBtimeSpeed.Location = new System.Drawing.Point(13, 177);
+            this.gBtimeSpeed.Controls.Add(this.cBtimeSpeed);
+            this.gBtimeSpeed.Location = new System.Drawing.Point(11, 158);
             this.gBtimeSpeed.Name = "gBtimeSpeed";
             this.gBtimeSpeed.Size = new System.Drawing.Size(216, 100);
             this.gBtimeSpeed.TabIndex = 6;
             this.gBtimeSpeed.TabStop = false;
             this.gBtimeSpeed.Text = "Ускорить время";
-            // 
-            // rBtimex60
-            // 
-            this.rBtimex60.AutoSize = true;
-            this.rBtimex60.Location = new System.Drawing.Point(17, 65);
-            this.rBtimex60.Name = "rBtimex60";
-            this.rBtimex60.Size = new System.Drawing.Size(42, 17);
-            this.rBtimex60.TabIndex = 2;
-            this.rBtimex60.Text = "x60";
-            this.rBtimex60.UseVisualStyleBackColor = true;
-            // 
-            // rBtimex10
-            // 
-            this.rBtimex10.AutoSize = true;
-            this.rBtimex10.Location = new System.Drawing.Point(17, 42);
-            this.rBtimex10.Name = "rBtimex10";
-            this.rBtimex10.Size = new System.Drawing.Size(42, 17);
-            this.rBtimex10.TabIndex = 1;
-            this.rBtimex10.Text = "x10";
-            this.rBtimex10.UseVisualStyleBackColor = true;
-            // 
-            // rBtimex1
-            // 
-            this.rBtimex1.AutoSize = true;
-            this.rBtimex1.Checked = true;
-            this.rBtimex1.Location = new System.Drawing.Point(17, 19);
-            this.rBtimex1.Name = "rBtimex1";
-            this.rBtimex1.Size = new System.Drawing.Size(36, 17);
-            this.rBtimex1.TabIndex = 0;
-            this.rBtimex1.TabStop = true;
-            this.rBtimex1.Text = "x1";
-            this.rBtimex1.UseVisualStyleBackColor = true;
             // 
             // bParamWrite
             // 
@@ -1046,6 +1010,21 @@
             this.WRpro.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.WRpro_ProgressChanged);
             this.WRpro.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.WRpro_RunWorkerCompleted);
             // 
+            // cBtimeSpeed
+            // 
+            this.cBtimeSpeed.FormattingEnabled = true;
+            this.cBtimeSpeed.Items.AddRange(new object[] {
+            "x1",
+            "x2",
+            "x10",
+            "x60",
+            "x600"});
+            this.cBtimeSpeed.Location = new System.Drawing.Point(18, 19);
+            this.cBtimeSpeed.Name = "cBtimeSpeed";
+            this.cBtimeSpeed.Size = new System.Drawing.Size(192, 21);
+            this.cBtimeSpeed.TabIndex = 9;
+            this.cBtimeSpeed.SelectedIndexChanged += new System.EventHandler(this.cBtimeSpeed_SelectedIndexChanged);
+            // 
             // FormHUB
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1070,7 +1049,6 @@
             this.gBchangePar.ResumeLayout(false);
             this.gBchangePar.PerformLayout();
             this.gBtimeSpeed.ResumeLayout(false);
-            this.gBtimeSpeed.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridTimers)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
             this.tP_TFT_WR_RD.ResumeLayout(false);
@@ -1142,9 +1120,6 @@
         private System.Windows.Forms.Button bParamWrite;
         private System.Windows.Forms.Button bParamRead;
         private System.Windows.Forms.GroupBox gBtimeSpeed;
-        private System.Windows.Forms.RadioButton rBtimex60;
-        private System.Windows.Forms.RadioButton rBtimex10;
-        private System.Windows.Forms.RadioButton rBtimex1;
         private System.Windows.Forms.Label labRej;
         private System.Windows.Forms.GroupBox gBchangePar;
         private System.Windows.Forms.Button bSetTime;
@@ -1175,6 +1150,7 @@
         private System.Windows.Forms.Label lbFT1divFT0mult100;
         private System.Windows.Forms.Label lbFT0minusFT1;
         private System.Windows.Forms.DataGridView dGtimers;
+        private System.Windows.Forms.ComboBox cBtimeSpeed;
     }
 }
 
