@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Data;
 using TESTAKVA;
+using System.Globalization;
 
 namespace TFTprog
 {
@@ -347,7 +348,64 @@ namespace TFTprog
 
 
     }
+
+    public static class TimeConverter
+    {
+        // Преобразовать текущее время из среды Windows в количество секунд с заданной даты
+        public static long Allsec(string StartDataTime)
+        {
+            // Парсим StartDataTime в формате "mm:HH:ss dd.MM.YYYY"
+            DateTime startDate = ParseTimeText(StartDataTime);
+
+            // Получаем текущее время
+            DateTime currentTime = DateTime.Now;
+
+            // Вычисляем разницу в секундах
+            TimeSpan elapsed = currentTime - startDate;
+            return (long)elapsed.TotalSeconds;
+        }
+
+        // Преобразовать количество секунд с заданной даты в строку формата TimeText
+        public static string GetDataTime(long NumSec, string StartDataTime)
+        {
+            // Парсим StartDataTime
+            DateTime startDate = ParseTimeText(StartDataTime);
+
+            // Добавляем секунды к начальной дате
+            DateTime resultTime = startDate.AddSeconds(NumSec);
+
+            // Преобразуем в формат TimeText
+            return FormatTimeText(resultTime);
+        }
+
+        // Преобразовать строку TimeText в количество секунд
+        public static long GetAllsec(string TimeText, string StartDataTime)
+        {
+            // Парсим TimeText и StartDataTime
+            DateTime startDate = ParseTimeText(StartDataTime);
+            DateTime time = ParseTimeText(TimeText);
+
+            // Вычисляем разницу в секундах
+            TimeSpan elapsed = time - startDate;
+            return (long)elapsed.TotalSeconds;
+        }
+
+        // Парсинг строки формата TimeText в DateTime
+        private static DateTime ParseTimeText(string timeText)
+        {
+            // Формат "mm:HH:ss dd.MM.YYYY"
+            string format = "mm:HH:ss dd.MM.yyyy";
+            return DateTime.ParseExact(timeText, format, CultureInfo.InvariantCulture);
+        }
+
+        // Форматирование DateTime в строку TimeText
+        private static string FormatTimeText(DateTime dateTime)
+        {
+            // Формат "mm:HH:ss dd.MM.YYYY"
+            return dateTime.ToString("HH:mm:ss dd.MM.yyyy", CultureInfo.InvariantCulture);
+        }
     }
+}
 
 
 
@@ -534,6 +592,4 @@ namespace TFTprog
 
 
     }
-
-
 };

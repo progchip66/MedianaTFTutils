@@ -16,7 +16,6 @@ using COMMAND;
 using ExtHubComm;
 using TESTAKVA;
 
-
 namespace TFTprog
 {
     
@@ -1790,6 +1789,16 @@ foreach (TabPage tabPage in tabControl1.TabPages)
                 isInitComboSpeed = true;
             }
         }
+
+        private void bSetBOARDwinDT_Click(object sender, EventArgs e)
+        {
+            string StartDataTime;
+            long tmpLong = TimeConverter.Allsec("00:00:00 01.01.1970");
+            StartDataTime = TimeConverter.GetDataTime(tmpLong, "00:00:00 01.01.1970");
+            lBDT.Text = StartDataTime;
+
+        }
+
     }
 
 

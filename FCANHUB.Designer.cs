@@ -74,11 +74,10 @@
             this.tabPageBTAddr = new System.Windows.Forms.TabPage();
             this.button2 = new System.Windows.Forms.Button();
             this.gBchangePar = new System.Windows.Forms.GroupBox();
-            this.bSetTime = new System.Windows.Forms.Button();
-            this.bSetDate = new System.Windows.Forms.Button();
             this.bParamRead = new System.Windows.Forms.Button();
             this.labRej = new System.Windows.Forms.Label();
             this.gBtimeSpeed = new System.Windows.Forms.GroupBox();
+            this.cBtimeSpeed = new System.Windows.Forms.ComboBox();
             this.bParamWrite = new System.Windows.Forms.Button();
             this.cBrej = new System.Windows.Forms.ComboBox();
             this.dataGridTimers = new System.Windows.Forms.DataGridView();
@@ -114,7 +113,12 @@
             this.dGparam = new System.Windows.Forms.DataGridView();
             this.lBrejak = new System.Windows.Forms.ListBox();
             this.WRpro = new System.ComponentModel.BackgroundWorker();
-            this.cBtimeSpeed = new System.Windows.Forms.ComboBox();
+            this.gBdateTime = new System.Windows.Forms.GroupBox();
+            this.bSetBOARDwinDT = new System.Windows.Forms.Button();
+            this.textBox2 = new System.Windows.Forms.TextBox();
+            this.bSetBoardDT = new System.Windows.Forms.Button();
+            this.LBDTread = new System.Windows.Forms.Label();
+            this.lBDT = new System.Windows.Forms.Label();
             this.tabControl1.SuspendLayout();
             this.tabPagePack.SuspendLayout();
             this.statusStrip1.SuspendLayout();
@@ -131,6 +135,7 @@
             this.tabPage1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dGtimers)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dGparam)).BeginInit();
+            this.gBdateTime.SuspendLayout();
             this.SuspendLayout();
             // 
             // lHEX2
@@ -586,8 +591,7 @@
             // 
             // gBchangePar
             // 
-            this.gBchangePar.Controls.Add(this.bSetTime);
-            this.gBchangePar.Controls.Add(this.bSetDate);
+            this.gBchangePar.Controls.Add(this.gBdateTime);
             this.gBchangePar.Controls.Add(this.bParamRead);
             this.gBchangePar.Controls.Add(this.labRej);
             this.gBchangePar.Controls.Add(this.gBtimeSpeed);
@@ -599,24 +603,6 @@
             this.gBchangePar.TabIndex = 7;
             this.gBchangePar.TabStop = false;
             this.gBchangePar.Text = "Действия";
-            // 
-            // bSetTime
-            // 
-            this.bSetTime.Location = new System.Drawing.Point(16, 343);
-            this.bSetTime.Name = "bSetTime";
-            this.bSetTime.Size = new System.Drawing.Size(211, 24);
-            this.bSetTime.TabIndex = 8;
-            this.bSetTime.Text = "Установить время";
-            this.bSetTime.UseVisualStyleBackColor = true;
-            // 
-            // bSetDate
-            // 
-            this.bSetDate.Location = new System.Drawing.Point(13, 296);
-            this.bSetDate.Name = "bSetDate";
-            this.bSetDate.Size = new System.Drawing.Size(215, 26);
-            this.bSetDate.TabIndex = 7;
-            this.bSetDate.Text = "Установить дату";
-            this.bSetDate.UseVisualStyleBackColor = true;
             // 
             // bParamRead
             // 
@@ -642,10 +628,25 @@
             this.gBtimeSpeed.Controls.Add(this.cBtimeSpeed);
             this.gBtimeSpeed.Location = new System.Drawing.Point(11, 158);
             this.gBtimeSpeed.Name = "gBtimeSpeed";
-            this.gBtimeSpeed.Size = new System.Drawing.Size(216, 100);
+            this.gBtimeSpeed.Size = new System.Drawing.Size(216, 60);
             this.gBtimeSpeed.TabIndex = 6;
             this.gBtimeSpeed.TabStop = false;
             this.gBtimeSpeed.Text = "Ускорить время";
+            // 
+            // cBtimeSpeed
+            // 
+            this.cBtimeSpeed.FormattingEnabled = true;
+            this.cBtimeSpeed.Items.AddRange(new object[] {
+            "x1",
+            "x2",
+            "x10",
+            "x60",
+            "x600"});
+            this.cBtimeSpeed.Location = new System.Drawing.Point(18, 19);
+            this.cBtimeSpeed.Name = "cBtimeSpeed";
+            this.cBtimeSpeed.Size = new System.Drawing.Size(192, 21);
+            this.cBtimeSpeed.TabIndex = 9;
+            this.cBtimeSpeed.SelectedIndexChanged += new System.EventHandler(this.cBtimeSpeed_SelectedIndexChanged);
             // 
             // bParamWrite
             // 
@@ -932,7 +933,7 @@
             // 
             // b_PARtableLoad
             // 
-            this.b_PARtableLoad.Location = new System.Drawing.Point(521, 637);
+            this.b_PARtableLoad.Location = new System.Drawing.Point(510, 637);
             this.b_PARtableLoad.Name = "b_PARtableLoad";
             this.b_PARtableLoad.Size = new System.Drawing.Size(127, 23);
             this.b_PARtableLoad.TabIndex = 1;
@@ -942,7 +943,7 @@
             // 
             // b_PARtableSave
             // 
-            this.b_PARtableSave.Location = new System.Drawing.Point(654, 637);
+            this.b_PARtableSave.Location = new System.Drawing.Point(643, 637);
             this.b_PARtableSave.Name = "b_PARtableSave";
             this.b_PARtableSave.Size = new System.Drawing.Size(130, 23);
             this.b_PARtableSave.TabIndex = 2;
@@ -951,7 +952,7 @@
             // 
             // b_newPARfilename
             // 
-            this.b_newPARfilename.Location = new System.Drawing.Point(801, 637);
+            this.b_newPARfilename.Location = new System.Drawing.Point(783, 639);
             this.b_newPARfilename.Name = "b_newPARfilename";
             this.b_newPARfilename.Size = new System.Drawing.Size(91, 23);
             this.b_newPARfilename.TabIndex = 3;
@@ -962,7 +963,7 @@
             // lbFT1divFT0mult100
             // 
             this.lbFT1divFT0mult100.AutoSize = true;
-            this.lbFT1divFT0mult100.Location = new System.Drawing.Point(895, 481);
+            this.lbFT1divFT0mult100.Location = new System.Drawing.Point(790, 388);
             this.lbFT1divFT0mult100.Name = "lbFT1divFT0mult100";
             this.lbFT1divFT0mult100.Size = new System.Drawing.Size(84, 13);
             this.lbFT1divFT0mult100.TabIndex = 4;
@@ -971,7 +972,7 @@
             // lbFT0minusFT1
             // 
             this.lbFT0minusFT1.AutoSize = true;
-            this.lbFT0minusFT1.Location = new System.Drawing.Point(895, 459);
+            this.lbFT0minusFT1.Location = new System.Drawing.Point(790, 413);
             this.lbFT0minusFT1.Name = "lbFT0minusFT1";
             this.lbFT0minusFT1.Size = new System.Drawing.Size(60, 13);
             this.lbFT0minusFT1.TabIndex = 3;
@@ -995,7 +996,7 @@
             // lBrejak
             // 
             this.lBrejak.FormattingEnabled = true;
-            this.lBrejak.Location = new System.Drawing.Point(884, 6);
+            this.lBrejak.Location = new System.Drawing.Point(884, 49);
             this.lBrejak.Name = "lBrejak";
             this.lBrejak.Size = new System.Drawing.Size(132, 420);
             this.lBrejak.TabIndex = 0;
@@ -1010,20 +1011,67 @@
             this.WRpro.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.WRpro_ProgressChanged);
             this.WRpro.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.WRpro_RunWorkerCompleted);
             // 
-            // cBtimeSpeed
+            // gBdateTime
             // 
-            this.cBtimeSpeed.FormattingEnabled = true;
-            this.cBtimeSpeed.Items.AddRange(new object[] {
-            "x1",
-            "x2",
-            "x10",
-            "x60",
-            "x600"});
-            this.cBtimeSpeed.Location = new System.Drawing.Point(18, 19);
-            this.cBtimeSpeed.Name = "cBtimeSpeed";
-            this.cBtimeSpeed.Size = new System.Drawing.Size(192, 21);
-            this.cBtimeSpeed.TabIndex = 9;
-            this.cBtimeSpeed.SelectedIndexChanged += new System.EventHandler(this.cBtimeSpeed_SelectedIndexChanged);
+            this.gBdateTime.Controls.Add(this.bSetBOARDwinDT);
+            this.gBdateTime.Controls.Add(this.textBox2);
+            this.gBdateTime.Controls.Add(this.bSetBoardDT);
+            this.gBdateTime.Controls.Add(this.LBDTread);
+            this.gBdateTime.Controls.Add(this.lBDT);
+            this.gBdateTime.Location = new System.Drawing.Point(48, 248);
+            this.gBdateTime.Name = "gBdateTime";
+            this.gBdateTime.Size = new System.Drawing.Size(132, 182);
+            this.gBdateTime.TabIndex = 7;
+            this.gBdateTime.TabStop = false;
+            this.gBdateTime.Text = "ДатаВремя";
+            // 
+            // bSetBOARDwinDT
+            // 
+            this.bSetBOARDwinDT.Location = new System.Drawing.Point(10, 141);
+            this.bSetBOARDwinDT.Name = "bSetBOARDwinDT";
+            this.bSetBOARDwinDT.Size = new System.Drawing.Size(110, 23);
+            this.bSetBOARDwinDT.TabIndex = 4;
+            this.bSetBOARDwinDT.Text = "SetBOARDwinDT";
+            this.bSetBOARDwinDT.UseVisualStyleBackColor = true;
+            this.bSetBOARDwinDT.Click += new System.EventHandler(this.bSetBOARDwinDT_Click);
+            // 
+            // textBox2
+            // 
+            this.textBox2.Location = new System.Drawing.Point(10, 103);
+            this.textBox2.Name = "textBox2";
+            this.textBox2.Size = new System.Drawing.Size(110, 20);
+            this.textBox2.TabIndex = 3;
+            // 
+            // bSetBoardDT
+            // 
+            this.bSetBoardDT.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.bSetBoardDT.ForeColor = System.Drawing.Color.Red;
+            this.bSetBoardDT.Location = new System.Drawing.Point(10, 73);
+            this.bSetBoardDT.Name = "bSetBoardDT";
+            this.bSetBoardDT.Size = new System.Drawing.Size(110, 23);
+            this.bSetBoardDT.TabIndex = 2;
+            this.bSetBoardDT.Text = "SetBoardDT";
+            this.bSetBoardDT.UseVisualStyleBackColor = true;
+            // 
+            // LBDTread
+            // 
+            this.LBDTread.AutoSize = true;
+            this.LBDTread.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.LBDTread.Location = new System.Drawing.Point(7, 45);
+            this.LBDTread.Name = "LBDTread";
+            this.LBDTread.Size = new System.Drawing.Size(51, 13);
+            this.LBDTread.TabIndex = 1;
+            this.LBDTread.Text = "noRead";
+            // 
+            // lBDT
+            // 
+            this.lBDT.AutoSize = true;
+            this.lBDT.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.lBDT.Location = new System.Drawing.Point(7, 20);
+            this.lBDT.Name = "lBDT";
+            this.lBDT.Size = new System.Drawing.Size(94, 13);
+            this.lBDT.TabIndex = 0;
+            this.lBDT.Text = "BoardDateTime";
             // 
             // FormHUB
             // 
@@ -1059,6 +1107,8 @@
             this.tabPage1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dGtimers)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.dGparam)).EndInit();
+            this.gBdateTime.ResumeLayout(false);
+            this.gBdateTime.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -1122,8 +1172,6 @@
         private System.Windows.Forms.GroupBox gBtimeSpeed;
         private System.Windows.Forms.Label labRej;
         private System.Windows.Forms.GroupBox gBchangePar;
-        private System.Windows.Forms.Button bSetTime;
-        private System.Windows.Forms.Button bSetDate;
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.Button button3;
         private System.Windows.Forms.ListBox LBoxInterface;
@@ -1151,6 +1199,12 @@
         private System.Windows.Forms.Label lbFT0minusFT1;
         private System.Windows.Forms.DataGridView dGtimers;
         private System.Windows.Forms.ComboBox cBtimeSpeed;
+        private System.Windows.Forms.GroupBox gBdateTime;
+        private System.Windows.Forms.Button bSetBOARDwinDT;
+        private System.Windows.Forms.TextBox textBox2;
+        private System.Windows.Forms.Button bSetBoardDT;
+        private System.Windows.Forms.Label LBDTread;
+        private System.Windows.Forms.Label lBDT;
     }
 }
 
