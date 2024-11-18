@@ -1793,12 +1793,20 @@ foreach (TabPage tabPage in tabControl1.TabPages)
         private void bSetBOARDwinDT_Click(object sender, EventArgs e)
         {
             string StartDataTime;
-            long tmpLong = TimeConverter.Allsec("00:00:00 01.01.1970");
-            StartDataTime = TimeConverter.GetDataTime(tmpLong, "00:00:00 01.01.1970");
+            //           long tmpLong = TimeConverter.Allsec("00:00:00 01.01.2000");
+            long tmpLong = CANHUB.GetRTCDateTime(Efl_DEV.fld_MainBoard);
+            StartDataTime = TimeConverter.GetDataTime(tmpLong, "00:00:00 01.01.2000");
+
+
             lBDT.Text = StartDataTime;
 
         }
 
+        private void bSetBoardDT_Click(object sender, EventArgs e)
+        {
+            long WinNowTime = TimeConverter.WindowsTimeTosec("00:00:00 01.01.2000");
+            CANHUB.SetRTCDateTime(WinNowTime, Efl_DEV.fld_MainBoard);
+        }
     }
 
 

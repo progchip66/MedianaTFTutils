@@ -74,6 +74,12 @@
             this.tabPageBTAddr = new System.Windows.Forms.TabPage();
             this.button2 = new System.Windows.Forms.Button();
             this.gBchangePar = new System.Windows.Forms.GroupBox();
+            this.gBdateTime = new System.Windows.Forms.GroupBox();
+            this.bSetBOARDwinDT = new System.Windows.Forms.Button();
+            this.textBox2 = new System.Windows.Forms.TextBox();
+            this.bSetBoardDT = new System.Windows.Forms.Button();
+            this.LBDTread = new System.Windows.Forms.Label();
+            this.lBDT = new System.Windows.Forms.Label();
             this.bParamRead = new System.Windows.Forms.Button();
             this.labRej = new System.Windows.Forms.Label();
             this.gBtimeSpeed = new System.Windows.Forms.GroupBox();
@@ -113,12 +119,6 @@
             this.dGparam = new System.Windows.Forms.DataGridView();
             this.lBrejak = new System.Windows.Forms.ListBox();
             this.WRpro = new System.ComponentModel.BackgroundWorker();
-            this.gBdateTime = new System.Windows.Forms.GroupBox();
-            this.bSetBOARDwinDT = new System.Windows.Forms.Button();
-            this.textBox2 = new System.Windows.Forms.TextBox();
-            this.bSetBoardDT = new System.Windows.Forms.Button();
-            this.LBDTread = new System.Windows.Forms.Label();
-            this.lBDT = new System.Windows.Forms.Label();
             this.tabControl1.SuspendLayout();
             this.tabPagePack.SuspendLayout();
             this.statusStrip1.SuspendLayout();
@@ -127,6 +127,7 @@
             this.gBsaveOneFile.SuspendLayout();
             this.tabPageBTAddr.SuspendLayout();
             this.gBchangePar.SuspendLayout();
+            this.gBdateTime.SuspendLayout();
             this.gBtimeSpeed.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridTimers)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
@@ -135,7 +136,6 @@
             this.tabPage1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dGtimers)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dGparam)).BeginInit();
-            this.gBdateTime.SuspendLayout();
             this.SuspendLayout();
             // 
             // lHEX2
@@ -604,6 +604,69 @@
             this.gBchangePar.TabStop = false;
             this.gBchangePar.Text = "Действия";
             // 
+            // gBdateTime
+            // 
+            this.gBdateTime.Controls.Add(this.bSetBOARDwinDT);
+            this.gBdateTime.Controls.Add(this.textBox2);
+            this.gBdateTime.Controls.Add(this.bSetBoardDT);
+            this.gBdateTime.Controls.Add(this.LBDTread);
+            this.gBdateTime.Controls.Add(this.lBDT);
+            this.gBdateTime.Location = new System.Drawing.Point(48, 248);
+            this.gBdateTime.Name = "gBdateTime";
+            this.gBdateTime.Size = new System.Drawing.Size(132, 182);
+            this.gBdateTime.TabIndex = 7;
+            this.gBdateTime.TabStop = false;
+            this.gBdateTime.Text = "ДатаВремя";
+            // 
+            // bSetBOARDwinDT
+            // 
+            this.bSetBOARDwinDT.Location = new System.Drawing.Point(10, 141);
+            this.bSetBOARDwinDT.Name = "bSetBOARDwinDT";
+            this.bSetBOARDwinDT.Size = new System.Drawing.Size(110, 23);
+            this.bSetBOARDwinDT.TabIndex = 4;
+            this.bSetBOARDwinDT.Text = "GetBoardDT";
+            this.bSetBOARDwinDT.UseVisualStyleBackColor = true;
+            this.bSetBOARDwinDT.Click += new System.EventHandler(this.bSetBOARDwinDT_Click);
+            // 
+            // textBox2
+            // 
+            this.textBox2.Location = new System.Drawing.Point(10, 103);
+            this.textBox2.Name = "textBox2";
+            this.textBox2.Size = new System.Drawing.Size(110, 20);
+            this.textBox2.TabIndex = 3;
+            // 
+            // bSetBoardDT
+            // 
+            this.bSetBoardDT.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.bSetBoardDT.ForeColor = System.Drawing.Color.Red;
+            this.bSetBoardDT.Location = new System.Drawing.Point(10, 73);
+            this.bSetBoardDT.Name = "bSetBoardDT";
+            this.bSetBoardDT.Size = new System.Drawing.Size(110, 23);
+            this.bSetBoardDT.TabIndex = 2;
+            this.bSetBoardDT.Text = "WinDTtoBoard";
+            this.bSetBoardDT.UseVisualStyleBackColor = true;
+            this.bSetBoardDT.Click += new System.EventHandler(this.bSetBoardDT_Click);
+            // 
+            // LBDTread
+            // 
+            this.LBDTread.AutoSize = true;
+            this.LBDTread.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.LBDTread.Location = new System.Drawing.Point(7, 45);
+            this.LBDTread.Name = "LBDTread";
+            this.LBDTread.Size = new System.Drawing.Size(51, 13);
+            this.LBDTread.TabIndex = 1;
+            this.LBDTread.Text = "noRead";
+            // 
+            // lBDT
+            // 
+            this.lBDT.AutoSize = true;
+            this.lBDT.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.lBDT.Location = new System.Drawing.Point(7, 20);
+            this.lBDT.Name = "lBDT";
+            this.lBDT.Size = new System.Drawing.Size(94, 13);
+            this.lBDT.TabIndex = 0;
+            this.lBDT.Text = "BoardDateTime";
+            // 
             // bParamRead
             // 
             this.bParamRead.Location = new System.Drawing.Point(13, 28);
@@ -1011,68 +1074,6 @@
             this.WRpro.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.WRpro_ProgressChanged);
             this.WRpro.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.WRpro_RunWorkerCompleted);
             // 
-            // gBdateTime
-            // 
-            this.gBdateTime.Controls.Add(this.bSetBOARDwinDT);
-            this.gBdateTime.Controls.Add(this.textBox2);
-            this.gBdateTime.Controls.Add(this.bSetBoardDT);
-            this.gBdateTime.Controls.Add(this.LBDTread);
-            this.gBdateTime.Controls.Add(this.lBDT);
-            this.gBdateTime.Location = new System.Drawing.Point(48, 248);
-            this.gBdateTime.Name = "gBdateTime";
-            this.gBdateTime.Size = new System.Drawing.Size(132, 182);
-            this.gBdateTime.TabIndex = 7;
-            this.gBdateTime.TabStop = false;
-            this.gBdateTime.Text = "ДатаВремя";
-            // 
-            // bSetBOARDwinDT
-            // 
-            this.bSetBOARDwinDT.Location = new System.Drawing.Point(10, 141);
-            this.bSetBOARDwinDT.Name = "bSetBOARDwinDT";
-            this.bSetBOARDwinDT.Size = new System.Drawing.Size(110, 23);
-            this.bSetBOARDwinDT.TabIndex = 4;
-            this.bSetBOARDwinDT.Text = "SetBOARDwinDT";
-            this.bSetBOARDwinDT.UseVisualStyleBackColor = true;
-            this.bSetBOARDwinDT.Click += new System.EventHandler(this.bSetBOARDwinDT_Click);
-            // 
-            // textBox2
-            // 
-            this.textBox2.Location = new System.Drawing.Point(10, 103);
-            this.textBox2.Name = "textBox2";
-            this.textBox2.Size = new System.Drawing.Size(110, 20);
-            this.textBox2.TabIndex = 3;
-            // 
-            // bSetBoardDT
-            // 
-            this.bSetBoardDT.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.bSetBoardDT.ForeColor = System.Drawing.Color.Red;
-            this.bSetBoardDT.Location = new System.Drawing.Point(10, 73);
-            this.bSetBoardDT.Name = "bSetBoardDT";
-            this.bSetBoardDT.Size = new System.Drawing.Size(110, 23);
-            this.bSetBoardDT.TabIndex = 2;
-            this.bSetBoardDT.Text = "SetBoardDT";
-            this.bSetBoardDT.UseVisualStyleBackColor = true;
-            // 
-            // LBDTread
-            // 
-            this.LBDTread.AutoSize = true;
-            this.LBDTread.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.LBDTread.Location = new System.Drawing.Point(7, 45);
-            this.LBDTread.Name = "LBDTread";
-            this.LBDTread.Size = new System.Drawing.Size(51, 13);
-            this.LBDTread.TabIndex = 1;
-            this.LBDTread.Text = "noRead";
-            // 
-            // lBDT
-            // 
-            this.lBDT.AutoSize = true;
-            this.lBDT.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.lBDT.Location = new System.Drawing.Point(7, 20);
-            this.lBDT.Name = "lBDT";
-            this.lBDT.Size = new System.Drawing.Size(94, 13);
-            this.lBDT.TabIndex = 0;
-            this.lBDT.Text = "BoardDateTime";
-            // 
             // FormHUB
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1096,6 +1097,8 @@
             this.tabPageBTAddr.ResumeLayout(false);
             this.gBchangePar.ResumeLayout(false);
             this.gBchangePar.PerformLayout();
+            this.gBdateTime.ResumeLayout(false);
+            this.gBdateTime.PerformLayout();
             this.gBtimeSpeed.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridTimers)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
@@ -1107,8 +1110,6 @@
             this.tabPage1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dGtimers)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.dGparam)).EndInit();
-            this.gBdateTime.ResumeLayout(false);
-            this.gBdateTime.PerformLayout();
             this.ResumeLayout(false);
 
         }

@@ -352,7 +352,7 @@ namespace TFTprog
     public static class TimeConverter
     {
         // Преобразовать текущее время из среды Windows в количество секунд с заданной даты
-        public static long Allsec(string StartDataTime)
+        public static long WindowsTimeTosec(string StartDataTime)
         {
             // Парсим StartDataTime в формате "mm:HH:ss dd.MM.YYYY"
             DateTime startDate = ParseTimeText(StartDataTime);
