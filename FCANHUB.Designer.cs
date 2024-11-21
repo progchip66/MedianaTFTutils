@@ -119,6 +119,7 @@
             this.dGparam = new System.Windows.Forms.DataGridView();
             this.lBrejak = new System.Windows.Forms.ListBox();
             this.WRpro = new System.ComponentModel.BackgroundWorker();
+            this.bCalibr = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
             this.tabPagePack.SuspendLayout();
             this.statusStrip1.SuspendLayout();
@@ -591,6 +592,7 @@
             // 
             // gBchangePar
             // 
+            this.gBchangePar.Controls.Add(this.bCalibr);
             this.gBchangePar.Controls.Add(this.gBdateTime);
             this.gBchangePar.Controls.Add(this.bParamRead);
             this.gBchangePar.Controls.Add(this.labRej);
@@ -1074,6 +1076,16 @@
             this.WRpro.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.WRpro_ProgressChanged);
             this.WRpro.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.WRpro_RunWorkerCompleted);
             // 
+            // bCalibr
+            // 
+            this.bCalibr.Location = new System.Drawing.Point(58, 437);
+            this.bCalibr.Name = "bCalibr";
+            this.bCalibr.Size = new System.Drawing.Size(110, 23);
+            this.bCalibr.TabIndex = 8;
+            this.bCalibr.Text = "Калибровка TFT";
+            this.bCalibr.UseVisualStyleBackColor = true;
+            this.bCalibr.Click += new System.EventHandler(this.bCalibr_Click);
+            // 
             // FormHUB
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1206,6 +1218,7 @@
         private System.Windows.Forms.Button bSetBoardDT;
         private System.Windows.Forms.Label LBDTread;
         private System.Windows.Forms.Label lBDT;
+        private System.Windows.Forms.Button bCalibr;
     }
 }
 

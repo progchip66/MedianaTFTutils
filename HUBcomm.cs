@@ -185,6 +185,8 @@ namespace ExtHubComm
             }
         }
 
+
+
         //Установка (считывание если параметр равен нулю) нового системного времени и даты путём отправки в плату управления
 
         public  long GetRTCDateTime( Efl_DEV DevType)
@@ -194,6 +196,15 @@ namespace ExtHubComm
             long result = BitConverter.ToUInt32(RxBuff, 0);
             return result;
         }
+
+        public void StartTFTcalibr(Efl_DEV DevType)
+        {//принудительный запуск процесса калибровки панели
+            byte[] comm_data = new byte[4] { 0, 0, 0, 0 };
+            CommSendAnsv(ECommand.cmd_StartTFTcalibr, DevType, comm_data, 100);
+            long result = BitConverter.ToUInt32(RxBuff, 0);
+            return ;
+        }
+
         public void SetRTCDateTime(long number, Efl_DEV DevType)
         {
             byte[] comm_data = new byte[4] { 0, 0, 0, 0 };
@@ -205,6 +216,9 @@ namespace ExtHubComm
                 throw new Exception("Ошибка операции записи-чтения в RTC MainBoard");
             }
         }
+
+
+
 
         // Функция SetSpeedFromStr
         public void SetSpeedFromStr(string xSpeed)

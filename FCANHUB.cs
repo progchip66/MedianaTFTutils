@@ -1807,6 +1807,11 @@ foreach (TabPage tabPage in tabControl1.TabPages)
             long WinNowTime = TimeConverter.WindowsTimeTosec("00:00:00 01.01.2000");
             CANHUB.SetRTCDateTime(WinNowTime, Efl_DEV.fld_MainBoard);
         }
+
+        private void bCalibr_Click(object sender, EventArgs e)
+        {
+            CANHUB.StartTFTcalibr(Efl_DEV.fld_TFTboard);
+        }
     }
 
 

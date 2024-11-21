@@ -113,6 +113,7 @@ namespace COMMAND
 
 		cmd_SetRTCDateTime = 0x5C,////Установка (считывание если параметр равен нулю) нового системного времени и даты путём отправки в плату управления
 		cmd_extTimers = 0x5D,//Установка нового системного времени и даты путём отправки в плату управления
+		cmd_StartTFTcalibr = 0x5E,//Запуск режима калибровки TFT панели
 		cmd_USER = 0x70,
 		cmd_TimeAccelerat = 0x71,
 		cmd_MaxminAKVAparMCUtoPC = 0x72,
