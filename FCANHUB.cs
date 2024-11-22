@@ -279,6 +279,17 @@ namespace TFTprog
         {
             InitializeComponent();
 
+            // Подписываемся на событие DataReceivedEvent
+            CANHUB.DataReceivedEvent += OnDataReceived;
+            // Обработчик события
+
+
+
+
+
+
+
+
             cBtimeSpeed.SelectedIndex = 0;
             tabControl1.SelectedIndex = 2;
             WORKAKVATEST.UpdateListtBoxRejak(lBrejak);
@@ -353,6 +364,25 @@ foreach (TabPage tabPage in tabControl1.TabPages)
 
 
            }
+
+
+
+        private void OnDataReceived(object sender, DataReceivedEventArgs e)
+        {
+            // Преобразуем массив байт в строку в формате HEX
+            string hexString = BitConverter.ToString(e.Data).Replace("-", " ");
+
+            // Поскольку событие может быть вызвано из другого потока, используем Invoke
+            if (InvokeRequired)
+            {
+                Invoke(new Action(() => textBox1.Text = hexString));
+            }
+            else
+            {
+                textBox1.Text = hexString;
+            }
+        }
+
 
 
 

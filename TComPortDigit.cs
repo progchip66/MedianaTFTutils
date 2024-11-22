@@ -20,7 +20,7 @@ namespace UART
 	}
 
 	public class DataReceivedEventArgs : EventArgs
-	{
+	{//создаём класс для передачи данных события
 		public byte[] Data { get; }
 
 		public DataReceivedEventArgs(byte[] data)
@@ -122,8 +122,9 @@ namespace UART
 		#region NewSerialCode
 
 		private readonly Mutex receivingMutex = new Mutex();
-		private readonly Queue<byte> tempBuffer = new Queue<byte>();
-
+		private readonly Queue<byte> tempBuffer = new Queue<byte>();//Очередь в которую переносятся байты и COM порта
+																	
+		//событие объявляется в классе ИЗДАТЕЛЕ, которым является TComPortDigit
 		public event EventHandler<DataReceivedEventArgs> DataReceivedEvent;
 
 		//public TComPortDigit(string portName, int baudRate)
@@ -136,106 +137,144 @@ namespace UART
 		}
 
 
-		private void SlaveReceiveLoop()
+		public virtual void OnDataReceived(byte[] data)
+		{
+			DataReceivedEvent?.Invoke(this, new DataReceivedEventArgs(data));
+		}
+
+
+	private void SlaveReceiveLoop()
 		{
 			while (true)
-			{
+			{//начальная инициализация в бесконечном цикле приёма
+
+				int interval = 10;
 				int expectedLength = 0;
-				int previousCount = 0;
-				int unchangedCountDuration = 0;
+				int tmpLEN = 0;
+				int curLen = 0;
 				bool mutexAcquired = false;
+				byte[] buffer = new byte[256 + 6];
 
 				try
 				{
-					// Ожидаем открытия соединения
+					// Ожидаем открытия соединения COM порта
 					while (!IsOpen)
-						Thread.Sleep(10);
+						Thread.Sleep(interval);
 
 					// Захватываем мьютекс и устанавливаем флаг
 					receivingMutex.WaitOne();
 					mutexAcquired = true;
 
-					List<byte> receivedData = new List<byte>();
+
 					expectedLength = 0;
-					previousCount = 0;
-					unchangedCountDuration = 0;
 
-					while ((true)&& (IsOpen))
+
+					while (IsOpen)
 					{
-						int bytesToRead = BytesToRead;
-						if (bytesToRead > 0)
-						{
-							byte[] buffer = new byte[bytesToRead];
-							Read(buffer, 0, bytesToRead);
+						RtsEnable = false;//переводим RS-485 в состояния приёма
 
-							foreach (var b in buffer)
-							{
-								tempBuffer.Enqueue(b);
-							}
+						if (BytesToRead > 0)
+						{//в COM порту появились новые данные для считывания
 
-							if (receivedData.Count == 0 && tempBuffer.Count > 0)
-							{
-								expectedLength = tempBuffer.Peek();
-							}
+							tmpLEN = BytesToRead;//получаем количество байт готовых для считывания из COM порта
 
-							while (tempBuffer.Count > 0 && receivedData.Count < expectedLength)
-							{
-								receivedData.Add(tempBuffer.Dequeue());
-							}
+							if (curLen == 0)
+							{// Первое считывание в очередной посылке
 
-							if (receivedData.Count == expectedLength)
-							{
-								// Успешное чтение пакета данных
-								DataReceivedEvent?.Invoke(this, new DataReceivedEventArgs(receivedData.ToArray()));
-								break;
-							}
-							else if (receivedData.Count > expectedLength)
-							{
-								throw new InvalidOperationException("Превышен ожидаемый размер данных.");
-							}
-						}
-
-						// Проверяем отсутствие новых байтов
-						if (receivedData.Count > 0)
-						{
-							if (receivedData.Count == previousCount)
-							{
-								unchangedCountDuration += 10;
+								Read(buffer, 0, tmpLEN);//считываем данные из COM порта в буфер
+								if (expectedLength == 0)
+								{//считывание из UART начала посылки									
+									expectedLength = buffer[0] + 6;//извлекаем ожидаемую длину посылки
+									curLen = tmpLEN;//текущее количество считанных данных
+								}
 							}
 							else
-							{
-								unchangedCountDuration = 0;
+							{//продолжение приёма посылки если с первого раза были считаны не все данные
+
+
+								if ((curLen + BytesToRead) > expectedLength)
+								{
+									throw new InvalidOperationException("Превышен ожидаемый размер данных.");
+								}
+								else
+								{
+
+									Read(buffer, curLen, tmpLEN);//считываем данные из буфера
+									curLen = +tmpLEN;
+								}
 							}
 
-							previousCount = receivedData.Count;
+							if (expectedLength > 0)
+							{//считывание посылки уже начато
 
-							if (unchangedCountDuration >= 10)
+								if (curLen == expectedLength)
+								{//вся посылка считана, можно приступать к обработке 
+
+
+
+									byte[] res_buf = new byte[expectedLength];//создаём массив байт ожидаемой длины
+									Array.Copy(buffer, res_buf, expectedLength);
+									// Успешное чтение пакета данных, формируем событие для его обработки
+									if (mutexAcquired)
+									{//если мьютекс захвачен
+									 // Временное освобождение мьютекса и ожидание
+										receivingMutex.ReleaseMutex();//освобождаем мьютекс
+										mutexAcquired = false;
+									}
+
+									OnDataReceived(res_buf);//вызываем событие в которое передаём данные из буфера
+									//DataReceivedEvent?.Invoke(this, new DataReceivedEventArgs(res_buf));
+									
+									curLen = 0;
+									expectedLength = 0;
+									Thread.Sleep(interval); //на 10 миллисекунд
+									receivingMutex.WaitOne();//ожидаем получения мьютекса
+									mutexAcquired = true;
+
+									break;//считывание и обработка события завершена
+								}
+							}
+							Thread.Sleep(interval);//задержка на приход оставшихся несчитанными данных
+							if (BytesToRead == 0)
+							{//за 10 миллисекунд должен был прийти хотя бы один байт
+								throw new InvalidOperationException("Превышен таймаут в процессе фонового приёма данных.");
+							}
+
+							
+						}
+						else
+                        {
+							curLen = 0;
+							expectedLength = 0;
+							if (mutexAcquired)
 							{
-								receivedData.Clear();
-								tempBuffer.Clear();
-								unchangedCountDuration = 0;
-								previousCount = 0;
-								throw new TimeoutException("Тайм-аут между байтами. Сброс приёма данных.");
+								// Временное освобождение мьютекса и ожидание
+								receivingMutex.ReleaseMutex();//освобождаем мьютекс
+								mutexAcquired = false;
+								Thread.Sleep(interval); //на 10 миллисекунд
+								receivingMutex.WaitOne();//ожидаем получения мьютекса
+								mutexAcquired = true;
 							}
 						}
+						
 
-						// Временное освобождение мьютекса и ожидание
-						receivingMutex.ReleaseMutex();
-						mutexAcquired = false;
-						Thread.Sleep(10);
-						receivingMutex.WaitOne();
-						mutexAcquired = true;
 					}
+
 				}
 				catch (Exception ex)
 				{
-					DisplayMessage($"Ошибка при приёме: {ex.Message}");
+					DisplayMessage($"Ошибка приёма в режиме SLAVE: {ex.Message}");
 				}
 				finally
 				{
 					if (mutexAcquired)
 					{
-						receivingMutex.ReleaseMutex();
+						// Временное освобождение мьютекса и ожидание
+						receivingMutex.ReleaseMutex();//освобождаем мьютекс
+						mutexAcquired = false;
+						Thread.Sleep(interval); //на 10 миллисекунд
+						receivingMutex.WaitOne();//ожидаем получения мьютекса
+						mutexAcquired = true;
 					}
 				}
 			}
@@ -275,7 +314,7 @@ namespace UART
 
 				if (startTimeoutMs > 0)
 				{//если за startTimeoutMs так и не поступил первый байт ответа приём заканчивается с ошибкой 
-					List<byte> response = new List<byte>();//создаётся список List
+	//				List<byte> response = new List<byte>();//создаётся список List
 					int expectedLength = 0;
 					int curLen = 0;
 					
@@ -307,7 +346,8 @@ namespace UART
 									addLen = expectedLength - curLen;
 									Read(buffer, curLen, addLen);
 									byte[] ResultArray = new byte[expectedLength];
-									Array.Copy(buffer, ResultArray, expectedLength);
+								
+								Array.Copy(buffer, ResultArray, expectedLength);
 									return ResultArray;//все данные считаны удачно
 								}
 								else
