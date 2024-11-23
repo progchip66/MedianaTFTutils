@@ -161,7 +161,7 @@ namespace RS485
 
             Array.Copy(data, 0, Outbuf, 2, data.Length);
 
-            int _crc = CRC16(Outbuf, 0, Convert.ToUInt16(data.Length + 2));
+            int _crc = CRC.CRC16(Outbuf, 0, Convert.ToUInt16(data.Length + 2));
             Outbuf[data.Length + 2] = (byte)(_crc & 0xff);
             Outbuf[data.Length + 3] = (byte)((_crc >> 8) & 0xff);
 ;
@@ -269,7 +269,7 @@ namespace RS485
             bserialNum[3] = buf[0];
             Array.Copy(bserialNum, 0, template, 0, 4);//вставляем серийный номер счётчика в массив
             //добавим CRC в конец массива шаблона запроса чтения количества кубических дециметров
-            int _crc = CRC16(template, 0, Convert.ToUInt16(template.Length - 2));
+            int _crc = CRC.CRC16(template, 0, Convert.ToUInt16(template.Length - 2));
             template[template.Length - 2] = (byte)(_crc & 0xff);
             template[template.Length -1] = (byte)((_crc >> 8) & 0xff);
             DiscardInBuffer();//очистим входной буфер COM порта от возможного мусора

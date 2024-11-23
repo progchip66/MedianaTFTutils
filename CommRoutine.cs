@@ -1,15 +1,29 @@
 ﻿using System;
+using System.Windows.Forms;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
 using UART;
 
+using System.IO.Ports;
+using System.IO;
+using System.Threading;
+using System.Runtime.InteropServices;
+
 namespace COMMAND
 {
 
+	public class DataReceivedEventArgs : EventArgs
+	{//создаём класс для передачи данных события
+		public byte[] Data { get; }
 
-	
+		public DataReceivedEventArgs(byte[] data)
+		{
+			Data = data;
+		}
+	}
+
 
 	public enum Efl_Head { flh_none = 0, flh_set, flh_send, flh_end, flh_stat };
 	public enum Efl_DEV { fld_PC = 0, fld_HUB, fld_MainBoard, fld_TFTboard, fld_FEUdetect, fld_none = 0x0f };//тип устройства
@@ -147,7 +161,8 @@ namespace COMMAND
 
 	class SHeadCom
 	{
-		public  byte[] Data = new byte[256];
+		public int CountReadData=0;//количество считанных байт находящихся в массиве bytesReadData
+		public  byte[] bytesReadData = new byte[256];//байты для хранения считанных командой данных
 
 		private byte[] bytes = new byte[4] { 0, 0, 0, 0 };
 
@@ -166,6 +181,16 @@ namespace COMMAND
 			bytes[3] = _bytes[3];
 			subCom.data = _bytes[3];
 		}
+
+		public bool GetValidHeaderData(byte[] _bytes)
+        {
+			if (!CRC.check0CRC16(_bytes, _bytes.Length))
+				return true;
+			getFromCommandArr(_bytes);//извлекаем HEADER из данных
+			Array.Copy(_bytes, 4, bytesReadData, 0, _bytes.Length-4);//копируем данные в буфер данных
+			return false;
+        }
+
 
 
 		public int DataLength
@@ -358,6 +383,8 @@ namespace COMMAND
 		 
 		public SHeadCom TxHeadCom = new SHeadCom(); //Класс для хранения заголовка(теперь и данных) отправляемой команды
 
+
+
 //		public SWR_RAMtoMEM FlowProRAMtoMEM = new SWR_RAMtoMEM();//Класс процесса для записи/чтения данных в память TFT контроллера для хранения заголовка отправляемой команды
 
 		//	public ECommand _RDCom = ECommand.cmd_none;
@@ -370,50 +397,303 @@ namespace COMMAND
 		private byte[] _RxBuff = new byte[constMaxLenIO];
 
 		public SHeadCom SlaveRxHeadCom = new SHeadCom(); //Класс для хранения заголовка принятой в режиме Slave команды
-		private byte[] _SlaveRxBuff = new byte[constMaxLenIO];//буфер для приёма данных в режиме Slave
-
-		public  byte[] _SlaveRxData = new byte[constMaxLenIO];//буфер для приёма данных в режиме Slave
 
 
+//		public  byte[] _SlaveRxData = new byte[constMaxLenIO];//буфер для приёма данных в режиме Slave
 
-		private UInt32[] _RxBuffuIntPar = new UInt32[constMaxLenIO / 4];
+
+
+//		private UInt32[] _RxBuffuIntPar = new UInt32[constMaxLenIO / 4];
 
 		private byte[] _TxBuff = new byte[constMaxLenIO];
 
-		
-		public uint[] slaveRxBuffuIntPar
-		{// Свойство для извлечения из массива байт массива UInt32, если члены не существуют заменяет их нулями
-			get
-			{
-				int length = (int)Math.Ceiling((double)_SlaveRxBuff.Length / 4); // Вычисляем количество элементов
-				uint[] result = new uint[length];
 
-				for (int i = 0; i < length; i++)
+
+
+		#region NewSerialCode
+
+		private readonly Mutex receivingMutex = new Mutex();
+		private readonly Queue<byte> tempBuffer = new Queue<byte>();//Очередь в которую переносятся байты и COM порта
+
+		//событие объявляется в классе ИЗДАТЕЛЕ, которым является TComPortDigit
+		public event EventHandler<DataReceivedEventArgs> DataReceivedEvent;
+
+		//public TComPortDigit(string portName, int baudRate)
+		public SCommStruct()
+		{
+
+
+			// Запускаем фоновый поток для приёма данных
+			new Thread(SlaveReceiveLoop) { IsBackground = true }.Start();
+		}
+
+
+		public virtual void OnDataReceived(byte[] data)
+		{
+			DataReceivedEvent?.Invoke(this, new DataReceivedEventArgs(data));
+		}
+
+
+		private void SlaveReceiveLoop()
+		{
+			while (true)
+			{//начальная инициализация в бесконечном цикле приёма
+
+				int interval = 10;
+				int expectedLength = 0;
+				int tmpLEN = 0;
+				int curLen = 0;
+				bool mutexAcquired = false;
+				byte[] buffer = new byte[256 + 6];
+
+				try
 				{
-					uint value = 0;
+					// Ожидаем открытия соединения COM порта
+					while (!IsOpen)
+						Thread.Sleep(interval);
 
-					for (int j = 0; j < 4; j++)
+					// Захватываем мьютекс и устанавливаем флаг
+					receivingMutex.WaitOne();
+					mutexAcquired = true;
+
+
+					expectedLength = 0;
+
+
+					while (IsOpen)
 					{
-						int index = i * 4 + j;
-						byte currentByte = index < _SlaveRxBuff.Length ? _SlaveRxBuff[index] : (byte)0;
-						value |= (uint)currentByte << (j * 8); // Сдвиг и объединение байтов
+						RtsEnable = false;//переводим RS-485 в состояния приёма
+
+						if (BytesToRead > 0)
+						{//в COM порту появились новые данные для считывания
+
+							tmpLEN = BytesToRead;//получаем количество байт готовых для считывания из COM порта
+
+							if (curLen == 0)
+							{// Первое считывание в очередной посылке
+
+								Read(buffer, 0, tmpLEN);//считываем данные из COM порта в буфер
+								if (expectedLength == 0)
+								{//считывание из UART начала посылки									
+									expectedLength = buffer[0] + 6;//извлекаем ожидаемую длину посылки
+									curLen = tmpLEN;//текущее количество считанных данных
+								}
+							}
+							else
+							{//продолжение приёма посылки если с первого раза были считаны не все данные
+
+
+								if ((curLen + BytesToRead) > expectedLength)
+								{
+									throw new InvalidOperationException("Превышен ожидаемый размер данных.");
+								}
+								else
+								{
+
+									Read(buffer, curLen, tmpLEN);//считываем данные из буфера
+									curLen = +tmpLEN;
+								}
+							}
+
+							if (expectedLength > 0)
+							{//считывание посылки уже начато
+
+								if (curLen == expectedLength)
+								{//вся посылка считана, можно приступать к обработке 
+
+
+
+									byte[] res_buf = new byte[expectedLength];//создаём массив байт ожидаемой длины
+
+									if (SlaveRxHeadCom.GetValidHeaderData(res_buf))//проверяем данные на валидность и помещаем считанные данные в SlaveRxHeadCom.bytesReadData 
+									{
+										SlaveRxHeadCom.getHeaderbytes();//получаем заголовок в структуру SHeadCom
+
+									}
+									else
+										throw new InvalidOperationException("Неверный CRC в принятых данных в режиме SLAVE.");
+
+
+									// Успешное чтение пакета данных, формируем событие для его обработки
+									if (mutexAcquired)
+									{//если мьютекс захвачен
+									 // Временное освобождение мьютекса и ожидание
+										receivingMutex.ReleaseMutex();//освобождаем мьютекс
+										mutexAcquired = false;
+									}
+									Array.Copy(buffer, res_buf, expectedLength);
+									OnDataReceived(res_buf);//вызываем событие в которое передаём данные из буфера
+															//DataReceivedEvent?.Invoke(this, new DataReceivedEventArgs(res_buf));
+
+									curLen = 0;
+									expectedLength = 0;
+									Thread.Sleep(interval); //на 10 миллисекунд
+									receivingMutex.WaitOne();//ожидаем получения мьютекса
+									mutexAcquired = true;
+
+									break;//считывание и обработка события завершена
+								}
+							}
+							Thread.Sleep(interval);//задержка на приход оставшихся несчитанными данных
+							if (BytesToRead == 0)
+							{//за 10 миллисекунд должен был прийти хотя бы один байт
+								throw new InvalidOperationException("Превышен таймаут в процессе фонового приёма данных.");
+							}
+
+
+						}
+						else
+						{
+							curLen = 0;
+							expectedLength = 0;
+							if (mutexAcquired)
+							{
+								// Временное освобождение мьютекса и ожидание
+								receivingMutex.ReleaseMutex();//освобождаем мьютекс
+								mutexAcquired = false;
+								Thread.Sleep(interval); //на 10 миллисекунд
+								receivingMutex.WaitOne();//ожидаем получения мьютекса
+								mutexAcquired = true;
+							}
+						}
+
+
 					}
 
-					result[i] = value;
 				}
-
-				return result;
+				catch (Exception ex)
+				{
+					DisplayMessage($"Ошибка приёма в режиме SLAVE: {ex.Message}");
+				}
+				finally
+				{
+					if (mutexAcquired)
+					{
+						// Временное освобождение мьютекса и ожидание
+						receivingMutex.ReleaseMutex();//освобождаем мьютекс
+						mutexAcquired = false;
+						Thread.Sleep(interval); //на 10 миллисекунд
+						receivingMutex.WaitOne();//ожидаем получения мьютекса
+						mutexAcquired = true;
+					}
+				}
 			}
 		}
 
 
-		/*		public ERxBufStat ReadRxBuff(byte newbyte)
-				{//чтение очередного байта в буфер
+
+		public byte[] SendCommand(byte[] data, int startTimeoutMs = 50)
+		{
+			receivingMutex.WaitOne(); //приостанавливаем выполнение команды отправки-приёма до получения мьютекса
 
 
-					return rxcom_readpro
+			try
+			{//isReceiving - флаг приёма по UART в фоновом режиме
 
-				}*/
+
+				if (!IsOpen)
+				{
+					throw new InvalidOperationException("Serial port is not open.");
+				}
+
+				// Перевести линию RTS в активное состояние
+				RtsEnable = true;
+
+
+				string Pname = PortName;
+				int bbbb = BaudRate;
+				int elapsedTime = 0;
+
+
+				// Отправка данных
+				Write(data, 0, data.Length);
+				// Ожидание завершения отправки данных
+				BaseStream.Flush();
+				RtsEnable = false;
+
+
+				if (startTimeoutMs > 0)// если startTimeoutMs==0, то ответа на команду не требуется
+				{//если за startTimeoutMs так и не поступил первый байт ответа приём заканчивается с ошибкой 
+				 //				List<byte> response = new List<byte>();//создаётся список List
+					int expectedLength = 0;
+					int curLen = 0;
+
+					int interval = 10;
+					byte[] buffer = new byte[256 + 6];
+					while (elapsedTime <= startTimeoutMs)
+					{
+
+						if ((BytesToRead > 0) && (expectedLength == 0))
+						{//первое считывание из UART
+							curLen = BytesToRead;
+							Read(buffer, 0, curLen);
+							expectedLength = buffer[0] + 6;//извлекаем ожидаемую длину посылки
+							if (curLen >= expectedLength)
+							{//вся посылка считана с первого раза полностью!
+								byte[] res_buf = new byte[expectedLength];
+								Array.Copy(buffer, res_buf, expectedLength);
+								return res_buf;
+							}
+
+						}
+						else
+						{//последующие считывания из UART
+							if (BytesToRead > 0)
+							{//считываем только если пришли новые данные
+								int addLen = BytesToRead;
+								if ((curLen + addLen) >= expectedLength)
+								{//последнее считывание в UART нужное, либо даже большее количество данных!
+									addLen = expectedLength - curLen;
+									Read(buffer, curLen, addLen);
+									byte[] ResultArray = new byte[expectedLength];
+
+									Array.Copy(buffer, ResultArray, expectedLength);
+									return ResultArray;//все данные считаны удачно
+								}
+								else
+								{//дочитываем очередной пакет данных
+									Read(buffer, curLen, addLen);
+									curLen += addLen;
+								}
+							}
+						}
+						Thread.Sleep(interval);
+						elapsedTime += interval;
+					}
+
+					throw new TimeoutException("Тайм-аут при получении ответа на команду.");
+				}
+				else
+				{
+					return new byte[0];
+				}
+
+			}
+			catch (Exception ex)
+			{
+				DisplayMessage($"Ошибка отправки команды: {ex.Message}");
+				//return Array.Empty<byte>();
+				return new byte[0];
+			}
+			finally
+			{
+
+				receivingMutex.ReleaseMutex();//данные отправлены и считаны, освобождаем мьютекс
+			}
+		}
+
+
+		private void DisplayMessage(string message)
+		{
+			// Здесь можно использовать MessageBox, если вызывать DisplayMessage в основном потоке,
+			// или сделать логирование в текстовый файл, если это фоновый поток
+			MessageBox.Show(message);
+		}
+
+
+
+		#endregion
+
 
 
 		public byte[] RxBuff
@@ -425,27 +705,8 @@ namespace COMMAND
 
 
 
-		void GetIntPar()
-		{
-			UInt32 mult = 1;
-			int j = 0;
-			int IntArrCount = 0;
-			UInt32 UIntVol = 0;
-			for (int i = 4; i < RxHeadCom.DataLength; i++)
-			{
-				UIntVol += Convert.ToUInt32(RxBuff[i + 4]) * mult;
-				if (j++ >= 3)
-				{
-					_RxBuffuIntPar[IntArrCount++] = UIntVol;
-					UIntVol = 0;
-					j = 0;
-					mult = 1;
-				}
-				else
-					mult = mult * 256;
-			}
 
-		}
+
 
 		public string ConcatenateStrings(string str1, string str2, string str3)
 		{
@@ -512,12 +773,11 @@ namespace COMMAND
 
 			if (bytesAnsv.Length == 0)
 				return;
-			if (!check0CRC16(bytesAnsv, bytesAnsv.Length))
+			if (!CRC.check0CRC16(bytesAnsv, bytesAnsv.Length))
 				throw new Exception("Ошибка контрольной суммы при чтении данных");
 			//считывание полученных данных во внутреннюю структуру устройства
 			RxHeadCom.getFromCommandArr(bytesAnsv);
 			Array.Copy(bytesAnsv, 4, RxBuff, 0, bytesAnsv.Length - 6);
-			GetIntPar();
 		}
 
 /*
@@ -542,7 +802,7 @@ namespace COMMAND
 			if (data != null)
 				Array.Copy(data, 0, Outbuf, 4, TxHeadCom.DataLength);
 
-			int _crc = CRC16(Outbuf, 0, Convert.ToUInt16(dataLength + 4));
+			int _crc = CRC.CRC16(Outbuf, 0, Convert.ToUInt16(dataLength + 4));
 			Outbuf[dataLength + 4] = (byte)(_crc & 0xff);
 			Outbuf[dataLength + 5] = (byte)((_crc >> 8) & 0xff);
 			byte[] result = new byte[dataLength + 6];
@@ -561,7 +821,7 @@ namespace COMMAND
 			if (data != null)
 				Array.Copy(data, 0, Outbuf, 4, TxHeadCom.DataLength);
 
-			int _crc = CRC16(Outbuf, 0, Convert.ToUInt16(dataLength + 4));
+			int _crc = CRC.CRC16(Outbuf, 0, Convert.ToUInt16(dataLength + 4));
 			Outbuf[dataLength + 4] = (byte)(_crc & 0xff);
 			Outbuf[dataLength + 5] = (byte)((_crc >> 8) & 0xff);
 

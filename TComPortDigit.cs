@@ -19,22 +19,10 @@ namespace UART
 		RS485
 	}
 
-	public class DataReceivedEventArgs : EventArgs
-	{//создаём класс для передачи данных события
-		public byte[] Data { get; }
-
-		public DataReceivedEventArgs(byte[] data)
-		{
-			Data = data;
-		}
-	}
 
 
-	public class TComPortDigit : SerialPort
-    {
-
-
-
+	public static class CRC
+	{
 		public static readonly byte[] auchCRCHi =
 		{
 			0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81,
@@ -79,6 +67,47 @@ namespace UART
 		0x40
 		};
 
+		public static ushort CRC16(byte[] puchMsg, int StartAdr, int usDataLen)
+		{
+			int i;
+			byte uchCRCHi = 0xFF; /* high byte of CRC initialized */
+			byte uchCRCLo = 0xFF; /* low byte of CRC initialized */
+			byte uIndex; /* will index into CRC lookup table */
+			for (i = 0; i < usDataLen; i++) /* pass through message buffer */
+			{
+				uIndex = (byte)(uchCRCLo ^ puchMsg[i + StartAdr]); /* calculate the CRC */
+				uchCRCLo = (byte)(uchCRCHi ^ auchCRCHi[uIndex]);
+				uchCRCHi = auchCRCLo[uIndex];
+			}
+			return (ushort)(uchCRCHi << 8 | uchCRCLo);
+		}
+
+		public static bool checkCRC16(byte[] puchMsg, int StartAdr, int usDataLen)
+		{
+			if (CRC16(puchMsg, StartAdr, usDataLen) == (ushort)(puchMsg[StartAdr + usDataLen] + puchMsg[StartAdr + usDataLen + 1] * 256))
+				return true;
+			else
+				return false;
+
+		}
+
+		public static bool check0CRC16(byte[] puchMsg, int length)
+		{
+			if (CRC16(puchMsg, 0, length) == 0)
+				return true;
+			else
+				return false;
+
+		}
+
+
+	}
+
+
+		public class TComPortDigit : SerialPort
+    {
+
+
 		const int constAnsvTimeOut = 5000;
 		const int constAnsvOneByteTimeOut = 200;
 
@@ -120,283 +149,9 @@ namespace UART
 		}
 
 
+/*
 
-		#region NewSerialCode
-
-		private readonly Mutex receivingMutex = new Mutex();
-		private readonly Queue<byte> tempBuffer = new Queue<byte>();//Очередь в которую переносятся байты и COM порта
-																	
-		//событие объявляется в классе ИЗДАТЕЛЕ, которым является TComPortDigit
-		public event EventHandler<DataReceivedEventArgs> DataReceivedEvent;
-
-		//public TComPortDigit(string portName, int baudRate)
-		public TComPortDigit()
-		{
-
-
-			// Запускаем фоновый поток для приёма данных
-			new Thread(SlaveReceiveLoop) { IsBackground = true }.Start();
-		}
-
-
-		public virtual void OnDataReceived(byte[] data)
-		{
-			DataReceivedEvent?.Invoke(this, new DataReceivedEventArgs(data));
-		}
-
-
-	private void SlaveReceiveLoop()
-		{
-			while (true)
-			{//начальная инициализация в бесконечном цикле приёма
-
-				int interval = 10;
-				int expectedLength = 0;
-				int tmpLEN = 0;
-				int curLen = 0;
-				bool mutexAcquired = false;
-				byte[] buffer = new byte[256 + 6];
-
-				try
-				{
-					// Ожидаем открытия соединения COM порта
-					while (!IsOpen)
-						Thread.Sleep(interval);
-
-					// Захватываем мьютекс и устанавливаем флаг
-					receivingMutex.WaitOne();
-					mutexAcquired = true;
-
-
-					expectedLength = 0;
-
-
-					while (IsOpen)
-					{
-						RtsEnable = false;//переводим RS-485 в состояния приёма
-
-						if (BytesToRead > 0)
-						{//в COM порту появились новые данные для считывания
-
-							tmpLEN = BytesToRead;//получаем количество байт готовых для считывания из COM порта
-
-							if (curLen == 0)
-							{// Первое считывание в очередной посылке
-
-								Read(buffer, 0, tmpLEN);//считываем данные из COM порта в буфер
-								if (expectedLength == 0)
-								{//считывание из UART начала посылки									
-									expectedLength = buffer[0] + 6;//извлекаем ожидаемую длину посылки
-									curLen = tmpLEN;//текущее количество считанных данных
-								}
-							}
-							else
-							{//продолжение приёма посылки если с первого раза были считаны не все данные
-
-
-								if ((curLen + BytesToRead) > expectedLength)
-								{
-									throw new InvalidOperationException("Превышен ожидаемый размер данных.");
-								}
-								else
-								{
-
-									Read(buffer, curLen, tmpLEN);//считываем данные из буфера
-									curLen = +tmpLEN;
-								}
-							}
-
-							if (expectedLength > 0)
-							{//считывание посылки уже начато
-
-								if (curLen == expectedLength)
-								{//вся посылка считана, можно приступать к обработке 
-
-
-
-									byte[] res_buf = new byte[expectedLength];//создаём массив байт ожидаемой длины
-									Array.Copy(buffer, res_buf, expectedLength);
-
-									// Успешное чтение пакета данных, формируем событие для его обработки
-									if (mutexAcquired)
-									{//если мьютекс захвачен
-									 // Временное освобождение мьютекса и ожидание
-										receivingMutex.ReleaseMutex();//освобождаем мьютекс
-										mutexAcquired = false;
-									}
-
-									OnDataReceived(res_buf);//вызываем событие в которое передаём данные из буфера
-									//DataReceivedEvent?.Invoke(this, new DataReceivedEventArgs(res_buf));
-									
-									curLen = 0;
-									expectedLength = 0;
-									Thread.Sleep(interval); //на 10 миллисекунд
-									receivingMutex.WaitOne();//ожидаем получения мьютекса
-									mutexAcquired = true;
-
-									break;//считывание и обработка события завершена
-								}
-							}
-							Thread.Sleep(interval);//задержка на приход оставшихся несчитанными данных
-							if (BytesToRead == 0)
-							{//за 10 миллисекунд должен был прийти хотя бы один байт
-								throw new InvalidOperationException("Превышен таймаут в процессе фонового приёма данных.");
-							}
-
-							
-						}
-						else
-                        {
-							curLen = 0;
-							expectedLength = 0;
-							if (mutexAcquired)
-							{
-								// Временное освобождение мьютекса и ожидание
-								receivingMutex.ReleaseMutex();//освобождаем мьютекс
-								mutexAcquired = false;
-								Thread.Sleep(interval); //на 10 миллисекунд
-								receivingMutex.WaitOne();//ожидаем получения мьютекса
-								mutexAcquired = true;
-							}
-						}
-						
-
-					}
-
-				}
-				catch (Exception ex)
-				{
-					DisplayMessage($"Ошибка приёма в режиме SLAVE: {ex.Message}");
-				}
-				finally
-				{
-					if (mutexAcquired)
-					{
-						// Временное освобождение мьютекса и ожидание
-						receivingMutex.ReleaseMutex();//освобождаем мьютекс
-						mutexAcquired = false;
-						Thread.Sleep(interval); //на 10 миллисекунд
-						receivingMutex.WaitOne();//ожидаем получения мьютекса
-						mutexAcquired = true;
-					}
-				}
-			}
-		}
-
-
-
-		public byte[] SendCommand(byte[] data,  int startTimeoutMs = 50)
-		{
-			receivingMutex.WaitOne(); //приостанавливаем выполнение команды отправки-приёма до получения мьютекса
-
-
-			try
-			{//isReceiving - флаг приёма по UART в фоновом режиме
-
-
-				if (!IsOpen)
-				{
-					throw new InvalidOperationException("Serial port is not open.");
-				}
-
-				// Перевести линию RTS в активное состояние
-				RtsEnable = true;
-
-
-				string Pname = PortName;
-				int bbbb = BaudRate;
-				int elapsedTime = 0;
-
-
-				// Отправка данных
-				Write(data, 0, data.Length);
-				// Ожидание завершения отправки данных
-				BaseStream.Flush();
-				RtsEnable = false;
-
-
-				if (startTimeoutMs > 0)
-				{//если за startTimeoutMs так и не поступил первый байт ответа приём заканчивается с ошибкой 
-	//				List<byte> response = new List<byte>();//создаётся список List
-					int expectedLength = 0;
-					int curLen = 0;
-					
-					int interval = 10;
-					byte[] buffer = new byte[256+6];
-					while (elapsedTime <= startTimeoutMs)
-					{
-
-						if ((BytesToRead > 0) && (expectedLength == 0))
-						{//первое считывание из UART
-							curLen = BytesToRead;
-							Read(buffer, 0, curLen);
-							expectedLength = buffer[0]+6;//извлекаем ожидаемую длину посылки
-							if (curLen >= expectedLength)
-                            {//вся посылка считана с первого раза полностью!
-								byte[] res_buf = new byte[expectedLength];
-								Array.Copy(buffer, res_buf, expectedLength);
-								return res_buf;
-							}								
-								 
-						}
-						else
-						{//последующие считывания из UART
-							if (BytesToRead > 0)
-                            {//считываем только если пришли новые данные
-								int addLen = BytesToRead;
-								if ((curLen + addLen) >= expectedLength)
-								{//последнее считывание в UART нужное, либо даже большее количество данных!
-									addLen = expectedLength - curLen;
-									Read(buffer, curLen, addLen);
-									byte[] ResultArray = new byte[expectedLength];
-								
-								Array.Copy(buffer, ResultArray, expectedLength);
-									return ResultArray;//все данные считаны удачно
-								}
-								else
-								{//дочитываем очередной пакет данных
-									Read(buffer, curLen, addLen);
-									curLen += addLen;
-								}
-							}
-						}
-						Thread.Sleep(interval);
-						elapsedTime += interval;
-					}
-
-					throw new TimeoutException("Тайм-аут при получении ответа на команду.");
-					}
-					else
-					{
-						return new byte[0];
-					}
-
-			}
-			catch (Exception ex)
-			{
-				DisplayMessage($"Ошибка отправки команды: {ex.Message}");
-				//return Array.Empty<byte>();
-				return new byte[0];
-			}
-			finally
-			{
-
-				receivingMutex.ReleaseMutex();//данные отправлены и считаны, освобождаем мьютекс
-			}
-		}
-
-
-		private void DisplayMessage(string message)
-		{
-			// Здесь можно использовать MessageBox, если вызывать DisplayMessage в основном потоке,
-			// или сделать логирование в текстовый файл, если это фоновый поток
-			MessageBox.Show(message);
-		}
-
-
-
-	#endregion
-
+*/
 
 	public int WriteToUART(byte[] buff, int countByte )
 		{
@@ -409,38 +164,7 @@ namespace UART
 
 
 
-		public ushort CRC16(byte[] puchMsg, int StartAdr, int usDataLen)
-		{
-			int i;
-			byte uchCRCHi = 0xFF; /* high byte of CRC initialized */
-			byte uchCRCLo = 0xFF; /* low byte of CRC initialized */
-			byte uIndex; /* will index into CRC lookup table */
-			for (i = 0; i < usDataLen; i++) /* pass through message buffer */
-			{
-				uIndex = (byte)(uchCRCLo ^ puchMsg[i + StartAdr]); /* calculate the CRC */
-				uchCRCLo = (byte)(uchCRCHi ^ auchCRCHi[uIndex]);
-				uchCRCHi = auchCRCLo[uIndex];
-			}
-			return (ushort)(uchCRCHi << 8 | uchCRCLo);
-		}
 
-		public bool checkCRC16(byte[] puchMsg, int StartAdr, int usDataLen)
-		{
-			if (CRC16(puchMsg, StartAdr, usDataLen) == (ushort)(puchMsg[StartAdr + usDataLen] + puchMsg[StartAdr + usDataLen + 1] * 256))
-				return true;
-			else
-				return false;
-
-		}
-
-		public bool check0CRC16(byte[] puchMsg, int length)
-		{
-			if (CRC16(puchMsg, 0, length) == 0)
-				return true;
-			else
-				return false;
-
-		}
 
 
 
@@ -556,7 +280,7 @@ namespace UART
 			if (_CountReadByte == 0)
 				throw new Exception("Не получен ответ");
 
-			if (check0CRC16(Inbuf, _CountReadByte))
+			if (CRC.check0CRC16(Inbuf, _CountReadByte))
 			{
 				byte[] result = new byte[_CountReadByte - 4];
 				Array.Copy(Inbuf, 2, result, 0, _CountReadByte - 4);

@@ -525,7 +525,7 @@ namespace ExtHubComm
                                 success = WriteBlock(BlockBytes,  BlockSize,  totalProcessedBytes, worker);
                                 if (success == eFLASHresultEnum.ALL_OK)
                                 {//если данные успешно записаны в RAM буфер делаем попытку записи их во FLASH память TFT панели
-                                    int _crc = CRC16(BlockBytes, 0, BlockSize);
+                                    int _crc = CRC.CRC16(BlockBytes, 0, BlockSize);
                                     success = WrVer_TFTFLASH4096(0, Flashaddr, BlockSize, _crc, Efl_DEV.fld_TFTboard);
 
                                 }
