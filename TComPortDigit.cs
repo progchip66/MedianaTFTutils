@@ -119,6 +119,8 @@ namespace UART
 			get { return _outComDataLen; }
 		}
 
+
+
 		#region NewSerialCode
 
 		private readonly Mutex receivingMutex = new Mutex();
@@ -214,6 +216,7 @@ namespace UART
 
 									byte[] res_buf = new byte[expectedLength];//создаём массив байт ожидаемой длины
 									Array.Copy(buffer, res_buf, expectedLength);
+
 									// Успешное чтение пакета данных, формируем событие для его обработки
 									if (mutexAcquired)
 									{//если мьютекс захвачен
@@ -393,18 +396,6 @@ namespace UART
 
 
 	#endregion
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 	public int WriteToUART(byte[] buff, int countByte )

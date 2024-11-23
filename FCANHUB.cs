@@ -1261,16 +1261,16 @@ foreach (TabPage tabPage in tabControl1.TabPages)
                     CANHUB.Up1Doun0adrFLASH = 1;
                     CANHUB.enProMenu = 0;
                     CANHUB.DirFlowPro = "MENU";
-                    int pPbarCount = 0;
+                    //  похоже это артефакт    int pPbarCount = 0;
                     int NumMENU = 0; ;
 
-                    int FLASHwrFileStartAdr = CANHUB.StartFLASHadrFlowPro;
+                    // похоже это артефакт   int FLASHwrFileStartAdr = CANHUB.StartFLASHadrFlowPro;
 
                     while (NumMENU < MENUfilecount)
                     {
                         int proMenuFiles = ((NumMENU + 1) * 100) / MENUfilecount;//нормализованный счётчик прогрессбара количества файлов
                         string MENU_FULLfilename = MENUfilenames[NumMENU];
-                        pPbarCount = 0;
+                        // похоже это артефакт  pPbarCount = 0;
 
                         FileInfo MENUfileInfo = new FileInfo(MENU_FULLfilename);
                         long fileSizeInBytes = MENUfileInfo.Length;
@@ -1300,7 +1300,7 @@ foreach (TabPage tabPage in tabControl1.TabPages)
                         }
 
                         NumMENU++;
-                        FLASHwrFileStartAdr = CANHUB.Resurs.GetAlignVol(FLASHwrFileStartAdr + CANHUB.FlowProRAMtoMEM.Length, CANHUB.FLASHalign, CANHUB.Up1Doun0adrFLASH);//устанавливаем новый адрес
+                        // похоже это артефакт  FLASHwrFileStartAdr = CANHUB.Resurs.GetAlignVol(FLASHwrFileStartAdr /* похоже это артефакт + CANHUB.FlowProRAMtoMEM.Length*/, CANHUB.FLASHalign, CANHUB.Up1Doun0adrFLASH);//устанавливаем новый адрес
 
 
                         if ((statMemPRO == EMemPRO.eopmpro_ready) || (statMemPRO == EMemPRO.eopmpro_wrFLASHOK))

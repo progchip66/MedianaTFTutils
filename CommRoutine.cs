@@ -147,8 +147,9 @@ namespace COMMAND
 
 	class SHeadCom
 	{
-		private byte[] bytes = new byte[4] { 0, 0, 0, 0 };
+		public  byte[] Data = new byte[256];
 
+		private byte[] bytes = new byte[4] { 0, 0, 0, 0 };
 
 		public S_subComOp subCom = new S_subComOp();//Класс установки субкоманды
 
@@ -220,7 +221,7 @@ namespace COMMAND
 			}
 		}
 
-		
+
 
 
 	}
@@ -304,6 +305,8 @@ namespace COMMAND
 
 	}
 
+	/*
+
 	class SWR_RAMtoMEM
 	{//класс поддержки процесса передачи по CAN и записи потоковых данных в память внешних устройств
 
@@ -324,70 +327,8 @@ namespace COMMAND
 		public ETypeMem OptTypeMem;
 
 		public EMemPRO Fpro = EMemPRO.eopmpro_none;
-		
-		
-
-
-		public byte[] ArrIntToArrByte(int[] ArrInt)
-		{
-			int tmpi;
-			int count = ArrInt.Length;
-			byte[] Arrtmpb = new byte[count * 4];
-			for (int i=0; i < count; i++)
-			{
-				tmpi = ArrInt[i];
-				Arrtmpb[i * 4] = Convert.ToByte(tmpi & 0xff);
-				tmpi = tmpi >> 8;
-				Arrtmpb[i * 4 + 1] = Convert.ToByte(tmpi & 0xff);
-				tmpi = tmpi >> 8;
-				Arrtmpb[i * 4 + 2] = Convert.ToByte(tmpi & 0xff);
-				tmpi = tmpi >> 8;
-				Arrtmpb[i * 4 + 3] = Convert.ToByte(tmpi & 0xff);
-			}
-			return Arrtmpb;
-		}
-
-		public byte[] InitPro(int StartWRAdr, int CountWrByte, int _proCRC,  ETypeMem DevTypeMem, int _AllignBytes, int _fnoNeeddAnswer, ETypeMem _OptTypeMem= ETypeMem.etmem_none,  int _OptExtAdr= 0x100000)
-		{// установка начальных значений для процесса записи данных и их упаковка в массив для формирования заголовка команды
-			Fpro = EMemPRO.eopmpro_setpar;
-
-			StartAddr = StartWRAdr;
-			Length = CountWrByte;
-			TypeMem = DevTypeMem;
-			AllignBytes = _AllignBytes;
-			proCRC16 = _proCRC;
-			Counter = 0;
-			SourceFileAddr = 0;
-			max_commDatalen = (255 / 4) * 4;//при записи в GRAM максимальное количество байт должно быть выравнено на 4 в меньшую сторону
-			FnoNeeddAnswer = _fnoNeeddAnswer;
-
-			OptExtAdr = _OptExtAdr;
-			OptTypeMem = _OptTypeMem;
-
-			subCom.data = 0;
-			subCom.DEV = DevTypeMem;
-			subCom.WRflowPro = 0;
-
-			return GetHeader();
-		}
-
-		public byte[] GetHeader()
-		{//подготовка байтовой последовательност для отправки заголовка
-
-			int[] tmpInt = new int[] { Convert.ToInt32(Fpro), StartAddr, Length, proCRC16, Convert.ToInt32(TypeMem), AllignBytes, OptExtAdr, Convert.ToInt32(OptTypeMem) };
-			return (ArrIntToArrByte(tmpInt));
-
-		}
-
-
-
-
-
-
-
-
 	}
-
+	*/
 
 	//class SHeadCom
 
@@ -413,10 +354,11 @@ namespace COMMAND
 
 		#endregion
 
-		public SHeadCom RxHeadCom = new SHeadCom(); //Класс для хранения заголовка принятой команды
-		public SHeadCom TxHeadCom = new SHeadCom(); //Класс для хранения заголовка отправляемой команды
+		public SHeadCom RxHeadCom = new SHeadCom(); //Класс для хранения заголовка(теперь и данных) принятой команды
+		 
+		public SHeadCom TxHeadCom = new SHeadCom(); //Класс для хранения заголовка(теперь и данных) отправляемой команды
 
-		public SWR_RAMtoMEM FlowProRAMtoMEM = new SWR_RAMtoMEM();//Класс процесса для записи/чтения данных в память TFT контроллера для хранения заголовка отправляемой команды
+//		public SWR_RAMtoMEM FlowProRAMtoMEM = new SWR_RAMtoMEM();//Класс процесса для записи/чтения данных в память TFT контроллера для хранения заголовка отправляемой команды
 
 		//	public ECommand _RDCom = ECommand.cmd_none;
 		public ECommand WRCom = ECommand.cmd_none;
@@ -426,9 +368,43 @@ namespace COMMAND
 
 
 		private byte[] _RxBuff = new byte[constMaxLenIO];
+
+		public SHeadCom SlaveRxHeadCom = new SHeadCom(); //Класс для хранения заголовка принятой в режиме Slave команды
+		private byte[] _SlaveRxBuff = new byte[constMaxLenIO];//буфер для приёма данных в режиме Slave
+
+		public  byte[] _SlaveRxData = new byte[constMaxLenIO];//буфер для приёма данных в режиме Slave
+
+
+
 		private UInt32[] _RxBuffuIntPar = new UInt32[constMaxLenIO / 4];
 
 		private byte[] _TxBuff = new byte[constMaxLenIO];
+
+		
+		public uint[] slaveRxBuffuIntPar
+		{// Свойство для извлечения из массива байт массива UInt32, если члены не существуют заменяет их нулями
+			get
+			{
+				int length = (int)Math.Ceiling((double)_SlaveRxBuff.Length / 4); // Вычисляем количество элементов
+				uint[] result = new uint[length];
+
+				for (int i = 0; i < length; i++)
+				{
+					uint value = 0;
+
+					for (int j = 0; j < 4; j++)
+					{
+						int index = i * 4 + j;
+						byte currentByte = index < _SlaveRxBuff.Length ? _SlaveRxBuff[index] : (byte)0;
+						value |= (uint)currentByte << (j * 8); // Сдвиг и объединение байтов
+					}
+
+					result[i] = value;
+				}
+
+				return result;
+			}
+		}
 
 
 		/*		public ERxBufStat ReadRxBuff(byte newbyte)
@@ -544,10 +520,21 @@ namespace COMMAND
 			GetIntPar();
 		}
 
-
+/*
+		public int GetFromSlaveCommand (byte[] data)
+        {//извлекаем данные из команды пришедшей в режиме Slave
+			if (!check0CRC16(data, data.Length))
+				return 1;//Ошибка контрольной суммы при чтении данных
+						 //throw new Exception("Ошибка контрольной суммы при чтении данных");
+						 //считывание полученных данных во внутреннюю структуру устройства
+			SlaveRxHeadCom.getFromCommandArr(data);//получаем заголовок
+			Array.Copy(_SlaveRxBuff, 4, RxBuff, 0, _SlaveRxBuff.Length - 6);//получаем данные
+			GetIntPar();
+		}
+*/
 
 		public byte[] GetCommFromHeader(byte[] data, int dataLength)
-		{//отправка команды на основе существующего Header
+		{//формируем посылку для отправки команды
 			RtsEnable = true;
 			TxHeadCom.DataLength = dataLength;
 			byte[] tmpb = TxHeadCom.getHeaderbytes();
@@ -583,41 +570,46 @@ namespace COMMAND
 			return ret;
 		}
 
+		/*
+					if (!check0CRC16(bytesAnsv, bytesAnsv.Length))
+						throw new Exception("Ошибка контрольной суммы при чтении данных");
+				//считывание полученных данных во внутреннюю структуру устройства
+				RxHeadCom.getFromCommandArr(bytesAnsv);
+					Array.Copy(bytesAnsv, 4, RxBuff, 0, bytesAnsv.Length - 6);
+
+					getFromCommandArr(byte[] _bytes)
 
 
 
 
+				public byte[] CommConstrDataIntPar(int NumInt, int par1 = 0, int par2 = 0, int par3 = 0, int par4 = 0, int par5 = 0, int par6 = 0, int par7 = 0, int par8 = 0)
+				{
+					if (NumInt > 8)
+						NumInt = 8;
+					if (NumInt > 0)
+					{
+						int[] iPar = new int[NumInt];
+						int i = 0;
+						iPar[i] = par1;
+						if (++i < NumInt)
+							iPar[1] = par2;
+						if (++i < NumInt)
+							iPar[2] = par3;
+						iPar[3] = par4;
+						if (++i < NumInt)
+							iPar[4] = par5;
+						if (++i < NumInt)
+							iPar[5] = par6;
+						if (++i < NumInt)
+							iPar[6] = par7;
+						if (++i < NumInt)
+							iPar[7] = par8;
 
-
-
-		public byte[] CommConstrDataIntPar(int NumInt, int par1 = 0, int par2 = 0, int par3 = 0, int par4 = 0, int par5 = 0, int par6 = 0, int par7 = 0, int par8 = 0)
-		{
-			if (NumInt > 8)
-				NumInt = 8;
-			if (NumInt > 0)
-			{
-				int[] iPar = new int[NumInt];
-				int i = 0;
-				iPar[i] = par1;
-				if (++i < NumInt)
-					iPar[1] = par2;
-				if (++i < NumInt)
-					iPar[2] = par3;
-				iPar[3] = par4;
-				if (++i < NumInt)
-					iPar[4] = par5;
-				if (++i < NumInt)
-					iPar[5] = par6;
-				if (++i < NumInt)
-					iPar[6] = par7;
-				if (++i < NumInt)
-					iPar[7] = par8;
-
-				return (FlowProRAMtoMEM.ArrIntToArrByte(iPar));
-			}
-			return null;
-			//команда без параметров
-		}
-
+						return (FlowProRAMtoMEM.ArrIntToArrByte(iPar));
+					}
+					return null;
+					//команда без параметров
+				}
+		*/
 	}
 }
