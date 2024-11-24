@@ -520,7 +520,7 @@ namespace COMMAND
 								{
 
 									Read(buffer, curLen, tmpLEN);//считываем данные из буфера
-									curLen = +tmpLEN;
+									curLen += tmpLEN;
 								}
 							}
 
