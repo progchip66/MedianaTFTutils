@@ -292,7 +292,9 @@ namespace TFTprog
 
             cBtimeSpeed.SelectedIndex = 0;
             tabControl1.SelectedIndex = 2;
-            WORKAKVATEST.UpdateListtBoxRejak(lBrejak);
+            WORKAKVATEST.UpdateComboBoxRejak(cBrej);
+
+
             this.Text = "DrawConfig  " + Properties.Settings.Default.Version;
             LBoxInterface.Items.Clear();
             LoadDefaultSetting();
@@ -316,11 +318,11 @@ namespace TFTprog
             //Инициализируем таблицу с таймерами
             WORKAKVATEST.FormatSimplGridView(dGtimers, 120, 30, new string[]{ "Rej", "CountSec", "LastStamp_mSec", "MaxCountSec", "DamageSec" }, WORKAKVATEST.GetTextHead(0, 7));
 
+            cBrej.SelectedIndex = 0;
 
-            
-  //          string[] TimersRowHeaders = { "Rej", "CountSec", "LastStamp_mSec", "MaxCountSec", "DamageSec" };
+            //          string[] TimersRowHeaders = { "Rej", "CountSec", "LastStamp_mSec", "MaxCountSec", "DamageSec" };
 
-  //          WORKAKVATEST.FormatTimersGridView(dGtimers,120,30);
+            //          WORKAKVATEST.FormatTimersGridView(dGtimers,120,30);
 
 
             //   WORKAKVATEST.DrawAKVAtable(dGparam, WORKAKVATEST.GVstruct);
@@ -1767,34 +1769,6 @@ foreach (TabPage tabPage in tabControl1.TabPages)
 
 
 
-        private void lBrejak_DoubleClick(object sender, EventArgs e)
-        {
-            try
-            {
-                WORKAKVATEST.selectedMode = WORKAKVATEST.SetRejakFromListBox((ListBox)sender);
-                WORKAKVATEST.SelectColumn(dGparam, lBrejak.SelectedIndex);
-                /*
-                //добавить сюда код по выделению столбца таблицы
-                // Очистим все предыдущие выделения
-                dGparam.ClearSelection();
-                // Убедимся, что индекс колонки допустимый
-                if (lBrejak.SelectedIndex >= 0 && lBrejak.SelectedIndex < dGparam.Columns.Count)
-                {
-                    // Программно выделим всю колонку
-                    dataGridView1.Columns[lBrejak.SelectedIndex].Selected = true;
-                }
-
-                dGparam.ClearSelection(); // очищаем предыдущее выделение
-                if (lBrejak.SelectedIndex>=0)
-                dGparam.Columns[lBrejak.SelectedIndex].Selected = true; // выделяем нужную колонку*/
-            }
-            catch (ArgumentException ex)
-            {
-                MessageBox.Show(ex.Message, "Ошибка выбора режима ", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-
         #endregion
 
         private void button4_Click(object sender, EventArgs e)
@@ -1852,7 +1826,14 @@ foreach (TabPage tabPage in tabControl1.TabPages)
         {
             CANHUB.StartTFTcalibr(Efl_DEV.fld_TFTboard);
         }
+
+        private void cBrej_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            WORKAKVATEST.selectedMode = WORKAKVATEST.SetRejakFromComboBox((ComboBox)sender);
+            WORKAKVATEST.SelectColumn(dGparam, cBrej.SelectedIndex);
+        }
+
     }
 
-
+    
 }

@@ -736,67 +736,121 @@ namespace TESTAKVA
             }
         }
 
-        #region ListBoxRejak
+        #region ComboBoxRejak
 
-        public void UpdateListtBoxRejak(ListBox lBox)
+        public void UpdateComboBoxRejak(ComboBox comboBox)
         {
-            // Очищаем старое содержимое ListBox
-            lBox.Items.Clear();
+            // Очищаем старое содержимое ComboBox
+            comboBox.Items.Clear();
 
-            // Массив строк, которые будут добавлены в ListBox
+            // Массив строк, которые будут добавлены в ComboBox
             string[] modes = new string[]
             {
-                "Wait",
-                "Wash",
-                "Fabric",
-                "prepWash",
-                "newWash",
-                "Damage",
-                "Sanitar",
-                "FirstStart",
-                "speedWash",
-                "Stop",
-                "WaitRazd",
-                "WashRazd",
-                "FabricRazd",
-                "prepWashSteep1",
-                "prepWashSteep2",
-                "prepWashSteep3",
-                "prepWashSteep4",
-                "prepnewWashSteep1",
-                "prepnewWashSteep2",
-                "SanitarSteep1",
-                "SanitarSteep2",
-                "SanitarSteep3",
-                "SanitarSteep4",
-                "SanitarSteep5",
-                "SanitarSteep6",
-                "SanitarSteep7",
-                "SanitarSteep8",
-                "FirstStartSteep1",
-                "FirstStatrSteep2",
-                "FirstStartSteep3",
-                "FirstStatrSteep4"
+        "Wait",
+        "Wash",
+        "Fabric",
+        "prepWash",
+        "newWash",
+        "Damage",
+        "Sanitar",
+        "FirstStart",
+        "speedWash",
+        "Stop",
+        "WaitRazd",
+        "WashRazd",
+        "FabricRazd",
+        "prepWashSteep1",
+        "prepWashSteep2",
+        "prepWashSteep3",
+        "prepWashSteep4",
+        "prepnewWashSteep1",
+        "prepnewWashSteep2",
+        "SanitarSteep1",
+        "SanitarSteep2",
+        "SanitarSteep3",
+        "SanitarSteep4",
+        "SanitarSteep5",
+        "SanitarSteep6",
+        "SanitarSteep7",
+        "SanitarSteep8",
+        "FirstStartSteep1",
+        "FirstStatrSteep2",
+        "FirstStartSteep3",
+        "FirstStatrSteep4"
             };
 
-            // Добавляем строки в ListBox
+            // Добавляем строки в ComboBox
             foreach (string mode in modes)
             {
-                lBox.Items.Add(mode);
+                comboBox.Items.Add(mode);
             }
         }
 
 
-        public ErejAKVA SetRejakFromListBox(ListBox listBox)
+
+        public void SetComboBoxFromRejak(ComboBox comboBox, ErejAKVA mode)
+        {
+            string modeText = "";
+
+            // Определяем строку на основе значения ErejAKVA
+            if (mode == ErejAKVA.rejak_Wait) modeText = "Wait";
+            else if (mode == ErejAKVA.rejak_Wash) modeText = "Wash";
+            else if (mode == ErejAKVA.rejak_Fabric) modeText = "Fabric";
+            else if (mode == ErejAKVA.rejak_prepWash) modeText = "prepWash";
+            else if (mode == ErejAKVA.rejak_newWash) modeText = "newWash";
+            else if (mode == ErejAKVA.rejak_Damage) modeText = "Damage";
+            else if (mode == ErejAKVA.rejak_Sanitar) modeText = "Sanitar";
+            else if (mode == ErejAKVA.rejak_FirstStart) modeText = "FirstStart";
+            else if (mode == ErejAKVA.rejak_speedWash) modeText = "speedWash";
+            else if (mode == ErejAKVA.rejak_Stop) modeText = "Stop";
+            else if (mode == ErejAKVA.rejak_WaitRazd) modeText = "WaitRazd";
+            else if (mode == ErejAKVA.rejak_WashRazd) modeText = "WashRazd";
+            else if (mode == ErejAKVA.rejak_FabricRazd) modeText = "FabricRazd";
+            else if (mode == ErejAKVA.rejak_prepWashSteep1) modeText = "prepWashSteep1";
+            else if (mode == ErejAKVA.rejak_prepWashSteep2) modeText = "prepWashSteep2";
+            else if (mode == ErejAKVA.rejak_prepWashSteep3) modeText = "prepWashSteep3";
+            else if (mode == ErejAKVA.rejak_prepWashSteep4) modeText = "prepWashSteep4";
+            else if (mode == ErejAKVA.rejak_prepnewWashSteep1) modeText = "prepnewWashSteep1";
+            else if (mode == ErejAKVA.rejak_prepnewWashSteep2) modeText = "prepnewWashSteep2";
+            else if (mode == ErejAKVA.rejak_SanitarSteep1) modeText = "SanitarSteep1";
+            else if (mode == ErejAKVA.rejak_SanitarSteep2) modeText = "SanitarSteep2";
+            else if (mode == ErejAKVA.rejak_SanitarSteep3) modeText = "SanitarSteep3";
+            else if (mode == ErejAKVA.rejak_SanitarSteep4) modeText = "SanitarSteep4";
+            else if (mode == ErejAKVA.rejak_SanitarSteep5) modeText = "SanitarSteep5";
+            else if (mode == ErejAKVA.rejak_SanitarSteep6) modeText = "SanitarSteep6";
+            else if (mode == ErejAKVA.rejak_SanitarSteep7) modeText = "SanitarSteep7";
+            else if (mode == ErejAKVA.rejak_SanitarSteep8) modeText = "SanitarSteep8";
+            else if (mode == ErejAKVA.rejak_FirstStartSteep1) modeText = "FirstStartSteep1";
+            else if (mode == ErejAKVA.rejak_FirstStatrSteep2) modeText = "FirstStatrSteep2";
+            else if (mode == ErejAKVA.rejak_FirstStartSteep3) modeText = "FirstStartSteep3";
+            else if (mode == ErejAKVA.rejak_FirstStatrSteep4) modeText = "FirstStatrSteep4";
+            else throw new ArgumentException("Неизвестное значение ErejAKVA.");
+
+            // Найдем индекс строки в ComboBox
+            int itemIndex = comboBox.Items.IndexOf(modeText);
+
+            if (itemIndex >= 0)
+            {
+                // Устанавливаем выбранный элемент
+                comboBox.SelectedIndex = itemIndex;
+            }
+            else
+            {
+                throw new ArgumentException("Режим не найден в списке.");
+            }
+        }
+
+
+        public ErejAKVA SetRejakFromComboBox(ComboBox comboBox)
         {
             // Получаем активный индекс выбранной строки
-            int selectedIndex = listBox.SelectedIndex;
-            if (selectedIndex < 0 || selectedIndex >= listBox.Items.Count)
+            int selectedIndex = comboBox.SelectedIndex;
+            if (selectedIndex < 0 || selectedIndex >= comboBox.Items.Count)
             {
                 throw new ArgumentOutOfRangeException("Неверный индекс строки.");
             }
 
-            string selectedLine = listBox.Items[selectedIndex].ToString();
+            string selectedLine = comboBox.Items[selectedIndex].ToString();
 
             // Сопоставляем строку с элементами перечисления ErejAKVA
             if (selectedLine == "Wait") return ErejAKVA.rejak_Wait;
@@ -835,57 +889,7 @@ namespace TESTAKVA
 
 
 
-        public void SetListBoxFromRejak(ListBox listBox, ErejAKVA mode)
-        {
-            string modeText = "";
 
-            // Восстанавливаем полные названия режимов, но строки без "rejak_"
-            if (mode == ErejAKVA.rejak_Wait) modeText = "Wait";
-            else if (mode == ErejAKVA.rejak_Wash) modeText = "Wash";
-            else if (mode == ErejAKVA.rejak_Fabric) modeText = "Fabric";
-            else if (mode == ErejAKVA.rejak_prepWash) modeText = "prepWash";
-            else if (mode == ErejAKVA.rejak_newWash) modeText = "newWash";
-            else if (mode == ErejAKVA.rejak_Damage) modeText = "Damage";
-            else if (mode == ErejAKVA.rejak_Sanitar) modeText = "Sanitar";
-            else if (mode == ErejAKVA.rejak_FirstStart) modeText = "FirstStart";
-            else if (mode == ErejAKVA.rejak_speedWash) modeText = "speedWash";
-            else if (mode == ErejAKVA.rejak_Stop) modeText = "Stop";
-            else if (mode == ErejAKVA.rejak_WaitRazd) modeText = "WaitRazd";
-            else if (mode == ErejAKVA.rejak_WashRazd) modeText = "WashRazd";
-            else if (mode == ErejAKVA.rejak_FabricRazd) modeText = "FabricRazd";
-            else if (mode == ErejAKVA.rejak_prepWashSteep1) modeText = "prepWashSteep1";
-            else if (mode == ErejAKVA.rejak_prepWashSteep2) modeText = "prepWashSteep2";
-            else if (mode == ErejAKVA.rejak_prepWashSteep3) modeText = "prepWashSteep3";
-            else if (mode == ErejAKVA.rejak_prepWashSteep4) modeText = "prepWashSteep4";
-            else if (mode == ErejAKVA.rejak_prepnewWashSteep1) modeText = "prepnewWashSteep1";
-            else if (mode == ErejAKVA.rejak_prepnewWashSteep2) modeText = "prepnewWashSteep2";
-            else if (mode == ErejAKVA.rejak_SanitarSteep1) modeText = "SanitarSteep1";
-            else if (mode == ErejAKVA.rejak_SanitarSteep2) modeText = "SanitarSteep2";
-            else if (mode == ErejAKVA.rejak_SanitarSteep3) modeText = "SanitarSteep3";
-            else if (mode == ErejAKVA.rejak_SanitarSteep4) modeText = "SanitarSteep4";
-            else if (mode == ErejAKVA.rejak_SanitarSteep5) modeText = "SanitarSteep5";
-            else if (mode == ErejAKVA.rejak_SanitarSteep6) modeText = "SanitarSteep6";
-            else if (mode == ErejAKVA.rejak_SanitarSteep7) modeText = "SanitarSteep7";
-            else if (mode == ErejAKVA.rejak_SanitarSteep8) modeText = "SanitarSteep8";
-            else if (mode == ErejAKVA.rejak_FirstStartSteep1) modeText = "FirstStartSteep1";
-            else if (mode == ErejAKVA.rejak_FirstStatrSteep2) modeText = "FirstStatrSteep2";
-            else if (mode == ErejAKVA.rejak_FirstStartSteep3) modeText = "FirstStartSteep3";
-            else if (mode == ErejAKVA.rejak_FirstStatrSteep4) modeText = "FirstStatrSteep4";
-            else throw new ArgumentException("Неизвестное значение ErejAKVA.");
-
-            // Найдем индекс строки в ListBox
-            int itemIndex = listBox.Items.IndexOf(modeText);
-
-            if (itemIndex >= 0)
-            {
-                // Устанавливаем выбранный элемент
-                listBox.SelectedIndex = itemIndex;
-            }
-            else
-            {
-                throw new ArgumentException("Режим не найден в списке.");
-            }
-        }
 
         #endregion
 

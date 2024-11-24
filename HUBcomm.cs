@@ -233,7 +233,7 @@ namespace ExtHubComm
                 ret = result;
             }
             byte[] byteArray = BitConverter.GetBytes(ret);
-            CommSendAnsv(ECommand.cmd_TimeAccelerat, Efl_DEV.fld_MainBoard, byteArray, 500);
+            CommSendAnsv(ECommand.cmd_TimeAccelerat, Efl_DEV.fld_TFTboard, byteArray, 50);
         }
 
 
