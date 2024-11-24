@@ -370,16 +370,26 @@ foreach (TabPage tabPage in tabControl1.TabPages)
         private void OnDataReceived(object sender, DataReceivedEventArgs e)
         {
             // Преобразуем массив байт в строку в формате HEX
-            string hexString = BitConverter.ToString(e.Data).Replace("-", " ");
+            //string hexString = BitConverter.ToString(e.Data).Replace("-", " ");
 
             // Поскольку событие может быть вызвано из другого потока, используем Invoke
             if (InvokeRequired)
             {
-                Invoke(new Action(() => textBox1.Text = hexString));
+                byte[] RXdata = new byte[e.Data.Length-6];//создаём массив для хранения данных
+                Array.Copy(e.Data,4, RXdata,0, e.Data.Length - 6);//копируем в него принятые данные без заголовка и CRC
+
+                //WORKAKVATEST.FromByteArray(e.Data);//извлекаем сырые считанные данные  new
+                //извлекаем данные из таймеров
+                WORKAKVATEST.TimersParFromByteArray(RXdata);
+
+                Invoke(new Action(() => WORKAKVATEST.DisplayInDataGridView(dGtimers)));
+
+                //Invoke(new Action(() => textBox1.Text = hexString));
+
             }
             else
             {
-                textBox1.Text = hexString;
+               // textBox1.Text = hexString;
             }
         }
 

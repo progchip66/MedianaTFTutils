@@ -551,6 +551,7 @@ namespace COMMAND
 										mutexAcquired = false;
 									}
 									Array.Copy(buffer, res_buf, expectedLength);
+
 									OnDataReceived(res_buf);//вызываем событие в которое передаём данные из буфера
 															//DataReceivedEvent?.Invoke(this, new DataReceivedEventArgs(res_buf));
 

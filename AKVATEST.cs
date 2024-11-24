@@ -168,7 +168,7 @@ namespace TESTAKVA
         private const int ArraySize = 8;
         public SATIMER[] T = new SATIMER[ArraySize];
 
-        public void FromByteArray(byte[] data)
+        public void TimersParFromByteArray(byte[] data)
         {//преобразования из массива байт в структуру
             if (data.Length != Marshal.SizeOf(typeof(SATIMER)) * ArraySize)
                 throw new ArgumentException("Invalid data length");
@@ -190,11 +190,11 @@ namespace TESTAKVA
             for (int i = 0; i < ArraySize; i++)
             {
                 // Проверяем каждую ячейку перед записью
-                UpdateCellIfChanged(dataGridView.Rows[0].Cells[i + 1], T[i].Rej);
-                UpdateCellIfChanged(dataGridView.Rows[1].Cells[i + 1], T[i].CountSec);
-                UpdateCellIfChanged(dataGridView.Rows[2].Cells[i + 1], T[i].LastStamp_mSec);
-                UpdateCellIfChanged(dataGridView.Rows[3].Cells[i + 1], T[i].MaxCountSec);
-                UpdateCellIfChanged(dataGridView.Rows[4].Cells[i + 1], T[i].DamageSec);
+                UpdateCellIfChanged(dataGridView.Rows[0].Cells[i], T[i].Rej);
+                UpdateCellIfChanged(dataGridView.Rows[1].Cells[i], T[i].CountSec);
+                UpdateCellIfChanged(dataGridView.Rows[2].Cells[i], T[i].LastStamp_mSec);
+                UpdateCellIfChanged(dataGridView.Rows[3].Cells[i], T[i].MaxCountSec);
+                UpdateCellIfChanged(dataGridView.Rows[4].Cells[i], T[i].DamageSec);
             }
         }
 
