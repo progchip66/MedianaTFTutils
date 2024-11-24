@@ -163,7 +163,8 @@ namespace COMMAND
 	{
 		public int CountReadData=0;//количество считанных байт находящихся в массиве bytesReadData
 		public  byte[] bytesReadData = new byte[256];//байты для хранения считанных командой данных
-
+		public uint[] uintReadData = new uint[64];//байты для хранения считанных командой данных
+		public float[] floatReadData = new float[64];//байты для хранения считанных командой данных
 		private byte[] bytes = new byte[4] { 0, 0, 0, 0 };
 
 		public S_subComOp subCom = new S_subComOp();//Класс установки субкоманды
@@ -180,18 +181,46 @@ namespace COMMAND
 			bytes[2] = _bytes[2];
 			bytes[3] = _bytes[3];
 			subCom.data = _bytes[3];
-		}
+		} 
 
 		public bool GetValidHeaderData(byte[] _bytes)
         {
 			if (!CRC.check0CRC16(_bytes, _bytes.Length))
-				return true;
+				return false;
 			getFromCommandArr(_bytes);//извлекаем HEADER из данных
+			CountReadData = _bytes.Length - 4;
 			Array.Copy(_bytes, 4, bytesReadData, 0, _bytes.Length-4);//копируем данные в буфер данных
-			return false;
+			CopyAndReset(bytesReadData, uintReadData, floatReadData, CountReadData);
+			return true;
         }
 
+		public void CopyAndReset(byte[] bytesReadData, uint[] uintReadData, float[] floatReadData, int num)
+		{
+			// Проверяем допустимость num
+			if (num > bytesReadData.Length)
+			{
+				num = bytesReadData.Length;
+			}
 
+			// Вычисляем количество байт с округлением вверх до кратного 4
+			int paddedNum = (num + 3) / 4 * 4;
+
+			// Обнуляем массивы uintReadData и floatReadData
+			Array.Clear(uintReadData, 0, uintReadData.Length);
+			Array.Clear(floatReadData, 0, floatReadData.Length);
+
+			// Копируем данные в массив uintReadData
+			for (int i = 0; i < paddedNum / 4 && i < uintReadData.Length; i++)
+			{
+				uintReadData[i] = BitConverter.ToUInt32(bytesReadData, i * 4);
+			}
+
+			// Копируем данные в массив floatReadData
+			for (int i = 0; i < paddedNum / 4 && i < floatReadData.Length; i++)
+			{
+				floatReadData[i] = BitConverter.ToSingle(bytesReadData, i * 4);
+			}
+		}
 
 		public int DataLength
 		{
@@ -504,7 +533,7 @@ namespace COMMAND
 
 
 									byte[] res_buf = new byte[expectedLength];//создаём массив байт ожидаемой длины
-
+									Array.Copy(buffer, 0, res_buf, 0, expectedLength);//копируем данные в буфер данных
 									if (SlaveRxHeadCom.GetValidHeaderData(res_buf))//проверяем данные на валидность и помещаем считанные данные в SlaveRxHeadCom.bytesReadData 
 									{
 										SlaveRxHeadCom.getHeaderbytes();//получаем заголовок в структуру SHeadCom
