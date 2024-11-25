@@ -317,7 +317,11 @@ namespace TFTprog
 
             //Инициализируем таблицу с таймерами
             WORKAKVATEST.FormatSimplGridView(dGtimers, 120, 30, new string[]{ "Rej", "CountSec", "LastStamp_mSec", "MaxCountSec", "DamageSec" }, WORKAKVATEST.GetTextHead(0, 7));
-
+            // Отключение сортировки для всех столбцов таблицы
+            foreach (DataGridViewColumn column in dGtimers.Columns)
+            {
+                column.SortMode = DataGridViewColumnSortMode.NotSortable;
+            }
             cBrej.SelectedIndex = 0;
 
             //          string[] TimersRowHeaders = { "Rej", "CountSec", "LastStamp_mSec", "MaxCountSec", "DamageSec" };
@@ -391,7 +395,7 @@ foreach (TabPage tabPage in tabControl1.TabPages)
             }
             else
             {
-               // textBox1.Text = hexString;
+                WORKAKVATEST.DisplayInDataGridView(dGtimers);
             }
         }
 
@@ -756,10 +760,7 @@ foreach (TabPage tabPage in tabControl1.TabPages)
             }
         }
 
-        private void bfindPort_Click_1(object sender, EventArgs e)
-        {
-            CANHUB.IsPortOpen(listComPort.Items);
-        }
+
 
         private void bCOMselect_Click_1(object sender, EventArgs e)
         {
@@ -1067,7 +1068,15 @@ foreach (TabPage tabPage in tabControl1.TabPages)
 
             dataGridTimers.DataSource = tableTimer;
             dataGridTimers.AllowUserToAddRows = false;
-
+            foreach (DataGridViewColumn column in dataGridTimers.Columns)
+            {
+                column.SortMode = DataGridViewColumnSortMode.NotSortable;
+            }
+            
+            foreach (DataGridViewColumn column in dataGridView1.Columns)
+            {
+                column.SortMode = DataGridViewColumnSortMode.NotSortable;
+            }
         }
 
 
@@ -1833,6 +1842,12 @@ foreach (TabPage tabPage in tabControl1.TabPages)
             WORKAKVATEST.SelectColumn(dGparam, cBrej.SelectedIndex);
         }
 
+        private void dGtimers_ColumnHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
+        {
+            // Индекс нажатого столбца
+            int columnIndex = e.ColumnIndex;
+            MessageBox.Show($"Нажат столбец: {columnIndex}");
+        }
     }
 
     
