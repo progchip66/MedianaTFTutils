@@ -21,11 +21,12 @@ namespace TFTprog
     
     public partial class FormHUB : Form
     {
+        private SWORKAKVATEST WORKAKVATEST;
         TFileManager fcreater = new TFileManager();
         SCANHUB CANHUB = new SCANHUB();
         
         SGRAF_FILES GRAF_FILES = new SGRAF_FILES();
-        SWORKAKVATEST WORKAKVATEST = new SWORKAKVATEST();
+        
         bool isInitComboSpeed = false;
 
         public void LoadDefaultSetting()
@@ -278,7 +279,8 @@ namespace TFTprog
         public FormHUB()
         {
             InitializeComponent();
-
+           
+            WORKAKVATEST = new SWORKAKVATEST(dGtimers, dGparam);
             // Подписываемся на событие DataReceivedEvent
             CANHUB.DataReceivedEvent += OnDataReceived;
             // Обработчик события
@@ -1842,12 +1844,6 @@ foreach (TabPage tabPage in tabControl1.TabPages)
             WORKAKVATEST.SelectColumn(dGparam, cBrej.SelectedIndex);
         }
 
-        private void dGtimers_ColumnHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
-        {
-            // Индекс нажатого столбца
-            int columnIndex = e.ColumnIndex;
-            MessageBox.Show($"Нажат столбец: {columnIndex}");
-        }
     }
 
     

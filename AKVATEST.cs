@@ -17,6 +17,92 @@ using System.Runtime.InteropServices;
 namespace TESTAKVA
 {
 
+    //описание структуры таймеров
+
+    public enum ErejTimer : uint
+    {
+        rejt_off = 0x00U,
+        rejt_on = 0x01U,
+        rejt_over = 0x02U
+    }
+
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct SATIMER
+    {
+        public ErejTimer Rej;
+        public uint CountSec;
+        public uint LastStamp_mSec;
+        public uint MaxCountSec;
+        public uint DamageSec;
+    }
+
+
+    public class TableManager
+    {
+        private int x = -1; // Координата строки изменённой ячейки
+        private int y = -1; // Координата столбца изменённой ячейки
+        private bool Change = false; // Флаг изменения вручную
+
+        // Конструктор класса
+        public TableManager(DataGridView dataGridView)
+        {
+            // Отключаем сортировку столбцов
+            dataGridView.ColumnHeaderMouseClick += (s, e) =>
+            {
+                dataGridView.Sort(dataGridView.Columns[0], System.ComponentModel.ListSortDirection.Ascending);
+            };
+
+            // Подключаемся к событию окончания редактирования
+            dataGridView.CellEndEdit += (s, e) =>
+            {
+                // Запоминаем координаты изменённой вручную ячейки
+                x = e.RowIndex;
+                y = e.ColumnIndex;
+                Change = true;
+            };
+        }
+
+        // Метод обновления ячеек
+        public void DisplayInDataGridView(DataGridView dataGridView, SATIMER[] T)
+        {
+            for (int i = 0; i < T.Length; i++)
+            {
+                UpdateCellIfNeeded(dataGridView.Rows[0].Cells[i], T[i].Rej, 0, i);
+                UpdateCellIfNeeded(dataGridView.Rows[1].Cells[i], T[i].CountSec, 1, i);
+                UpdateCellIfNeeded(dataGridView.Rows[2].Cells[i], T[i].LastStamp_mSec, 2, i);
+                UpdateCellIfNeeded(dataGridView.Rows[3].Cells[i], T[i].MaxCountSec, 3, i);
+                UpdateCellIfNeeded(dataGridView.Rows[4].Cells[i], T[i].DamageSec, 4, i);
+            }
+        }
+
+        private void UpdateCellIfNeeded(DataGridViewCell cell, object newValue, int row, int col)
+        {
+            // Если ячейка была изменена вручную, пропускаем её обновление
+            if (Change && x == row && y == col)
+            {
+                Change = false; // Сбрасываем флаг после пропуска обновления
+                return;
+            }
+
+            // Обновляем ячейку, если новое значение отличается
+            UpdateCellIfChanged(cell, newValue);
+        }
+
+        public void UpdateCellIfChanged(DataGridViewCell cell, object newValue)
+        {
+            // Проверяем, что ячейка нередактируемая и новое значение отличается от текущего
+            if (!cell.ReadOnly && !Equals(cell.Value, newValue))
+            {
+                cell.Value = newValue;
+            }
+        }
+    }
+
+
+
+
+
     public enum ErejAKVA
     {
         rejak_Wait = 1,           // ожидание
@@ -66,6 +152,7 @@ namespace TESTAKVA
         public float LitrPerHour { get; set; }
         public float LitrPerMinute { get; set; }
     }
+
     public class SAKVApar
     {
         public ErejAKVA Rej { get; set; }
@@ -96,14 +183,6 @@ namespace TESTAKVA
 
         public uint TimeStampSec { get; set; }
 
-
-
-
-
-
-
-
-
     }
 
 
@@ -123,11 +202,25 @@ namespace TESTAKVA
 
 
 
+
+
+
     public class SWORKAKVATEST
     {
-        public GridViewParams GVstruct;
+        private DataGridView TimersGridView;
+        private DataGridView ParamGridView;
+        public SWORKAKVATEST(DataGridView _TimersGridView, DataGridView _ParamGridView)
+        {
+            TimersGridView = _TimersGridView ?? throw new ArgumentNullException(nameof(_TimersGridView));
+            ParamGridView = _ParamGridView ?? throw new ArgumentNullException(nameof(_ParamGridView));
+        }
 
+        public GridViewParams GVstruct;
+        public SATIMER[] T = new SATIMER[ArraySize];
         public ErejAKVA selectedMode = ErejAKVA.rejak_Stop;
+
+
+
 
         public  readonly string[] rejheaders = { "Wait", "Wash", "Fabric", "prepWash", "newWash", "Damage", "Sanitar", "FirstStart", "speedWash", "Stop",
                          "WaitRazd", "WashRazd", "FabricRazd", "prepWashSteep1", "prepWashSteep2", "prepWashSteep3", "prepWashSteep4",
@@ -136,7 +229,7 @@ namespace TESTAKVA
 
         public readonly string[] rowHeaders = { "FM[0]", "FM[1]", "FM[2]", "PT[0]", "PT[1]", "QT[0]", "QT[1]", "QT[2]",
                             "InONOFF", "InESC", "InPressRazd", "InFlowMeters" };
- 
+
         public  void initSWORKAKVATEST(DataGridView gridView)
         {//Инициализация параметров 
          //инициализация структуры  GridViewParams GVstruct;
@@ -145,28 +238,9 @@ namespace TESTAKVA
 
 
      #region Timers
-        //описание структуры таймеров
-
-        public enum ErejTimer : uint
-        {
-            rejt_off = 0x00U,
-            rejt_on = 0x01U,
-            rejt_over = 0x02U
-        }
-
-        [StructLayout(LayoutKind.Sequential, Pack = 1)]
-        public struct SATIMER
-        {
-            public ErejTimer Rej;
-            public uint CountSec;
-            public uint LastStamp_mSec;
-            public uint MaxCountSec;
-            public uint DamageSec;
-        }
-
 
         private const int ArraySize = 8;
-        public SATIMER[] T = new SATIMER[ArraySize];
+
 
         public void TimersParFromByteArray(byte[] data)
         {//преобразования из массива байт в структуру
@@ -224,8 +298,9 @@ namespace TESTAKVA
 
 
      #region SimplFormatTibles
+//ТАБЛИЦА ПАРАМЕТРОВ
 
-        //выдаёт последовательность строк соедржащих числа увеличивающиеся на 1 для формирования заголовков
+        //выдаёт последовательность строк соедержащих числа увеличивающиеся на 1 для формирования заголовков
         public string[] GetTextHead(int Start, int End)
         {
             // Вычисляем количество элементов в массиве
@@ -424,7 +499,7 @@ namespace TESTAKVA
 
         public void SetHeaders(DataGridView dataGridView, string[] strTop, string[] HeadLeft,  int LenLeftHead, int numCol, int colView)
         {
-            //выравнивание тестав верхнего заголовка по центру
+            //выравнивание текстов верхнего заголовка по центру
             dataGridView.ColumnHeadersDefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
             // Установка ширины левого заголовка (RowHeadersWidth)
             dataGridView.RowHeadersWidth = LenLeftHead;
