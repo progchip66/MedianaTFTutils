@@ -37,7 +37,7 @@ namespace TESTAKVA
         public uint DamageSec;
     }
 
-
+/*
     public class TableManager
     {
         private int x = -1; // Координата строки изменённой ячейки
@@ -99,7 +99,7 @@ namespace TESTAKVA
         }
     }
 
-
+*/
 
 
 
@@ -209,6 +209,7 @@ namespace TESTAKVA
     {
         private DataGridView TimersGridView;
         private DataGridView ParamGridView;
+
         public SWORKAKVATEST(DataGridView _TimersGridView, DataGridView _ParamGridView)
         {//конструктор в котором происходит формирование таблиц таймеров и параметров
             TimersGridView = _TimersGridView ?? throw new ArgumentNullException(nameof(_TimersGridView));
@@ -219,7 +220,69 @@ namespace TESTAKVA
             //форматирование таблицы таймеров
             FormatTimersGridView(120, 30, new string[] { "Rej", "CountSec", "LastStamp_mSec", "MaxCountSec", "DamageSec" }, GetTextHead(0, 7));
             TimersParPerminEdit();
+            // Отключаем сортировку столбцов
+            TimersGridView.ColumnHeaderMouseClick += (s, e) =>
+            {
+                TimersGridView.Sort(TimersGridView.Columns[0], System.ComponentModel.ListSortDirection.Ascending);
+            };
+
+            // Подключаемся к событию окончания редактирования
+            TimersGridView.CellEndEdit += (s, e) =>
+            {
+                try
+                { 
+                // Получаем значение отредактированной ячейки
+                var cellValue = TimersGridView.Rows[e.RowIndex].Cells[e.ColumnIndex].Value?.ToString();
+
+                // Пытаемся преобразовать значение в uint
+                if (uint.TryParse(cellValue, out uint parsedValue))
+                {
+                    // Если получилось, присваиваем значение переменной ChangeTimersVol
+                    ChangeTimersVol = parsedValue;
+                    boolChangeTimersVol = true;
+                }
+                else
+                {
+                    // Если преобразование не удалось, вызываем исключение
+                    boolChangeTimersVol = false;
+                    throw new InvalidCastException($"'{cellValue}' не является типом uint.");
+                }
+                // Запоминаем координаты изменённой вручную ячейки
+                xChangeTimersVol = e.RowIndex;
+                yChangeTimersVol = e.ColumnIndex;
+                }
+                catch (Exception ex)
+                {
+                    // Обработка исключения (например, вывод сообщения об ошибке)
+                    MessageBox.Show(ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            };
         }
+
+        //boolChangeTimersVol
+        public void SendChangeTimersData(byte[] TimersData)
+        {
+            int StartIndex = (xChangeTimersVol * 5 + yChangeTimersVol) * 4;
+
+            // Получение байтового представления числа
+            byte[] uVolBytes = BitConverter.GetBytes(ChangeTimersVol);
+
+            // Проверка: достаточно ли места в массиве для копирования
+            if (StartIndex + uVolBytes.Length > TimersData.Length)
+            {
+                throw new InvalidCastException($"Недостаточно места в массиве для копирования данных из TimersGridView");
+            }
+            else
+            {
+                // Копирование байтов в массив bArr
+                boolChangeTimersVol = false;
+                Array.Copy(uVolBytes, 0, TimersData, StartIndex, uVolBytes.Length);
+
+            }
+
+        }
+
+
 
         public GridViewParams FormatParamsGV;//структура хранения параметров форматирования таблицы ParamGridView
         public SATIMER[] T = new SATIMER[ArraySize];
@@ -239,9 +302,14 @@ namespace TESTAKVA
 
 
 
-     #region Timers
-
+        #region Timers
+        private bool boolChangeTimersVol = false;
+        private int xChangeTimersVol = -1;
+        private int yChangeTimersVol = -1;
+        private uint ChangeTimersVol = 0;
         private const int ArraySize = 8;
+
+        private byte[] tmpbufTimersData = new byte[Marshal.SizeOf(typeof(SATIMER)) * ArraySize];//массив в который копируются считанные данные таймеров
 
 
         public void TimersParFromByteArray(byte[] data)
@@ -250,13 +318,14 @@ namespace TESTAKVA
                 throw new ArgumentException("Invalid data length");
 
             for (int i = 0; i < ArraySize; i++)
-            {
+            {// считывание параметров в структуру одного из таймеров
                 int offset = i * Marshal.SizeOf(typeof(SATIMER));
                 IntPtr ptr = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(SATIMER)));
                 Marshal.Copy(data, offset, ptr, Marshal.SizeOf(typeof(SATIMER)));
                 T[i] = (SATIMER)Marshal.PtrToStructure(ptr, typeof(SATIMER));
                 Marshal.FreeHGlobal(ptr);
             }
+            Array.Copy(data, tmpbufTimersData, data.Length);//копируем считанные данные таймеров
         }
 
 

@@ -126,7 +126,7 @@ namespace COMMAND
 		cmd_TFTmenu = 0x5B,//вывод меню на TFT панели
 
 		cmd_SetRTCDateTime = 0x5C,////Установка (считывание если параметр равен нулю) нового системного времени и даты путём отправки в плату управления
-		cmd_extTimers = 0x5D,//Установка нового системного времени и даты путём отправки в плату управления
+		cmd_extTimers = 0x5D,///Отправка(приём) пакета данных, содержащих информацию о всех восьми таймерах
 		cmd_StartTFTcalibr = 0x5E,//Запуск режима калибровки TFT панели
 		cmd_USER = 0x70,
 		cmd_TimeAccelerat = 0x71,
@@ -611,6 +611,16 @@ namespace COMMAND
 		}
 
 
+		void RedSlaveCom_PARCER()
+        {//ОБРАБОТКА КОМАНД ПРИНЯТЫХ В SLAVE РЕЖИМЕ
+			switch ()
+            {
+
+            }
+
+        }
+
+
 
 		public byte[] SendCommand(byte[] data, int startTimeoutMs = 50)
 		{
@@ -801,8 +811,8 @@ namespace COMMAND
 
 			byte[] bytesAnsv = SendCommand(datasend, TimeOutStartAnsv);//отправка данных команды и приём ответа с переключением RTS
 
-			if (bytesAnsv.Length == 0)
-				return;
+			if ((bytesAnsv.Length == 0)||(TimeOutStartAnsv==0))
+				return;//ответа на команду не требуется
 			if (!CRC.check0CRC16(bytesAnsv, bytesAnsv.Length))
 				throw new Exception("Ошибка контрольной суммы при чтении данных");
 			//считывание полученных данных во внутреннюю структуру устройства

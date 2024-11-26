@@ -337,6 +337,7 @@ namespace TFTprog
 
                 //WORKAKVATEST.FromByteArray(e.Data);//извлекаем сырые считанные данные  new
                 //извлекаем данные из таймеров
+
                 WORKAKVATEST.TimersParFromByteArray(RXdata);
 
                 Invoke(new Action(() => WORKAKVATEST.DisplayInDataGridView()));
