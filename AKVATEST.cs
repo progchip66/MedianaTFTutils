@@ -210,12 +210,18 @@ namespace TESTAKVA
         private DataGridView TimersGridView;
         private DataGridView ParamGridView;
         public SWORKAKVATEST(DataGridView _TimersGridView, DataGridView _ParamGridView)
-        {
+        {//конструктор в котором происходит формирование таблиц таймеров и параметров
             TimersGridView = _TimersGridView ?? throw new ArgumentNullException(nameof(_TimersGridView));
             ParamGridView = _ParamGridView ?? throw new ArgumentNullException(nameof(_ParamGridView));
+            FormatParamsGridView();//установка параметров таблицы параметров
+            DrawAKVAtable(ParamGridView, FormatParamsGV);            
+            ParamSetHeaders();//форматирование таблицы параметров
+            //форматирование таблицы таймеров
+            FormatTimersGridView(120, 30, new string[] { "Rej", "CountSec", "LastStamp_mSec", "MaxCountSec", "DamageSec" }, GetTextHead(0, 7));
+            TimersParPerminEdit();
         }
 
-        public GridViewParams GVstruct;
+        public GridViewParams FormatParamsGV;//структура хранения параметров форматирования таблицы ParamGridView
         public SATIMER[] T = new SATIMER[ArraySize];
         public ErejAKVA selectedMode = ErejAKVA.rejak_Stop;
 
@@ -230,11 +236,7 @@ namespace TESTAKVA
         public readonly string[] rowHeaders = { "FM[0]", "FM[1]", "FM[2]", "PT[0]", "PT[1]", "QT[0]", "QT[1]", "QT[2]",
                             "InONOFF", "InESC", "InPressRazd", "InFlowMeters" };
 
-        public  void initSWORKAKVATEST(DataGridView gridView)
-        {//Инициализация параметров 
-         //инициализация структуры  GridViewParams GVstruct;
 
-        }
 
 
      #region Timers
@@ -257,18 +259,45 @@ namespace TESTAKVA
             }
         }
 
-        public void DisplayInDataGridView(DataGridView dataGridView)
+
+        
+
+        private void TimersParPerminEdit()
+        {//разрешает редактировать только одну строку номер 1 содержащую текущее значением таймеров
+            int editableRowIndex = 1; // Номер строки, которая остаётся редактируемой
+            foreach (DataGridViewRow row in TimersGridView.Rows)
+            {
+                if (row.Index != editableRowIndex)
+                {
+                    // Запрет редактирования
+                    row.ReadOnly = true;
+
+                    // Установка серого фона для нередактируемых строк
+                    row.DefaultCellStyle.BackColor = Color.LightGray;
+                }
+                else
+                {
+                    // Разрешение редактирования для одной строки
+                    row.ReadOnly = false;
+
+                    // Сброс цвета для редактируемой строки (по умолчанию)
+                    row.DefaultCellStyle.BackColor = TimersGridView.DefaultCellStyle.BackColor;
+                }
+            }
+        }
+
+        public void DisplayInDataGridView()
         {
             //Запись должна проводиться только в нередактируемую ячейку и только если её значение изменилось.
             // Заполняем таблицу данными из SATIMER[]
             for (int i = 0; i < ArraySize; i++)
             {
                 // Проверяем каждую ячейку перед записью
-                UpdateCellIfChanged(dataGridView.Rows[0].Cells[i], T[i].Rej);
-                UpdateCellIfChanged(dataGridView.Rows[1].Cells[i], T[i].CountSec);
-                UpdateCellIfChanged(dataGridView.Rows[2].Cells[i], T[i].LastStamp_mSec);
-                UpdateCellIfChanged(dataGridView.Rows[3].Cells[i], T[i].MaxCountSec);
-                UpdateCellIfChanged(dataGridView.Rows[4].Cells[i], T[i].DamageSec);
+                UpdateCellIfChanged(TimersGridView.Rows[0].Cells[i], T[i].Rej);
+                UpdateCellIfChanged(TimersGridView.Rows[1].Cells[i], T[i].CountSec);
+                UpdateCellIfChanged(TimersGridView.Rows[2].Cells[i], T[i].LastStamp_mSec);
+                UpdateCellIfChanged(TimersGridView.Rows[3].Cells[i], T[i].MaxCountSec);
+                UpdateCellIfChanged(TimersGridView.Rows[4].Cells[i], T[i].DamageSec);
             }
         }
 
@@ -281,15 +310,15 @@ namespace TESTAKVA
             }
         }
 
-        public void UpdateFromDataGridView(DataGridView dataGridView)
+        public void UpdateFromDataGridView()
         {// считывание всех данных из таблицы
             for (int i = 0; i < ArraySize; i++)
             {
-                T[i].Rej = (ErejTimer)Enum.Parse(typeof(ErejTimer), dataGridView.Rows[0].Cells[i + 1].Value.ToString());
-                T[i].CountSec = uint.Parse(dataGridView.Rows[1].Cells[i + 1].Value.ToString());
-                T[i].LastStamp_mSec = uint.Parse(dataGridView.Rows[2].Cells[i + 1].Value.ToString());
-                T[i].MaxCountSec = uint.Parse(dataGridView.Rows[3].Cells[i + 1].Value.ToString());
-                T[i].DamageSec = uint.Parse(dataGridView.Rows[4].Cells[i + 1].Value.ToString());
+                T[i].Rej = (ErejTimer)Enum.Parse(typeof(ErejTimer), TimersGridView.Rows[0].Cells[i + 1].Value.ToString());
+                T[i].CountSec = uint.Parse(TimersGridView.Rows[1].Cells[i + 1].Value.ToString());
+                T[i].LastStamp_mSec = uint.Parse(TimersGridView.Rows[2].Cells[i + 1].Value.ToString());
+                T[i].MaxCountSec = uint.Parse(TimersGridView.Rows[3].Cells[i + 1].Value.ToString());
+                T[i].DamageSec = uint.Parse(TimersGridView.Rows[4].Cells[i + 1].Value.ToString());
             }
         }
 
@@ -322,63 +351,70 @@ namespace TESTAKVA
         //      Функция форматёр таблицы не содержащей полосы прокрутки под  заголовки
         //      в виде набора строк вводятся верхний заголовок и нижний заголовок
 
-        public void FormatSimplGridView(DataGridView dataGridView, int rowHeaderWidth, int columnHeaderHeight, string[] rowHeaders, string[] columnHeaders)
+        public void FormatTimersGridView( int rowHeaderWidth, int columnHeaderHeight, string[] rowHeaders, string[] columnHeaders)
         {
-            dataGridView.ColumnHeadersDefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+            TimersGridView.ColumnHeadersDefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
             int rowCount = rowHeaders.Length;
             int columnCount = columnHeaders.Length;
 
             // Настройка DataGridView
-            dataGridView.ScrollBars = ScrollBars.None; // Отключение полос прокрутки
-            dataGridView.AllowUserToAddRows = false;  // Отключение возможности добавления новой строки
+            TimersGridView.ScrollBars = ScrollBars.None; // Отключение полос прокрутки
+            TimersGridView.AllowUserToAddRows = false;  // Отключение возможности добавления новой строки
 
             // Очистка столбцов и строк
-            dataGridView.Columns.Clear();
-            dataGridView.Rows.Clear();
+            TimersGridView.Columns.Clear();
+            TimersGridView.Rows.Clear();
 
             // Установка размеров заголовков с учетом остатков
-            int totalWidth = dataGridView.ClientSize.Width;
-            int totalHeight = dataGridView.ClientSize.Height;
+            int totalWidth = TimersGridView.ClientSize.Width;
+            int totalHeight = TimersGridView.ClientSize.Height;
 
             // Вычисление остатков
             int widthRemainder = (totalWidth - rowHeaderWidth) % columnCount;
             int heightRemainder = (totalHeight - columnHeaderHeight) % rowCount;
 
             // Увеличение размеров заголовков на остатки
-            dataGridView.RowHeadersWidth = rowHeaderWidth + widthRemainder;
-            dataGridView.ColumnHeadersHeight = columnHeaderHeight + heightRemainder;
+            TimersGridView.RowHeadersWidth = rowHeaderWidth + widthRemainder;
+            TimersGridView.ColumnHeadersHeight = columnHeaderHeight + heightRemainder;
 
             // Установка столбцов
             for (int i = 0; i < columnCount; i++)
             {
-                dataGridView.Columns.Add($"C{i}", columnHeaders[i]);
+                TimersGridView.Columns.Add($"C{i}", columnHeaders[i]);
             }
 
             // Добавление строк и установка заголовков строк
             for (int i = 0; i < rowCount; i++)
             {
-                dataGridView.Rows.Add();
-                dataGridView.Rows[i].HeaderCell.Value = rowHeaders[i];
+                TimersGridView.Rows.Add();
+                TimersGridView.Rows[i].HeaderCell.Value = rowHeaders[i];
             }
 
             // Вычисление ширины столбцов и высоты строк
-            int columnWidth = (totalWidth - dataGridView.RowHeadersWidth) / columnCount;
-            int rowHeight = (totalHeight - dataGridView.ColumnHeadersHeight) / rowCount;
+            int columnWidth = (totalWidth - TimersGridView.RowHeadersWidth) / columnCount;
+            int rowHeight = (totalHeight - TimersGridView.ColumnHeadersHeight) / rowCount;
 
             // Установка ширины столбцов
-            foreach (DataGridViewColumn column in dataGridView.Columns)
+            foreach (DataGridViewColumn column in TimersGridView.Columns)
             {
                 column.Width = columnWidth;
             }
 
             // Установка высоты строк
-            foreach (DataGridViewRow row in dataGridView.Rows)
+            foreach (DataGridViewRow row in TimersGridView.Rows)
             {
                 row.Height = rowHeight;
             }
 
             // Включение отображения заголовков строк
-            dataGridView.RowHeadersVisible = true;
+            TimersGridView.RowHeadersVisible = true;
+
+            foreach (DataGridViewColumn column in TimersGridView.Columns)
+            {
+                column.SortMode = DataGridViewColumnSortMode.NotSortable;
+            }
+           
+
         }
 
 
@@ -484,57 +520,105 @@ namespace TESTAKVA
                 dGparam.Size.Height,
 
          */
-        public GridViewParams initParamsGridView(GridViewParams GVstr)
-        {//начальная инициализация структуры GVstruct содержащей параметры таблицы
+        public void FormatParamsGridView()
+        {//форматируем таблицу структуры GVstruct
 
-            GVstr.numRow =  rowHeaders.Length; //общее количество колонок в таблице на одну больше чем количество режимов из за крайне левого столбца
-            GVstr.numCol = rejheaders.Length; //общее количество строк в таблице
-            GVstr.L1 = 1;//сразу после инициализации номер колонки которая отображается следующей за зафиксированной нулевой
-            GVstr.WidthLeftCol = 75;  // //ширина крайне левой колонки
-            GVstr.ViewCol = 7;           //количество колонок, которые должны умещаться в промежутке видимой зоны от крайне левой зафиксированной колонки до крайне правой
-            return GVstr;
+            FormatParamsGV.numRow =  rowHeaders.Length; //общее количество колонок в таблице на одну больше чем количество режимов из за крайне левого столбца
+            FormatParamsGV.numCol = rejheaders.Length; //общее количество строк в таблице
+            FormatParamsGV.L1 = 1;//сразу после инициализации номер колонки которая отображается следующей за зафиксированной нулевой
+            FormatParamsGV.WidthLeftCol = 75;  // //ширина крайне левой колонки
+            FormatParamsGV.ViewCol = 7;           //количество колонок, которые должны умещаться в промежутке видимой зоны от крайне левой зафиксированной колонки до крайне правой
+            // Чтение текущих размеров компонента в структуру (ширина и высота)
+            FormatParamsGV.Width = ParamGridView.Size.Width;
+            FormatParamsGV.Height = ParamGridView.Size.Height;
+
+/*
+
+            // Настройка первой фиксированной колонки (ширина крайней левой колонки)
+            if (ParamGridView.Columns.Count > 0)
+            {
+                ParamGridView.Columns[0].Width = FormatParamsGV.WidthLeftCol;
+            }
+
+            // Настройка видимых колонок (если нужно вручную настроить количество видимых колонок)
+            for (int i = 1; i < Math.Min(ParamGridView.Columns.Count, FormatParamsGV.ViewCol + 1); i++)
+            {
+                // Устанавливаем ширину каждой видимой колонки (кроме первой фиксированной)
+                ParamGridView.Columns[i].Width = (FormatParamsGV.Width - FormatParamsGV.WidthLeftCol) / FormatParamsGV.ViewCol;
+            }
+
+            // Настройка для номера колонки, следующей за первой фиксированной (если требуется)
+            ParamGridView.FirstDisplayedScrollingColumnIndex = FormatParamsGV.L1;
+*/
         }
 
+        /*
+                public void ApplyGridViewParams(DataGridView gridView)
+                {//gridView - сама таблица, gridParams - структура параметров таблицы
+
+                    // Чтение текущих размеров компонента в структуру (ширина и высота)
+                    FormatParamsGV.Width = gridView.Size.Width;
+                    FormatParamsGV.Height = gridView.Size.Height;
+
+                    // Настройка первой фиксированной колонки (ширина крайней левой колонки)
+                    if (gridView.Columns.Count > 0)
+                    {
+                        gridView.Columns[0].Width = FormatParamsGV.WidthLeftCol;
+                    }
+
+                    // Настройка видимых колонок (если нужно вручную настроить количество видимых колонок)
+                    for (int i = 1; i < Math.Min(gridView.Columns.Count, FormatParamsGV.ViewCol + 1); i++)
+                    {
+                        // Устанавливаем ширину каждой видимой колонки (кроме первой фиксированной)
+                        gridView.Columns[i].Width = (FormatParamsGV.Width - FormatParamsGV.WidthLeftCol) / FormatParamsGV.ViewCol;
+                    }
+
+                    // Настройка для номера колонки, следующей за первой фиксированной (если требуется)
+                    gridView.FirstDisplayedScrollingColumnIndex = FormatParamsGV.L1;
+                }
+        */
 
 
-        public void SetHeaders(DataGridView dataGridView, string[] strTop, string[] HeadLeft,  int LenLeftHead, int numCol, int colView)
-        {
+  
+
+        public void ParamSetHeaders()
+        {//формирование таблицы параметров
             //выравнивание текстов верхнего заголовка по центру
-            dataGridView.ColumnHeadersDefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+            ParamGridView.ColumnHeadersDefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
             // Установка ширины левого заголовка (RowHeadersWidth)
-            dataGridView.RowHeadersWidth = LenLeftHead;
+            ParamGridView.RowHeadersWidth = FormatParamsGV.WidthLeftCol;
 
             // Установка заголовков строк (левый хеадер)
-            for (int i = 0; i < HeadLeft.Length; i++)
+            for (int i = 0; i < rowHeaders.Length; i++)
             {
-                if (i < dataGridView.Rows.Count)
+                if (i < ParamGridView.Rows.Count)
                 {
-                    dataGridView.Rows[i].HeaderCell.Value = HeadLeft[i];
+                    ParamGridView.Rows[i].HeaderCell.Value = rowHeaders[i];
                 }
                 else
                 {
                     // Если строк недостаточно, добавляем строки
-                    dataGridView.Rows.Add();
-                    dataGridView.Rows[i].HeaderCell.Value = HeadLeft[i];
+                    ParamGridView.Rows.Add();
+                    ParamGridView.Rows[i].HeaderCell.Value = rowHeaders[i];
                 }
             }
 
             // Расчёт ширины каждого столбца
-            int totalWidth = dataGridView.ClientSize.Width; // Общая ширина видимой зоны
-            int columnSeparatorWidth = dataGridView.Columns[0].DividerWidth; // Ширина разделителя столбцов
+            int totalWidth = ParamGridView.ClientSize.Width; // Общая ширина видимой зоны
+            int columnSeparatorWidth = ParamGridView.Columns[0].DividerWidth; // Ширина разделителя столбцов
 
             // Вычисляем доступное место для колонок, вычитая ширину левого заголовка и разделители столбцов
-            int availableWidth = totalWidth - dataGridView.RowHeadersWidth - (columnSeparatorWidth * colView);
-
+            int availableWidth = totalWidth - ParamGridView.RowHeadersWidth - (columnSeparatorWidth * FormatParamsGV.ViewCol);
+            
             // Рассчитываем ширину одной колонки
-            int columnWidth = availableWidth / colView;
+            int columnWidth = availableWidth / FormatParamsGV.ViewCol;
 
             // Установка заголовков столбцов (верхний хеадер)
-            dataGridView.ColumnCount = strTop.Length;
-            for (int i = 0; i < strTop.Length; i++)
+            ParamGridView.ColumnCount = rejheaders.Length;
+            for (int i = 0; i < rejheaders.Length; i++)
             {
-                dataGridView.Columns[i].HeaderText = strTop[i];
-                dataGridView.Columns[i].Width = columnWidth; // Устанавливаем ширину для  столбцов
+                ParamGridView.Columns[i].HeaderText = rejheaders[i];
+                ParamGridView.Columns[i].Width = columnWidth; // Устанавливаем ширину для  столбцов
             }
         }
 
@@ -595,32 +679,7 @@ namespace TESTAKVA
 
 
 
-        public GridViewParams ApplyGridViewParams(DataGridView  gridView, GridViewParams gridParams)
-        {//gridView - сама таблица, gridParams - структура параметров таблицы
 
-            // Чтение текущих размеров компонента в структуру (ширина и высота)
-            gridParams.Width = gridView.Size.Width;
-            gridParams.Height = gridView.Size.Height;
-            gridView.RowCount = gridParams.numRow;
-            gridView.ColumnCount = gridParams.numCol;
-
-            // Настройка первой фиксированной колонки (ширина крайней левой колонки)
-            if (gridView.Columns.Count > 0)
-            {
-                gridView.Columns[0].Width = gridParams.WidthLeftCol;
-            }
-
-            // Настройка видимых колонок (если нужно вручную настроить количество видимых колонок)
-            for (int i = 1; i < Math.Min(gridView.Columns.Count, gridParams.ViewCol + 1); i++)
-            {
-                // Устанавливаем ширину каждой видимой колонки (кроме первой фиксированной)
-                gridView.Columns[i].Width = (gridParams.Width - gridParams.WidthLeftCol) / gridParams.ViewCol;
-            }
-
-            // Настройка для номера колонки, следующей за первой фиксированной (если требуется)
-            gridView.FirstDisplayedScrollingColumnIndex = gridParams.L1;
-            return gridParams;
-        }
 
 
         public GridViewParams DrawAKVAtable(DataGridView AKVAparGridView, GridViewParams gridParams)

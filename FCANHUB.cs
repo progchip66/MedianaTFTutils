@@ -285,13 +285,6 @@ namespace TFTprog
             CANHUB.DataReceivedEvent += OnDataReceived;
             // Обработчик события
 
-
-
-
-
-
-
-
             cBtimeSpeed.SelectedIndex = 0;
             tabControl1.SelectedIndex = 2;
             WORKAKVATEST.UpdateComboBoxRejak(cBrej);
@@ -300,68 +293,24 @@ namespace TFTprog
             this.Text = "DrawConfig  " + Properties.Settings.Default.Version;
             LBoxInterface.Items.Clear();
             LoadDefaultSetting();
-            //инициализируем структуру с параметрами для отображения ParamsGridView
-            WORKAKVATEST.GVstruct = WORKAKVATEST.initParamsGridView( WORKAKVATEST.GVstruct);
-            //инициализируем и форматируем таблицу dGparam на основе структуры ParamsGridView
-            WORKAKVATEST.GVstruct = WORKAKVATEST.ApplyGridViewParams(dGparam, WORKAKVATEST.GVstruct);
+
             // Отрисовка таблицы dGparam
-           WORKAKVATEST.SetHeaders(dGparam, WORKAKVATEST.rejheaders, WORKAKVATEST.rowHeaders, WORKAKVATEST.GVstruct.WidthLeftCol, WORKAKVATEST.GVstruct.numCol, WORKAKVATEST.GVstruct.ViewCol);
-           WORKAKVATEST.AdjustRowHeights(dGparam);
+            /* похоже надо убрать        WORKAKVATEST.AdjustRowHeights(dGparam);
 
-            // Устанавливаем режим сортировки для всех столбцов
-            foreach (DataGridViewColumn column in dGparam.Columns)
-            {
-                column.SortMode = DataGridViewColumnSortMode.NotSortable;
-            }
+                     // Устанавливаем режим сортировки для всех столбцов
+                     foreach (DataGridViewColumn column in dGparam.Columns)
+                     {
+                         column.SortMode = DataGridViewColumnSortMode.NotSortable;
+                     }
 
-            // Устанавливаем режим выделения колонок с заголовком
-            dGparam.SelectionMode = DataGridViewSelectionMode.ColumnHeaderSelect;
+                     // Устанавливаем режим выделения колонок с заголовком
+                     dGparam.SelectionMode = DataGridViewSelectionMode.ColumnHeaderSelect;
 
-            //Инициализируем таблицу с таймерами
-            WORKAKVATEST.FormatSimplGridView(dGtimers, 120, 30, new string[]{ "Rej", "CountSec", "LastStamp_mSec", "MaxCountSec", "DamageSec" }, WORKAKVATEST.GetTextHead(0, 7));
-            // Отключение сортировки для всех столбцов таблицы
-            foreach (DataGridViewColumn column in dGtimers.Columns)
-            {
-                column.SortMode = DataGridViewColumnSortMode.NotSortable;
-            }
+                     //Инициализируем таблицу с таймерами
+                     WORKAKVATEST.FormatTimersGridView( 120, 30, new string[]{ "Rej", "CountSec", "LastStamp_mSec", "MaxCountSec", "DamageSec" }, WORKAKVATEST.GetTextHead(0, 7));
+              */
+
             cBrej.SelectedIndex = 0;
-
-            //          string[] TimersRowHeaders = { "Rej", "CountSec", "LastStamp_mSec", "MaxCountSec", "DamageSec" };
-
-            //          WORKAKVATEST.FormatTimersGridView(dGtimers,120,30);
-
-
-            //   WORKAKVATEST.DrawAKVAtable(dGparam, WORKAKVATEST.GVstruct);
-
-
-            /*
-// активизация вкладки по имени
-foreach (TabPage tabPage in tabControl1.TabPages)
-{
-    if (tabPage.Text == "Название вкладки")
-    {
-        tabControl1.SelectedTab = tabPage;
-        break;
-    }
-}
-
-                    public int X { get; set; }//координала X левого верхнего угла
-        public int Y { get; set; }//координала Y левого верхнего угла
-        public int Width { get; set; }//ширина всех колонок, кроме левой
-        public int Height { get; set; }//высота всех строк
-        public int L1 { get; set; }//номер колонки которая отображается следующей за зафиксированной нулевой
-        public int WidthLeftCol { get; set; }//ширина крайне левой колонки
-        public int Vcol { get; set; }//количество колонок, которые должны умещаться в промежутке видимой зоны от крайне левой зафиксированной колонки до крайне правой
-
-        public GridViewParams(int _x, int _y, int _width, int _height, int _L1, int _widthLeftCol, int _vcol)
-             */
-
-
-
-
-
-
-
 
 
             if (CANHUB.IsPortOpen(listComPort.Items))
@@ -390,14 +339,14 @@ foreach (TabPage tabPage in tabControl1.TabPages)
                 //извлекаем данные из таймеров
                 WORKAKVATEST.TimersParFromByteArray(RXdata);
 
-                Invoke(new Action(() => WORKAKVATEST.DisplayInDataGridView(dGtimers)));
+                Invoke(new Action(() => WORKAKVATEST.DisplayInDataGridView()));
 
                 //Invoke(new Action(() => textBox1.Text = hexString));
 
             }
             else
             {
-                WORKAKVATEST.DisplayInDataGridView(dGtimers);
+                WORKAKVATEST.DisplayInDataGridView();
             }
         }
 
