@@ -155,6 +155,7 @@ namespace COMMAND
 		ervPICTupd = 0x03,//происходит закачка новых изображений в FLASH память TFT панели, работа по стандартному алгоритму останавливается обновление экранов происходит только для демонстрации загруженных картинок
 		ervNewSetOK = 0x04,//ответ подтверждение прихода команды, никаких установок не происходит
 		evrTFTcalibr = 0x05,//переход в режим калибровки TFT панели
+		evrPCsimulator = 0x06, //режим симуляции когда данные датчиков извлекаются из компьютера
 	};
 
 
@@ -512,9 +513,11 @@ namespace COMMAND
 							{//продолжение приёма посылки если с первого раза были считаны не все данные
 
 
-								if ((curLen + BytesToRead) > expectedLength)
+								if ((curLen + tmpLEN) > expectedLength)
 								{
-									throw new InvalidOperationException("Превышен ожидаемый размер данных.");
+									Read(buffer, curLen, expectedLength- curLen);//считываем из буфера только ожидаемую часть посылки
+									curLen = expectedLength;
+
 								}
 								else
 								{
@@ -550,21 +553,46 @@ namespace COMMAND
 										receivingMutex.ReleaseMutex();//освобождаем мьютекс
 										mutexAcquired = false;
 									}
-									Array.Copy(buffer, res_buf, expectedLength);
+	/*		Убрал бредовый? код						if ((buffer.Length >= expectedLength) && (res_buf.Length == expectedLength))
+									{
+										Array.Copy(buffer, res_buf, expectedLength);
+									}
+									else
+									{
+										throw new InvalidOperationException(
+											$"Ошибка: длина буферов недопустима. " +
+											$"Длина buffer: {buffer.Length}, длина res_buf: {res_buf.Length}, ожидаемая длина: {expectedLength}.");
+									}
+	*/
 
 									OnDataReceived(res_buf);//вызываем событие в которое передаём данные из буфера
 															//DataReceivedEvent?.Invoke(this, new DataReceivedEventArgs(res_buf));
 
 									curLen = 0;
 									expectedLength = 0;
-									Thread.Sleep(interval); //на 10 миллисекунд
-									receivingMutex.WaitOne();//ожидаем получения мьютекса
-									mutexAcquired = true;
+									if (mutexAcquired)
+									{
+										// Временное освобождение мьютекса и ожидание
+										receivingMutex.ReleaseMutex();//освобождаем мьютекс
+										mutexAcquired = false;
+										Thread.Sleep(interval); //на 10 миллисекунд
+										receivingMutex.WaitOne();//ожидаем получения мьютекса
+										mutexAcquired = true;
+									}
 
 									break;//считывание и обработка события завершена
 								}
 							}
-							Thread.Sleep(interval);//задержка на приход оставшихся несчитанными данных
+							if (mutexAcquired)
+							{
+								// Временное освобождение мьютекса и ожидание
+								receivingMutex.ReleaseMutex();//освобождаем мьютекс
+								mutexAcquired = false;
+								Thread.Sleep(interval); //на 10 миллисекунд
+								receivingMutex.WaitOne();//ожидаем получения мьютекса
+								mutexAcquired = true;
+							}
+
 							if (BytesToRead == 0)
 							{//за 10 миллисекунд должен был прийти хотя бы один байт
 								throw new InvalidOperationException("Превышен таймаут в процессе фонового приёма данных.");
@@ -594,6 +622,7 @@ namespace COMMAND
 				catch (Exception ex)
 				{
 					DisplayMessage($"Ошибка приёма в режиме SLAVE: {ex.Message}");
+
 				}
 				finally
 				{
@@ -611,21 +640,21 @@ namespace COMMAND
 		}
 
 
-		void RedSlaveCom_PARCER()
-        {//ОБРАБОТКА КОМАНД ПРИНЯТЫХ В SLAVE РЕЖИМЕ
-			switch ()
-            {
+		/*	void RedSlaveCom_PARCER()
+			{//ОБРАБОТКА КОМАНД ПРИНЯТЫХ В SLAVE РЕЖИМЕ
+				switch ()
+				{
 
-            }
+				}
 
-        }
+			}
+		*/
 
 
 
 		public byte[] SendCommand(byte[] data, int startTimeoutMs = 50)
 		{
 			receivingMutex.WaitOne(); //приостанавливаем выполнение команды отправки-приёма до получения мьютекса
-
 
 			try
 			{//isReceiving - флаг приёма по UART в фоновом режиме
@@ -717,7 +746,7 @@ namespace COMMAND
 			}
 			finally
 			{
-
+				RtsEnable = false;
 				receivingMutex.ReleaseMutex();//данные отправлены и считаны, освобождаем мьютекс
 			}
 		}

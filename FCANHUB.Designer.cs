@@ -97,6 +97,7 @@
             this.bfindPort = new System.Windows.Forms.Button();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.gBchangePar = new System.Windows.Forms.GroupBox();
+            this.cBrejSimulator = new System.Windows.Forms.ComboBox();
             this.bCalibr = new System.Windows.Forms.Button();
             this.gBdateTime = new System.Windows.Forms.GroupBox();
             this.lspeederTIME = new System.Windows.Forms.Label();
@@ -119,6 +120,7 @@
             this.tB_PARfileMan = new System.Windows.Forms.TextBox();
             this.dGparam = new System.Windows.Forms.DataGridView();
             this.WRpro = new System.ComponentModel.BackgroundWorker();
+            this.labRejSimulator = new System.Windows.Forms.Label();
             this.tabControl1.SuspendLayout();
             this.tabPagePack.SuspendLayout();
             this.statusStrip1.SuspendLayout();
@@ -834,6 +836,8 @@
             // 
             // gBchangePar
             // 
+            this.gBchangePar.Controls.Add(this.labRejSimulator);
+            this.gBchangePar.Controls.Add(this.cBrejSimulator);
             this.gBchangePar.Controls.Add(this.bCalibr);
             this.gBchangePar.Controls.Add(this.gBdateTime);
             this.gBchangePar.Controls.Add(this.bParamRead);
@@ -842,14 +846,26 @@
             this.gBchangePar.Controls.Add(this.cBrej);
             this.gBchangePar.Location = new System.Drawing.Point(790, 6);
             this.gBchangePar.Name = "gBchangePar";
-            this.gBchangePar.Size = new System.Drawing.Size(223, 417);
+            this.gBchangePar.Size = new System.Drawing.Size(223, 544);
             this.gBchangePar.TabIndex = 8;
             this.gBchangePar.TabStop = false;
             this.gBchangePar.Text = "Действия";
             // 
+            // cBrejSimulator
+            // 
+            this.cBrejSimulator.FormattingEnabled = true;
+            this.cBrejSimulator.Items.AddRange(new object[] {
+            "Симуляция отключена",
+            "Симуляция работы таймеров"});
+            this.cBrejSimulator.Location = new System.Drawing.Point(16, 41);
+            this.cBrejSimulator.Name = "cBrejSimulator";
+            this.cBrejSimulator.Size = new System.Drawing.Size(192, 21);
+            this.cBrejSimulator.TabIndex = 9;
+            this.cBrejSimulator.SelectedIndexChanged += new System.EventHandler(this.cBrejSimulator_SelectedIndexChanged);
+            // 
             // bCalibr
             // 
-            this.bCalibr.Location = new System.Drawing.Point(47, 374);
+            this.bCalibr.Location = new System.Drawing.Point(47, 437);
             this.bCalibr.Name = "bCalibr";
             this.bCalibr.Size = new System.Drawing.Size(110, 23);
             this.bCalibr.TabIndex = 8;
@@ -866,7 +882,7 @@
             this.gBdateTime.Controls.Add(this.bSetBoardDT);
             this.gBdateTime.Controls.Add(this.LBDTread);
             this.gBdateTime.Controls.Add(this.lBDT);
-            this.gBdateTime.Location = new System.Drawing.Point(16, 145);
+            this.gBdateTime.Location = new System.Drawing.Point(16, 208);
             this.gBdateTime.Name = "gBdateTime";
             this.gBdateTime.Size = new System.Drawing.Size(192, 214);
             this.gBdateTime.TabIndex = 7;
@@ -948,7 +964,7 @@
             // 
             // bParamRead
             // 
-            this.bParamRead.Location = new System.Drawing.Point(16, 19);
+            this.bParamRead.Location = new System.Drawing.Point(16, 79);
             this.bParamRead.Name = "bParamRead";
             this.bParamRead.Size = new System.Drawing.Size(192, 28);
             this.bParamRead.TabIndex = 2;
@@ -959,15 +975,15 @@
             // labRej
             // 
             this.labRej.AutoSize = true;
-            this.labRej.Location = new System.Drawing.Point(75, 92);
+            this.labRej.Location = new System.Drawing.Point(44, 152);
             this.labRej.Name = "labRej";
-            this.labRej.Size = new System.Drawing.Size(82, 13);
+            this.labRej.Size = new System.Drawing.Size(131, 13);
             this.labRej.TabIndex = 5;
-            this.labRej.Text = "Режим работы";
+            this.labRej.Text = "Режим работы Фильтра";
             // 
             // bParamWrite
             // 
-            this.bParamWrite.Location = new System.Drawing.Point(16, 53);
+            this.bParamWrite.Location = new System.Drawing.Point(16, 113);
             this.bParamWrite.Name = "bParamWrite";
             this.bParamWrite.Size = new System.Drawing.Size(192, 27);
             this.bParamWrite.TabIndex = 3;
@@ -989,7 +1005,7 @@
             "Первое включение FirstStart 8",
             "Быстраяпромывка speedWash 9",
             "Останов Stop 10"});
-            this.cBrej.Location = new System.Drawing.Point(16, 108);
+            this.cBrej.Location = new System.Drawing.Point(16, 168);
             this.cBrej.Name = "cBrej";
             this.cBrej.Size = new System.Drawing.Size(192, 21);
             this.cBrej.TabIndex = 4;
@@ -1035,7 +1051,7 @@
             // lbFT1divFT0mult100
             // 
             this.lbFT1divFT0mult100.AutoSize = true;
-            this.lbFT1divFT0mult100.Location = new System.Drawing.Point(803, 466);
+            this.lbFT1divFT0mult100.Location = new System.Drawing.Point(803, 579);
             this.lbFT1divFT0mult100.Name = "lbFT1divFT0mult100";
             this.lbFT1divFT0mult100.Size = new System.Drawing.Size(84, 13);
             this.lbFT1divFT0mult100.TabIndex = 4;
@@ -1044,7 +1060,7 @@
             // lbFT0minusFT1
             // 
             this.lbFT0minusFT1.AutoSize = true;
-            this.lbFT0minusFT1.Location = new System.Drawing.Point(803, 440);
+            this.lbFT0minusFT1.Location = new System.Drawing.Point(803, 553);
             this.lbFT0minusFT1.Name = "lbFT0minusFT1";
             this.lbFT0minusFT1.Size = new System.Drawing.Size(60, 13);
             this.lbFT0minusFT1.TabIndex = 3;
@@ -1072,6 +1088,15 @@
             this.WRpro.DoWork += new System.ComponentModel.DoWorkEventHandler(this.WRpro_DoWork);
             this.WRpro.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.WRpro_ProgressChanged);
             this.WRpro.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.WRpro_RunWorkerCompleted);
+            // 
+            // labRejSimulator
+            // 
+            this.labRejSimulator.AutoSize = true;
+            this.labRejSimulator.Location = new System.Drawing.Point(44, 25);
+            this.labRejSimulator.Name = "labRejSimulator";
+            this.labRejSimulator.Size = new System.Drawing.Size(141, 13);
+            this.labRejSimulator.TabIndex = 10;
+            this.labRejSimulator.Text = "Выбор режима симуляции";
             // 
             // FormHUB
             // 
@@ -1204,6 +1229,8 @@
         private System.Windows.Forms.Button bParamWrite;
         private System.Windows.Forms.ComboBox cBrej;
         private System.Windows.Forms.Label lspeederTIME;
+        private System.Windows.Forms.ComboBox cBrejSimulator;
+        private System.Windows.Forms.Label labRejSimulator;
     }
 }
 

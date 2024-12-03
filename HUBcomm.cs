@@ -244,8 +244,8 @@ namespace ExtHubComm
             byte[] comm_data = new byte[4] { 0, 0, 0, 0 };
             comm_data[0]= Convert.ToByte(REJ);
             //CommSendAnsv(ECommand command, Efl_DEV _RecDev = Efl_DEV.fld_none, byte[] data = null, byte SubCom = 0, int TimeOutStartAnsv = 500, int TimeOutNextByte = 100)
-            CommSendAnsv(ECommand.cmd_Rejim, DevType, comm_data,1500);
-            return (ERejWork)(RxBuff[0]);
+            CommSendAnsv(ECommand.cmd_Rejim, DevType, comm_data,0);
+            return REJ;
         }
 
         public byte[] GenerateByteArray(int NumBytes)

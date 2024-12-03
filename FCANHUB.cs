@@ -311,7 +311,7 @@ namespace TFTprog
               */
 
             cBrej.SelectedIndex = 0;
-
+            cBrejSimulator.SelectedIndex = 0;
 
             if (CANHUB.IsPortOpen(listComPort.Items))
             {
@@ -326,8 +326,6 @@ namespace TFTprog
 
         private void OnDataReceived(object sender, DataReceivedEventArgs e)
         {
-            // Преобразуем массив байт в строку в формате HEX
-            //string hexString = BitConverter.ToString(e.Data).Replace("-", " ");
 
             // Поскольку событие может быть вызвано из другого потока, используем Invoke
             if (InvokeRequired)
@@ -335,19 +333,24 @@ namespace TFTprog
                 byte[] RXdata = new byte[e.Data.Length-6];//создаём массив для хранения данных
                 Array.Copy(e.Data,4, RXdata,0, e.Data.Length - 6);//копируем в него принятые данные без заголовка и CRC
 
-                //WORKAKVATEST.FromByteArray(e.Data);//извлекаем сырые считанные данные  new
                 //извлекаем данные из таймеров
 
-                WORKAKVATEST.TimersParFromByteArray(RXdata);
+                if (WORKAKVATEST.boolChangeTimersVol)//обновление вручную значения в таблице таймеров произведено
+                {
+                    WORKAKVATEST.UpdateTimersArr(ref RXdata);//модифицируем полученное по COM изменённое значение
+                    WORKAKVATEST.boolChangeTimersVol = false;//сбрасываем флаг ручного изменения данных
+                    //public void CommSendAnsv(ECommand command, Efl_DEV _RecDev = Efl_DEV.fld_none, byte[] data = null, int TimeOutStartAnsv = 50)
+                    CANHUB.CommSendAnsv(ECommand.cmd_extTimers, Efl_DEV.fld_TFTboard, RXdata, 0);//отправляем команду которая не предусматривает ответа
+                }    
 
-                Invoke(new Action(() => WORKAKVATEST.DisplayInDataGridView()));
-
-                //Invoke(new Action(() => textBox1.Text = hexString));
+                WORKAKVATEST.TimersParFromByteArray(RXdata);//обновление структуры таймеров
+                Invoke(new Action(() => WORKAKVATEST.DisplayInDataGridView()));//отображение данных в таблице
 
             }
             else
             {
                 WORKAKVATEST.DisplayInDataGridView();
+
             }
         }
 
@@ -1794,6 +1797,32 @@ namespace TFTprog
             WORKAKVATEST.SelectColumn(dGparam, cBrej.SelectedIndex);
         }
 
+        private void cBrejSimulator_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                switch (cBrejSimulator.SelectedIndex)
+                {
+                    case 0:
+                        if (CANHUB.IsOpen)
+                            CANHUB.ChangeDEVExhRejWork(ERejWork.ervTFT_master, Efl_DEV.fld_TFTboard);
+                        break;
+                    case 1:
+                        if (CANHUB.IsOpen)
+                            CANHUB.ChangeDEVExhRejWork(ERejWork.evrPCsimulator, Efl_DEV.fld_TFTboard);
+                        break;
+                    default:
+                        break;
+                }
+            }
+            catch (Exception)
+            {
+                MessageBox.Show("Возникла ошибка при попытке сменить режим работы", "Не удаётся сменить режим работы",
+                         MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+        }
     }
 
     

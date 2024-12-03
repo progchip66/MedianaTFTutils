@@ -240,16 +240,17 @@ namespace TESTAKVA
                     // Если получилось, присваиваем значение переменной ChangeTimersVol
                     ChangeTimersVol = parsedValue;
                     boolChangeTimersVol = true;
-                }
+                        // Запоминаем координаты изменённой вручную ячейки
+                        xChangeTimersVol =  e.ColumnIndex;
+                        yChangeTimersVol = e.RowIndex;
+                    }
                 else
                 {
                     // Если преобразование не удалось, вызываем исключение
                     boolChangeTimersVol = false;
                     throw new InvalidCastException($"'{cellValue}' не является типом uint.");
                 }
-                // Запоминаем координаты изменённой вручную ячейки
-                xChangeTimersVol = e.RowIndex;
-                yChangeTimersVol = e.ColumnIndex;
+
                 }
                 catch (Exception ex)
                 {
@@ -303,7 +304,7 @@ namespace TESTAKVA
 
 
         #region Timers
-        private bool boolChangeTimersVol = false;
+        public bool boolChangeTimersVol = false;
         private int xChangeTimersVol = -1;
         private int yChangeTimersVol = -1;
         private uint ChangeTimersVol = 0;
@@ -355,9 +356,18 @@ namespace TESTAKVA
             }
         }
 
+        public void UpdateCellIfChanged(DataGridViewCell cell, object newValue)
+        {
+            // Проверяем, что ячейка нередактируемая и новое значение отличается от текущего
+            if (/*!cell.ReadOnly &&*/ !Equals(cell.Value, newValue))
+            {
+                cell.Value = newValue;
+            }
+        }
+
         public void DisplayInDataGridView()
         {
-            //Запись должна проводиться только в нередактируемую ячейку и только если её значение изменилось.
+
             // Заполняем таблицу данными из SATIMER[]
             for (int i = 0; i < ArraySize; i++)
             {
@@ -368,16 +378,34 @@ namespace TESTAKVA
                 UpdateCellIfChanged(TimersGridView.Rows[3].Cells[i], T[i].MaxCountSec);
                 UpdateCellIfChanged(TimersGridView.Rows[4].Cells[i], T[i].DamageSec);
             }
+
+            // Необходимо заменить значение ячейки
+
+
+            /*           void InsertUintIntoArray(byte[] array, int address, uint value)
+                       {
+                           byte[] valueBytes = BitConverter.GetBytes(value);
+                           Array.Copy(valueBytes, 0, array, address, valueBytes.Length);
+                       }*/
+
         }
 
-        public void UpdateCellIfChanged(DataGridViewCell cell, object newValue)
+        public void UpdateTimersArr(ref byte[] NewTimersData)
         {
-            // Проверяем, что ячейка нередактируемая и новое значение отличается от текущего
-            if (!cell.ReadOnly && !Equals(cell.Value, newValue))
+            if (!boolChangeTimersVol)
             {
-                cell.Value = newValue;
+                return;
             }
+            boolChangeTimersVol = false;
+            //если в ручном редакторе было введено новое корректное значение
+            byte[] valueBytes = BitConverter.GetBytes(ChangeTimersVol);//изменяем значение на новое
+            Array.Copy(valueBytes, 0, NewTimersData, xChangeTimersVol * 5 * 4 + yChangeTimersVol * 4, valueBytes.Length);//копируем в массив байт
+            // возвращаем данные, которые необходимо отправить
         }
+
+
+
+
 
         public void UpdateFromDataGridView()
         {// считывание всех данных из таблицы
