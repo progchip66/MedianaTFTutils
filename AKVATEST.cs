@@ -636,6 +636,9 @@ namespace TESTAKVA
             FormatParamsGV.Width = ParamGridView.Size.Width;
             FormatParamsGV.Height = ParamGridView.Size.Height;
 
+
+
+
             /*
 
                         // Настройка первой фиксированной колонки (ширина крайней левой колонки)
@@ -723,6 +726,21 @@ namespace TESTAKVA
             {
                 ParamGridView.Columns[i].HeaderText = rejheaders[i];
                 ParamGridView.Columns[i].Width = columnWidth; // Устанавливаем ширину для  столбцов
+            }
+
+            // Отключение автосортировки для всех столбцов
+            foreach (DataGridViewColumn column in ParamGridView.Columns)
+            {
+                column.SortMode = DataGridViewColumnSortMode.NotSortable;
+            }
+
+            // Установка фона всех ячеек таблицы в Color.LightGray
+            foreach (DataGridViewRow row in ParamGridView.Rows)
+            {
+                foreach (DataGridViewCell cell in row.Cells)
+                {
+                    cell.Style.BackColor = Color.LightGray;
+                }
             }
         }
 

@@ -97,6 +97,7 @@
             this.bfindPort = new System.Windows.Forms.Button();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.gBchangePar = new System.Windows.Forms.GroupBox();
+            this.labRejSimulator = new System.Windows.Forms.Label();
             this.cBrejSimulator = new System.Windows.Forms.ComboBox();
             this.bCalibr = new System.Windows.Forms.Button();
             this.gBdateTime = new System.Windows.Forms.GroupBox();
@@ -120,7 +121,6 @@
             this.tB_PARfileMan = new System.Windows.Forms.TextBox();
             this.dGparam = new System.Windows.Forms.DataGridView();
             this.WRpro = new System.ComponentModel.BackgroundWorker();
-            this.labRejSimulator = new System.Windows.Forms.Label();
             this.tabControl1.SuspendLayout();
             this.tabPagePack.SuspendLayout();
             this.statusStrip1.SuspendLayout();
@@ -851,6 +851,15 @@
             this.gBchangePar.TabStop = false;
             this.gBchangePar.Text = "Действия";
             // 
+            // labRejSimulator
+            // 
+            this.labRejSimulator.AutoSize = true;
+            this.labRejSimulator.Location = new System.Drawing.Point(44, 25);
+            this.labRejSimulator.Name = "labRejSimulator";
+            this.labRejSimulator.Size = new System.Drawing.Size(141, 13);
+            this.labRejSimulator.TabIndex = 10;
+            this.labRejSimulator.Text = "Выбор режима симуляции";
+            // 
             // cBrejSimulator
             // 
             this.cBrejSimulator.FormattingEnabled = true;
@@ -1080,6 +1089,7 @@
             this.dGparam.Name = "dGparam";
             this.dGparam.Size = new System.Drawing.Size(776, 345);
             this.dGparam.TabIndex = 1;
+            this.dGparam.ColumnHeaderMouseClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.dGparam_ColumnHeaderMouseClick);
             // 
             // WRpro
             // 
@@ -1088,15 +1098,6 @@
             this.WRpro.DoWork += new System.ComponentModel.DoWorkEventHandler(this.WRpro_DoWork);
             this.WRpro.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.WRpro_ProgressChanged);
             this.WRpro.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.WRpro_RunWorkerCompleted);
-            // 
-            // labRejSimulator
-            // 
-            this.labRejSimulator.AutoSize = true;
-            this.labRejSimulator.Location = new System.Drawing.Point(44, 25);
-            this.labRejSimulator.Name = "labRejSimulator";
-            this.labRejSimulator.Size = new System.Drawing.Size(141, 13);
-            this.labRejSimulator.TabIndex = 10;
-            this.labRejSimulator.Text = "Выбор режима симуляции";
             // 
             // FormHUB
             // 

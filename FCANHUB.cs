@@ -1032,7 +1032,7 @@ namespace TFTprog
                 column.SortMode = DataGridViewColumnSortMode.NotSortable;
             }
             
-            foreach (DataGridViewColumn column in dataGridView1.Columns)
+            foreach (DataGridViewColumn column in dGparam.Columns)
             {
                 column.SortMode = DataGridViewColumnSortMode.NotSortable;
             }
@@ -1800,6 +1800,27 @@ namespace TFTprog
         {
             WORKAKVATEST.selectedMode = WORKAKVATEST.SetRejakFromComboBox((ComboBox)sender);
             WORKAKVATEST.SelectColumn(dGparam, cBrej.SelectedIndex);
+
+            // Проходим по всем ячейкам таблицы
+            foreach (DataGridViewRow row in dGparam.Rows)
+            {
+                foreach (DataGridViewCell cell in row.Cells)
+                {
+                    // Если ячейка в том же столбце, что и заголовок, на который кликнули
+                    if (cell.ColumnIndex == cBrej.SelectedIndex)
+                    {
+                        // Устанавливаем цвет на DefaultCellStyle.BackColor
+                        cell.Style.BackColor = dGparam.DefaultCellStyle.BackColor;
+                    }
+                    else
+                    {
+                        // Устанавливаем цвет на LightGray
+                        cell.Style.BackColor = Color.LightGray;
+                    }
+                }
+            }
+
+
         }
 
         private void cBrejSimulator_SelectedIndexChanged(object sender, EventArgs e)
@@ -1827,6 +1848,31 @@ namespace TFTprog
                 return;
             }
 
+        }
+
+        private void dGparam_ColumnHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
+        {
+            // Получаем индекс столбца, на который кликнули
+            int clickedColumnIndex = e.ColumnIndex;
+
+            // Проходим по всем ячейкам таблицы
+            foreach (DataGridViewRow row in dGparam.Rows)
+            {
+                foreach (DataGridViewCell cell in row.Cells)
+                {
+                    // Если ячейка в том же столбце, что и заголовок, на который кликнули
+                    if (cell.ColumnIndex == clickedColumnIndex)
+                    {
+                        // Устанавливаем цвет на DefaultCellStyle.BackColor
+                        cell.Style.BackColor = dGparam.DefaultCellStyle.BackColor;
+                    }
+                    else
+                    {
+                        // Устанавливаем цвет на LightGray
+                        cell.Style.BackColor = Color.LightGray;
+                    }
+                }
+            }
         }
     }
 
