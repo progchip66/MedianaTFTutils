@@ -214,5 +214,29 @@ namespace TFTprog.Properties {
                 this["ParamFileName"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string LastTableFile {
+            get {
+                return ((string)(this["LastTableFile"]));
+            }
+            set {
+                this["LastTableFile"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string TablesFolder {
+            get {
+                return ((string)(this["TablesFolder"]));
+            }
+            set {
+                this["TablesFolder"] = value;
+            }
+        }
     }
 }

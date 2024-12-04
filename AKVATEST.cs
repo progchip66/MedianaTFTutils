@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Windows.Forms;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Globalization;
@@ -13,6 +14,12 @@ using TFTprog;
 using System.IO;
 using System.Drawing;
 using System.Runtime.InteropServices;
+
+
+
+
+
+
 
 namespace TESTAKVA
 {
@@ -37,69 +44,69 @@ namespace TESTAKVA
         public uint DamageSec;
     }
 
-/*
-    public class TableManager
-    {
-        private int x = -1; // Координата строки изменённой ячейки
-        private int y = -1; // Координата столбца изменённой ячейки
-        private bool Change = false; // Флаг изменения вручную
-
-        // Конструктор класса
-        public TableManager(DataGridView dataGridView)
+    /*
+        public class TableManager
         {
-            // Отключаем сортировку столбцов
-            dataGridView.ColumnHeaderMouseClick += (s, e) =>
-            {
-                dataGridView.Sort(dataGridView.Columns[0], System.ComponentModel.ListSortDirection.Ascending);
-            };
+            private int x = -1; // Координата строки изменённой ячейки
+            private int y = -1; // Координата столбца изменённой ячейки
+            private bool Change = false; // Флаг изменения вручную
 
-            // Подключаемся к событию окончания редактирования
-            dataGridView.CellEndEdit += (s, e) =>
+            // Конструктор класса
+            public TableManager(DataGridView dataGridView)
             {
-                // Запоминаем координаты изменённой вручную ячейки
-                x = e.RowIndex;
-                y = e.ColumnIndex;
-                Change = true;
-            };
-        }
+                // Отключаем сортировку столбцов
+                dataGridView.ColumnHeaderMouseClick += (s, e) =>
+                {
+                    dataGridView.Sort(dataGridView.Columns[0], System.ComponentModel.ListSortDirection.Ascending);
+                };
 
-        // Метод обновления ячеек
-        public void DisplayInDataGridView(DataGridView dataGridView, SATIMER[] T)
-        {
-            for (int i = 0; i < T.Length; i++)
+                // Подключаемся к событию окончания редактирования
+                dataGridView.CellEndEdit += (s, e) =>
+                {
+                    // Запоминаем координаты изменённой вручную ячейки
+                    x = e.RowIndex;
+                    y = e.ColumnIndex;
+                    Change = true;
+                };
+            }
+
+            // Метод обновления ячеек
+            public void DisplayInDataGridView(DataGridView dataGridView, SATIMER[] T)
             {
-                UpdateCellIfNeeded(dataGridView.Rows[0].Cells[i], T[i].Rej, 0, i);
-                UpdateCellIfNeeded(dataGridView.Rows[1].Cells[i], T[i].CountSec, 1, i);
-                UpdateCellIfNeeded(dataGridView.Rows[2].Cells[i], T[i].LastStamp_mSec, 2, i);
-                UpdateCellIfNeeded(dataGridView.Rows[3].Cells[i], T[i].MaxCountSec, 3, i);
-                UpdateCellIfNeeded(dataGridView.Rows[4].Cells[i], T[i].DamageSec, 4, i);
+                for (int i = 0; i < T.Length; i++)
+                {
+                    UpdateCellIfNeeded(dataGridView.Rows[0].Cells[i], T[i].Rej, 0, i);
+                    UpdateCellIfNeeded(dataGridView.Rows[1].Cells[i], T[i].CountSec, 1, i);
+                    UpdateCellIfNeeded(dataGridView.Rows[2].Cells[i], T[i].LastStamp_mSec, 2, i);
+                    UpdateCellIfNeeded(dataGridView.Rows[3].Cells[i], T[i].MaxCountSec, 3, i);
+                    UpdateCellIfNeeded(dataGridView.Rows[4].Cells[i], T[i].DamageSec, 4, i);
+                }
+            }
+
+            private void UpdateCellIfNeeded(DataGridViewCell cell, object newValue, int row, int col)
+            {
+                // Если ячейка была изменена вручную, пропускаем её обновление
+                if (Change && x == row && y == col)
+                {
+                    Change = false; // Сбрасываем флаг после пропуска обновления
+                    return;
+                }
+
+                // Обновляем ячейку, если новое значение отличается
+                UpdateCellIfChanged(cell, newValue);
+            }
+
+            public void UpdateCellIfChanged(DataGridViewCell cell, object newValue)
+            {
+                // Проверяем, что ячейка нередактируемая и новое значение отличается от текущего
+                if (!cell.ReadOnly && !Equals(cell.Value, newValue))
+                {
+                    cell.Value = newValue;
+                }
             }
         }
 
-        private void UpdateCellIfNeeded(DataGridViewCell cell, object newValue, int row, int col)
-        {
-            // Если ячейка была изменена вручную, пропускаем её обновление
-            if (Change && x == row && y == col)
-            {
-                Change = false; // Сбрасываем флаг после пропуска обновления
-                return;
-            }
-
-            // Обновляем ячейку, если новое значение отличается
-            UpdateCellIfChanged(cell, newValue);
-        }
-
-        public void UpdateCellIfChanged(DataGridViewCell cell, object newValue)
-        {
-            // Проверяем, что ячейка нередактируемая и новое значение отличается от текущего
-            if (!cell.ReadOnly && !Equals(cell.Value, newValue))
-            {
-                cell.Value = newValue;
-            }
-        }
-    }
-
-*/
+    */
 
 
 
@@ -215,7 +222,7 @@ namespace TESTAKVA
             TimersGridView = _TimersGridView ?? throw new ArgumentNullException(nameof(_TimersGridView));
             ParamGridView = _ParamGridView ?? throw new ArgumentNullException(nameof(_ParamGridView));
             FormatParamsGridView();//установка параметров таблицы параметров
-            DrawAKVAtable(ParamGridView, FormatParamsGV);            
+            DrawAKVAtable(ParamGridView, FormatParamsGV);
             ParamSetHeaders();//форматирование таблицы параметров
             //форматирование таблицы таймеров
             FormatTimersGridView(120, 30, new string[] { "Rej", "CountSec", "LastStamp_mSec", "MaxCountSec", "DamageSec" }, GetTextHead(0, 7));
@@ -230,26 +237,26 @@ namespace TESTAKVA
             TimersGridView.CellEndEdit += (s, e) =>
             {
                 try
-                { 
-                // Получаем значение отредактированной ячейки
-                var cellValue = TimersGridView.Rows[e.RowIndex].Cells[e.ColumnIndex].Value?.ToString();
-
-                // Пытаемся преобразовать значение в uint
-                if (uint.TryParse(cellValue, out uint parsedValue))
                 {
-                    // Если получилось, присваиваем значение переменной ChangeTimersVol
-                    ChangeTimersVol = parsedValue;
-                    boolChangeTimersVol = true;
+                    // Получаем значение отредактированной ячейки
+                    var cellValue = TimersGridView.Rows[e.RowIndex].Cells[e.ColumnIndex].Value?.ToString();
+
+                    // Пытаемся преобразовать значение в uint
+                    if (uint.TryParse(cellValue, out uint parsedValue))
+                    {
+                        // Если получилось, присваиваем значение переменной ChangeTimersVol
+                        ChangeTimersVol = parsedValue;
+                        boolChangeTimersVol = true;
                         // Запоминаем координаты изменённой вручную ячейки
-                        xChangeTimersVol =  e.ColumnIndex;
+                        xChangeTimersVol = e.ColumnIndex;
                         yChangeTimersVol = e.RowIndex;
                     }
-                else
-                {
-                    // Если преобразование не удалось, вызываем исключение
-                    boolChangeTimersVol = false;
-                    throw new InvalidCastException($"'{cellValue}' не является типом uint.");
-                }
+                    else
+                    {
+                        // Если преобразование не удалось, вызываем исключение
+                        boolChangeTimersVol = false;
+                        throw new InvalidCastException($"'{cellValue}' не является типом uint.");
+                    }
 
                 }
                 catch (Exception ex)
@@ -292,7 +299,7 @@ namespace TESTAKVA
 
 
 
-        public  readonly string[] rejheaders = { "Wait", "Wash", "Fabric", "prepWash", "newWash", "Damage", "Sanitar", "FirstStart", "speedWash", "Stop",
+        public readonly string[] rejheaders = { "Wait", "Wash", "Fabric", "prepWash", "newWash", "Damage", "Sanitar", "FirstStart", "speedWash", "Stop",
                          "WaitRazd", "WashRazd", "FabricRazd", "prepWashSteep1", "prepWashSteep2", "prepWashSteep3", "prepWashSteep4",
                          "newWashSteep1", "newWashSteep2", "SanitarSteep1", "SanitarSteep2", "SanitarSteep3", "SanitarSteep4", "SanitarSteep5", "SanitarSteep6",
                          "SanitarSteep7", "SanitarSteep8", "FirstStartSteep1", "FirstStartSteep2", "FirstStartSteep3", "FirstStartSteep4" };
@@ -330,7 +337,7 @@ namespace TESTAKVA
         }
 
 
-        
+
 
         private void TimersParPerminEdit()
         {//разрешает редактировать только одну строку номер 1 содержащую текущее значением таймеров
@@ -419,12 +426,12 @@ namespace TESTAKVA
             }
         }
 
-     #endregion
+        #endregion
 
 
 
-     #region SimplFormatTibles
-//ТАБЛИЦА ПАРАМЕТРОВ
+        #region SimplFormatTibles
+        //ТАБЛИЦА ПАРАМЕТРОВ
 
         //выдаёт последовательность строк соедержащих числа увеличивающиеся на 1 для формирования заголовков
         public string[] GetTextHead(int Start, int End)
@@ -444,11 +451,11 @@ namespace TESTAKVA
             return result;
         }
 
-   
+
         //      Функция форматёр таблицы не содержащей полосы прокрутки под  заголовки
         //      в виде набора строк вводятся верхний заголовок и нижний заголовок
 
-        public void FormatTimersGridView( int rowHeaderWidth, int columnHeaderHeight, string[] rowHeaders, string[] columnHeaders)
+        public void FormatTimersGridView(int rowHeaderWidth, int columnHeaderHeight, string[] rowHeaders, string[] columnHeaders)
         {
             TimersGridView.ColumnHeadersDefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
             int rowCount = rowHeaders.Length;
@@ -510,15 +517,15 @@ namespace TESTAKVA
             {
                 column.SortMode = DataGridViewColumnSortMode.NotSortable;
             }
-           
+
 
         }
 
 
-    #endregion
+        #endregion
 
 
-     #region DateTime
+        #region DateTime
         // Константы для расчётов
         private const int SecondsInMinute = 60;
         private const int SecondsInHour = 3600;
@@ -591,11 +598,11 @@ namespace TESTAKVA
             Console.WriteLine("Секунды с 01.01.2000 для текущего времени: " + sec);
         }
 
-     #endregion
+        #endregion
 
 
 
-     #region ScrollTable
+        #region ScrollTable
 
         /*
             public struct GridViewParams
@@ -620,7 +627,7 @@ namespace TESTAKVA
         public void FormatParamsGridView()
         {//форматируем таблицу структуры GVstruct
 
-            FormatParamsGV.numRow =  rowHeaders.Length; //общее количество колонок в таблице на одну больше чем количество режимов из за крайне левого столбца
+            FormatParamsGV.numRow = rowHeaders.Length; //общее количество колонок в таблице на одну больше чем количество режимов из за крайне левого столбца
             FormatParamsGV.numCol = rejheaders.Length; //общее количество строк в таблице
             FormatParamsGV.L1 = 1;//сразу после инициализации номер колонки которая отображается следующей за зафиксированной нулевой
             FormatParamsGV.WidthLeftCol = 75;  // //ширина крайне левой колонки
@@ -629,24 +636,24 @@ namespace TESTAKVA
             FormatParamsGV.Width = ParamGridView.Size.Width;
             FormatParamsGV.Height = ParamGridView.Size.Height;
 
-/*
+            /*
 
-            // Настройка первой фиксированной колонки (ширина крайней левой колонки)
-            if (ParamGridView.Columns.Count > 0)
-            {
-                ParamGridView.Columns[0].Width = FormatParamsGV.WidthLeftCol;
-            }
+                        // Настройка первой фиксированной колонки (ширина крайней левой колонки)
+                        if (ParamGridView.Columns.Count > 0)
+                        {
+                            ParamGridView.Columns[0].Width = FormatParamsGV.WidthLeftCol;
+                        }
 
-            // Настройка видимых колонок (если нужно вручную настроить количество видимых колонок)
-            for (int i = 1; i < Math.Min(ParamGridView.Columns.Count, FormatParamsGV.ViewCol + 1); i++)
-            {
-                // Устанавливаем ширину каждой видимой колонки (кроме первой фиксированной)
-                ParamGridView.Columns[i].Width = (FormatParamsGV.Width - FormatParamsGV.WidthLeftCol) / FormatParamsGV.ViewCol;
-            }
+                        // Настройка видимых колонок (если нужно вручную настроить количество видимых колонок)
+                        for (int i = 1; i < Math.Min(ParamGridView.Columns.Count, FormatParamsGV.ViewCol + 1); i++)
+                        {
+                            // Устанавливаем ширину каждой видимой колонки (кроме первой фиксированной)
+                            ParamGridView.Columns[i].Width = (FormatParamsGV.Width - FormatParamsGV.WidthLeftCol) / FormatParamsGV.ViewCol;
+                        }
 
-            // Настройка для номера колонки, следующей за первой фиксированной (если требуется)
-            ParamGridView.FirstDisplayedScrollingColumnIndex = FormatParamsGV.L1;
-*/
+                        // Настройка для номера колонки, следующей за первой фиксированной (если требуется)
+                        ParamGridView.FirstDisplayedScrollingColumnIndex = FormatParamsGV.L1;
+            */
         }
 
         /*
@@ -676,7 +683,7 @@ namespace TESTAKVA
         */
 
 
-  
+
 
         public void ParamSetHeaders()
         {//формирование таблицы параметров
@@ -706,7 +713,7 @@ namespace TESTAKVA
 
             // Вычисляем доступное место для колонок, вычитая ширину левого заголовка и разделители столбцов
             int availableWidth = totalWidth - ParamGridView.RowHeadersWidth - (columnSeparatorWidth * FormatParamsGV.ViewCol);
-            
+
             // Рассчитываем ширину одной колонки
             int columnWidth = availableWidth / FormatParamsGV.ViewCol;
 
@@ -736,8 +743,8 @@ namespace TESTAKVA
 
             // Проверяем, виден ли горизонтальный скроллбар, используя Controls
 
-                // Получаем высоту горизонтального скроллбара, если он виден
-                visibleHeight -= SystemInformation.HorizontalScrollBarHeight;
+            // Получаем высоту горизонтального скроллбара, если он виден
+            visibleHeight -= SystemInformation.HorizontalScrollBarHeight;
 
 
             // Количество строк
@@ -887,7 +894,7 @@ namespace TESTAKVA
             }
 
 
-     #endregion
+            #endregion
 
             /*            // Очистим все предыдущие выделения
                         DGV.ClearSelection();
@@ -1118,24 +1125,21 @@ namespace TESTAKVA
             else throw new ArgumentException("Неизвестный режим.");
         }
 
-
-
-
-
-        #endregion
-
-
-
-
-
-
-
-
-
-
-
-
     }
+
+
+
+    #endregion
+
+
+
+ 
+
+
+
+
+
+
 }
 
 

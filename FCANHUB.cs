@@ -1,4 +1,7 @@
-﻿using System;
+﻿
+
+
+using System;
 using System.Threading.Tasks;
 using System.IO;
 using System.Collections.Generic;
@@ -15,6 +18,7 @@ using RS485;
 using COMMAND;
 using ExtHubComm;
 using TESTAKVA;
+
 
 namespace TFTprog
 {
@@ -1494,7 +1498,8 @@ namespace TFTprog
 
         private void bParamRead_Click(object sender, EventArgs e)
         {
-            CANHUB.GetAKVAparFromMainBoard();
+
+            LoadSaveTable.LoadDataGridViewFromCsv(dGparam, true);
         }
 
         private void button2_Click_1(object sender, EventArgs e)
@@ -1590,7 +1595,7 @@ namespace TFTprog
 
         private void bParamWrite_Click(object sender, EventArgs e)
         {
-
+            LoadSaveTable.SaveTableWithFileDialog(dGparam, true);
         }
 
         private void listComPort_SelectedIndexChanged_1(object sender, EventArgs e)
@@ -1825,5 +1830,148 @@ namespace TFTprog
         }
     }
 
-    
-}
+
+    #region TablesLoadSave
+
+    public static class LoadSaveTable
+    {
+
+
+        public static void LoadDataGridViewFromCsv(DataGridView dataGridView, bool loadHeader)
+        {
+            using (OpenFileDialog openFileDialog = new OpenFileDialog())
+            {
+                openFileDialog.Filter = "CSV files (*.csv)|*.csv";
+                openFileDialog.FileName = Properties.Settings.Default.LastTableFile;
+
+                if (openFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    string filePath = openFileDialog.FileName;
+
+                    try
+                    {
+                        dataGridView.Rows.Clear();
+                        if (loadHeader)
+                            dataGridView.Columns.Clear();
+
+                        using (StreamReader reader = new StreamReader(filePath, Encoding.UTF8))
+                        {
+                            bool isFirstLine = true;
+                            while (!reader.EndOfStream)
+                            {
+                                string line = reader.ReadLine();
+                                string[] values = line.Split(';');
+
+                                if (isFirstLine && loadHeader)
+                                {
+                                    foreach (string header in values)
+                                        dataGridView.Columns.Add(header, header);
+                                    isFirstLine = false;
+                                }
+                                else
+                                {
+                                    if (dataGridView.Columns.Count == 0)
+                                    {
+                                        for (int i = 0; i < values.Length; i++)
+                                            dataGridView.Columns.Add($"Column{i + 1}", $"Column{i + 1}");
+                                    }
+                                    dataGridView.Rows.Add(values);
+                                }
+                            }
+                        }
+
+                        Properties.Settings.Default.LastTableFile = filePath;
+                        Properties.Settings.Default.Save();
+                        MessageBox.Show("File loaded successfully.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("An error occurred while loading the file: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            }
+        }
+
+        public static void SaveTableWithFileDialog(DataGridView dataGridView, bool saveHeader)
+        {
+            string defaultFolder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Tables");
+            string defaultFileName = "ParamTable.csv";
+
+            // Убедиться, что папка Debug существует
+            if (!Directory.Exists(defaultFolder))
+            {
+                Directory.CreateDirectory(defaultFolder);
+            }
+
+            using (SaveFileDialog saveFileDialog = new SaveFileDialog())
+            {
+                saveFileDialog.InitialDirectory = defaultFolder; // Устанавливаем папку по умолчанию
+                saveFileDialog.FileName = defaultFileName;       // Устанавливаем имя файла по умолчанию
+                saveFileDialog.Filter = "CSV files (*.csv)|*.csv"; // Фильтр для файлов
+
+                if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    string selectedFilePath = saveFileDialog.FileName;
+
+                    try
+                    {
+                        // Сохранение данных в CSV
+                        SaveDataGridViewToCsv(dataGridView, saveHeader, selectedFilePath);
+
+                        // Сохранить имя файла в настройках
+                        Properties.Settings.Default.LastTableFile = selectedFilePath;
+                        Properties.Settings.Default.Save();
+
+                        MessageBox.Show("File saved successfully.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"An error occurred while saving the file: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            }
+        }
+
+        private static void SaveDataGridViewToCsv(DataGridView dataGridView, bool saveHeader, string filePath)
+        {
+            using (StreamWriter writer = new StreamWriter(filePath, false, Encoding.UTF8))
+            {
+                // Сохранение заголовков
+                if (saveHeader)
+                {
+                    for (int i = 0; i < dataGridView.Columns.Count; i++)
+                    {
+                        writer.Write(dataGridView.Columns[i].HeaderText);
+                        if (i < dataGridView.Columns.Count - 1)
+                        {
+                            writer.Write(";");
+                        }
+                    }
+                    writer.WriteLine();
+                }
+
+                // Сохранение данных
+                foreach (DataGridViewRow row in dataGridView.Rows)
+                {
+                    if (!row.IsNewRow)
+                    {
+                        for (int i = 0; i < dataGridView.Columns.Count; i++)
+                        {
+                            writer.Write(row.Cells[i].Value?.ToString() ?? string.Empty);
+                            if (i < dataGridView.Columns.Count - 1)
+                            {
+                                writer.Write(";");
+                            }
+                        }
+                        writer.WriteLine();
+                    }
+                }
+            }
+        }
+
+
+        #endregion
+
+
+    }
+ }
