@@ -44,71 +44,6 @@ namespace TESTAKVA
         public uint DamageSec;
     }
 
-    /*
-        public class TableManager
-        {
-            private int x = -1; // Координата строки изменённой ячейки
-            private int y = -1; // Координата столбца изменённой ячейки
-            private bool Change = false; // Флаг изменения вручную
-
-            // Конструктор класса
-            public TableManager(DataGridView dataGridView)
-            {
-                // Отключаем сортировку столбцов
-                dataGridView.ColumnHeaderMouseClick += (s, e) =>
-                {
-                    dataGridView.Sort(dataGridView.Columns[0], System.ComponentModel.ListSortDirection.Ascending);
-                };
-
-                // Подключаемся к событию окончания редактирования
-                dataGridView.CellEndEdit += (s, e) =>
-                {
-                    // Запоминаем координаты изменённой вручную ячейки
-                    x = e.RowIndex;
-                    y = e.ColumnIndex;
-                    Change = true;
-                };
-            }
-
-            // Метод обновления ячеек
-            public void DisplayInDataGridView(DataGridView dataGridView, SATIMER[] T)
-            {
-                for (int i = 0; i < T.Length; i++)
-                {
-                    UpdateCellIfNeeded(dataGridView.Rows[0].Cells[i], T[i].Rej, 0, i);
-                    UpdateCellIfNeeded(dataGridView.Rows[1].Cells[i], T[i].CountSec, 1, i);
-                    UpdateCellIfNeeded(dataGridView.Rows[2].Cells[i], T[i].LastStamp_mSec, 2, i);
-                    UpdateCellIfNeeded(dataGridView.Rows[3].Cells[i], T[i].MaxCountSec, 3, i);
-                    UpdateCellIfNeeded(dataGridView.Rows[4].Cells[i], T[i].DamageSec, 4, i);
-                }
-            }
-
-            private void UpdateCellIfNeeded(DataGridViewCell cell, object newValue, int row, int col)
-            {
-                // Если ячейка была изменена вручную, пропускаем её обновление
-                if (Change && x == row && y == col)
-                {
-                    Change = false; // Сбрасываем флаг после пропуска обновления
-                    return;
-                }
-
-                // Обновляем ячейку, если новое значение отличается
-                UpdateCellIfChanged(cell, newValue);
-            }
-
-            public void UpdateCellIfChanged(DataGridViewCell cell, object newValue)
-            {
-                // Проверяем, что ячейка нередактируемая и новое значение отличается от текущего
-                if (!cell.ReadOnly && !Equals(cell.Value, newValue))
-                {
-                    cell.Value = newValue;
-                }
-            }
-        }
-
-    */
-
-
 
     public enum ErejAKVA
     {
@@ -153,17 +88,10 @@ namespace TESTAKVA
     }
 
 
-    public struct SParFlow
-    {
-        public float AllLitr { get; set; }
-        public float LitrPerHour { get; set; }
-        public float LitrPerMinute { get; set; }
-    }
-
     public class SAKVApar
     {
         public ErejAKVA Rej { get; set; }
-        public SParFlow[] FM { get; set; } = new SParFlow[3];
+        public float[] FM { get; set; } = new float[3];
         public float[] PT { get; set; } = new float[2];
         public float[] QT { get; set; } = new float[3];
 
@@ -190,7 +118,92 @@ namespace TESTAKVA
 
         public uint TimeStampSec { get; set; }
 
+        // Метод для загрузки из массива байт
+        public static SAKVApar FromByteArray(byte[] data)
+        {
+            if (data.Length != Marshal.SizeOf(typeof(SAKVAparRaw)))
+                throw new ArgumentException("Размер массива не соответствует размеру структуры SAKVApar");
+
+            // Преобразование массива байт в сырую структуру
+            var handle = GCHandle.Alloc(data, GCHandleType.Pinned);
+            try
+            {
+                var raw = (SAKVAparRaw)Marshal.PtrToStructure(handle.AddrOfPinnedObject(), typeof(SAKVAparRaw));
+                return ConvertFromRaw(raw);
+            }
+            finally
+            {
+                handle.Free();
+            }
+        }
+
+        // Метод для преобразования в массив байт
+        public byte[] ToByteArray()
+        {
+            var raw = ConvertToRaw();
+            int size = Marshal.SizeOf(raw);
+            byte[] result = new byte[size];
+            var handle = GCHandle.Alloc(result, GCHandleType.Pinned);
+            try
+            {
+                Marshal.StructureToPtr(raw, handle.AddrOfPinnedObject(), false);
+            }
+            finally
+            {
+                handle.Free();
+            }
+            return result;
+        }
+
+        // Конвертация сырых данных в объект SAKVApar
+        private static SAKVApar ConvertFromRaw(SAKVAparRaw raw)
+        {
+            var obj = new SAKVApar
+            {
+                Rej = (ErejAKVA)raw.Rej,
+                FM = raw.FM,
+                PT = raw.PT,
+                QT = raw.QT,
+                INs = raw.INs,
+                TimeStampSec = raw.TimeStampSec
+            };
+            return obj;
+        }
+
+        // Конвертация объекта SAKVApar в сырые данные
+        private SAKVAparRaw ConvertToRaw()
+        {
+            return new SAKVAparRaw
+            {
+                Rej = (int)Rej,
+                FM = FM,
+                PT = PT,
+                QT = QT,
+                INs = INs,
+                TimeStampSec = TimeStampSec
+            };
+        }
+
+        // Описание сырой структуры
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        private struct SAKVAparRaw
+        {
+            public int Rej;
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 3)]
+            public float[] FM;
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
+            public float[] PT;
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 3)]
+            public float[] QT;
+            public uint INs;
+            public uint TimeStampSec;
+        }
     }
+
+
+
+
+
 
 
 
@@ -233,6 +246,39 @@ namespace TESTAKVA
                 TimersGridView.Sort(TimersGridView.Columns[0], System.ComponentModel.ListSortDirection.Ascending);
             };
 
+            TimersGridView.CellMouseDoubleClick += (s, e) =>
+            {//подключаемся к событию двойного клика - событие изменения состояния таймера on/off
+                // Проверяем, что двойной клик произошел в области первой строки
+                if (e.RowIndex == 0 && e.ColumnIndex >= 0)
+                {
+                    // Определяем номер колонки
+                    int NumCol = e.ColumnIndex;
+
+                    // Получаем текст ячейки, на которую был произведён двойной клик
+                    string text = TimersGridView.Rows[e.RowIndex].Cells[NumCol].Value?.ToString();
+
+                    // Проверяем текст и при необходимости изменяем его
+                    if (text == "rejt_over")
+                    {
+                        TimersGridView.Rows[1].Cells[NumCol].Value = "0";
+                        TimersGridView.Rows[e.RowIndex].Cells[NumCol].Value = "rejt_on";
+                    }
+                    else
+                    {
+                        if (text == "rejt_on")
+                        {
+                            TimersGridView.Rows[e.RowIndex].Cells[NumCol].Value = "rejt_over";
+                        }
+                    }
+   //видимо необходимо вместо булевой переменной вносить тип возвращаемой посылке 
+                    boolChangeTimersVol = UpdateOneTimerFromDataGridView(ref T[NumCol],NumCol);
+                    if (boolChangeTimersVol)
+                        xChangeTimersVol = NumCol;
+
+                }
+            };
+
+
             // Подключаемся к событию окончания редактирования
             TimersGridView.CellEndEdit += (s, e) =>
             {
@@ -245,17 +291,12 @@ namespace TESTAKVA
                     if (uint.TryParse(cellValue, out uint parsedValue))
                     {
                         // Если получилось, присваиваем значение переменной ChangeTimersVol
-                        ChangeTimersVol = parsedValue;
-                        boolChangeTimersVol = true;
+                        int NumCol = e.ColumnIndex;
+                        boolChangeTimersVol = UpdateOneTimerFromDataGridView(ref T[NumCol],NumCol);//попытка обновить значения таймера введёнными данными
+                        if (boolChangeTimersVol)
+                            xChangeTimersVol = NumCol;
                         // Запоминаем координаты изменённой вручную ячейки
-                        xChangeTimersVol = e.ColumnIndex;
-                        yChangeTimersVol = e.RowIndex;
-                    }
-                    else
-                    {
-                        // Если преобразование не удалось, вызываем исключение
-                        boolChangeTimersVol = false;
-                        throw new InvalidCastException($"'{cellValue}' не является типом uint.");
+                       
                     }
 
                 }
@@ -266,31 +307,6 @@ namespace TESTAKVA
                 }
             };
         }
-
-        //boolChangeTimersVol
-        public void SendChangeTimersData(byte[] TimersData)
-        {
-            int StartIndex = (xChangeTimersVol * 5 + yChangeTimersVol) * 4;
-
-            // Получение байтового представления числа
-            byte[] uVolBytes = BitConverter.GetBytes(ChangeTimersVol);
-
-            // Проверка: достаточно ли места в массиве для копирования
-            if (StartIndex + uVolBytes.Length > TimersData.Length)
-            {
-                throw new InvalidCastException($"Недостаточно места в массиве для копирования данных из TimersGridView");
-            }
-            else
-            {
-                // Копирование байтов в массив bArr
-                boolChangeTimersVol = false;
-                Array.Copy(uVolBytes, 0, TimersData, StartIndex, uVolBytes.Length);
-
-            }
-
-        }
-
-
 
         public GridViewParams FormatParamsGV;//структура хранения параметров форматирования таблицы ParamGridView
         public SATIMER[] T = new SATIMER[ArraySize];
@@ -312,8 +328,7 @@ namespace TESTAKVA
 
         #region Timers
         public bool boolChangeTimersVol = false;
-        private int xChangeTimersVol = -1;
-        private int yChangeTimersVol = -1;
+        public int xChangeTimersVol = -1;
         private uint ChangeTimersVol = 0;
         private const int ArraySize = 8;
 
@@ -321,7 +336,7 @@ namespace TESTAKVA
 
 
         public void TimersParFromByteArray(byte[] data)
-        {//преобразования из массива байт в структуру
+        {//преобразования из массива байт в структуру таймера
             if (data.Length != Marshal.SizeOf(typeof(SATIMER)) * ArraySize)
                 throw new ArgumentException("Invalid data length");
 
@@ -340,11 +355,12 @@ namespace TESTAKVA
 
 
         private void TimersParPerminEdit()
-        {//разрешает редактировать только одну строку номер 1 содержащую текущее значением таймеров
+        {//разрешает редактировать только две строки - номер 1(Count) и 4(Damage) содержащие текущее значением таймеров
             int editableRowIndex = 1; // Номер строки, которая остаётся редактируемой
+            int editableRowIndex2 = 4; // Номер строки, которая остаётся редактируемой
             foreach (DataGridViewRow row in TimersGridView.Rows)
             {
-                if (row.Index != editableRowIndex)
+                if ((row.Index != editableRowIndex) && (row.Index != editableRowIndex2))
                 {
                     // Запрет редактирования
                     row.ReadOnly = true;
@@ -372,7 +388,7 @@ namespace TESTAKVA
             }
         }
 
-        public void DisplayInDataGridView()
+        public void DisplayInTimersGridView()
         {
 
             // Заполняем таблицу данными из SATIMER[]
@@ -386,45 +402,65 @@ namespace TESTAKVA
                 UpdateCellIfChanged(TimersGridView.Rows[4].Cells[i], T[i].DamageSec);
             }
 
-            // Необходимо заменить значение ячейки
-
-
-            /*           void InsertUintIntoArray(byte[] array, int address, uint value)
-                       {
-                           byte[] valueBytes = BitConverter.GetBytes(value);
-                           Array.Copy(valueBytes, 0, array, address, valueBytes.Length);
-                       }*/
-
         }
 
-        public void UpdateTimersArr(ref byte[] NewTimersData)
-        {
-            if (!boolChangeTimersVol)
+
+        public bool UpdateOneTimerFromDataGridView(ref SATIMER TIM, int TimerNum)
+        {//считывание данных об одном таймере из соответствующего столбца таблицы
+            // Проверка выхода за пределы массива
+            if (TimerNum >= T.Length)
+                return false;
+
+            // Создание временного массива для проверки корректности данных
+            SATIMER Ttmp = new SATIMER();
+
+            try
             {
-                return;
+                // Попытка преобразовать данные во временный массив
+                Ttmp.Rej = (ErejTimer)Enum.Parse(typeof(ErejTimer), TimersGridView.Rows[0].Cells[TimerNum].Value.ToString());
+                Ttmp.CountSec = uint.Parse(TimersGridView.Rows[1].Cells[TimerNum].Value.ToString());
+                Ttmp.LastStamp_mSec = uint.Parse(TimersGridView.Rows[2].Cells[TimerNum].Value.ToString());
+                Ttmp.MaxCountSec = uint.Parse(TimersGridView.Rows[3].Cells[TimerNum].Value.ToString());
+                Ttmp.DamageSec = uint.Parse(TimersGridView.Rows[4].Cells[TimerNum].Value.ToString());
+
+                // Если все преобразования прошли успешно, копируем данные в структуру таймера
+                TIM = Ttmp;
+                return true; // Успешное преобразование
             }
-            boolChangeTimersVol = false;
-            //если в ручном редакторе было введено новое корректное значение
-            byte[] valueBytes = BitConverter.GetBytes(ChangeTimersVol);//изменяем значение на новое
-            Array.Copy(valueBytes, 0, NewTimersData, xChangeTimersVol * 5 * 4 + yChangeTimersVol * 4, valueBytes.Length);//копируем в массив байт
-            // возвращаем данные, которые необходимо отправить
+            catch
+            {
+                // Логируем или игнорируем ошибку
+                return false; // Ошибка преобразования
+            }
         }
 
-
-
-
-
-        public void UpdateFromDataGridView()
+        public void UpdateAllTimersFromDataGridView()
         {// считывание всех данных из таблицы
             for (int i = 0; i < ArraySize; i++)
             {
-                T[i].Rej = (ErejTimer)Enum.Parse(typeof(ErejTimer), TimersGridView.Rows[0].Cells[i + 1].Value.ToString());
-                T[i].CountSec = uint.Parse(TimersGridView.Rows[1].Cells[i + 1].Value.ToString());
-                T[i].LastStamp_mSec = uint.Parse(TimersGridView.Rows[2].Cells[i + 1].Value.ToString());
-                T[i].MaxCountSec = uint.Parse(TimersGridView.Rows[3].Cells[i + 1].Value.ToString());
-                T[i].DamageSec = uint.Parse(TimersGridView.Rows[4].Cells[i + 1].Value.ToString());
+                UpdateOneTimerFromDataGridView(ref T[i], i);
             }
         }
+
+        public  byte[] OneTimerToBytes<T>(T structure) where T : struct
+        {
+            int size = Marshal.SizeOf(typeof(T)); // Получаем размер структуры в байтах
+            byte[] buffer = new byte[size]; // Создаем массив байт для хранения данных
+
+            IntPtr ptr = Marshal.AllocHGlobal(size); // Выделяем память в неуправляемой области
+            try
+            {
+                Marshal.StructureToPtr(structure, ptr, false); // Копируем данные из структуры в неуправляемую память
+                Marshal.Copy(ptr, buffer, 0, size); // Копируем данные из неуправляемой памяти в массив байт
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(ptr); // Освобождаем неуправляемую память
+            }
+
+            return buffer;
+        }
+
 
         #endregion
 
@@ -604,26 +640,7 @@ namespace TESTAKVA
 
         #region ScrollTable
 
-        /*
-            public struct GridViewParams
-            {
-                public int numCol { get; set; }//общее количество колонок в таблице
-                public int numRow { get; set; }//общее количество строк в таблице
-                public int X { get; set; }//координала X левого верхнего угла
-                public int Y { get; set; }//координала Y левого верхнего угла
-                public int Width { get; set; }//ширина всех колонок, кроме левой
-                public int Height { get; set; }//высота всех строк
-                public int L1 { get; set; }//номер колонки которая отображается следующей за зафиксированной нулевой
-                public int WidthLeftCol { get; set; }//ширина крайне левой колонки
-                public int Vcol { get; set; }//количество колонок, которые должны умещаться в промежутке видимой зоны от крайне левой зафиксированной колонки до крайне правой
-            }
 
-                        dGparam.Location.X,
-                dGparam.Location.Y,
-                dGparam.Size.Width,
-                dGparam.Size.Height,
-
-         */
         public void FormatParamsGridView()
         {//форматируем таблицу структуры GVstruct
 
@@ -635,58 +652,7 @@ namespace TESTAKVA
             // Чтение текущих размеров компонента в структуру (ширина и высота)
             FormatParamsGV.Width = ParamGridView.Size.Width;
             FormatParamsGV.Height = ParamGridView.Size.Height;
-
-
-
-
-            /*
-
-                        // Настройка первой фиксированной колонки (ширина крайней левой колонки)
-                        if (ParamGridView.Columns.Count > 0)
-                        {
-                            ParamGridView.Columns[0].Width = FormatParamsGV.WidthLeftCol;
-                        }
-
-                        // Настройка видимых колонок (если нужно вручную настроить количество видимых колонок)
-                        for (int i = 1; i < Math.Min(ParamGridView.Columns.Count, FormatParamsGV.ViewCol + 1); i++)
-                        {
-                            // Устанавливаем ширину каждой видимой колонки (кроме первой фиксированной)
-                            ParamGridView.Columns[i].Width = (FormatParamsGV.Width - FormatParamsGV.WidthLeftCol) / FormatParamsGV.ViewCol;
-                        }
-
-                        // Настройка для номера колонки, следующей за первой фиксированной (если требуется)
-                        ParamGridView.FirstDisplayedScrollingColumnIndex = FormatParamsGV.L1;
-            */
         }
-
-        /*
-                public void ApplyGridViewParams(DataGridView gridView)
-                {//gridView - сама таблица, gridParams - структура параметров таблицы
-
-                    // Чтение текущих размеров компонента в структуру (ширина и высота)
-                    FormatParamsGV.Width = gridView.Size.Width;
-                    FormatParamsGV.Height = gridView.Size.Height;
-
-                    // Настройка первой фиксированной колонки (ширина крайней левой колонки)
-                    if (gridView.Columns.Count > 0)
-                    {
-                        gridView.Columns[0].Width = FormatParamsGV.WidthLeftCol;
-                    }
-
-                    // Настройка видимых колонок (если нужно вручную настроить количество видимых колонок)
-                    for (int i = 1; i < Math.Min(gridView.Columns.Count, FormatParamsGV.ViewCol + 1); i++)
-                    {
-                        // Устанавливаем ширину каждой видимой колонки (кроме первой фиксированной)
-                        gridView.Columns[i].Width = (FormatParamsGV.Width - FormatParamsGV.WidthLeftCol) / FormatParamsGV.ViewCol;
-                    }
-
-                    // Настройка для номера колонки, следующей за первой фиксированной (если требуется)
-                    gridView.FirstDisplayedScrollingColumnIndex = FormatParamsGV.L1;
-                }
-        */
-
-
-
 
         public void ParamSetHeaders()
         {//формирование таблицы параметров
@@ -727,7 +693,7 @@ namespace TESTAKVA
                 ParamGridView.Columns[i].HeaderText = rejheaders[i];
                 ParamGridView.Columns[i].Width = columnWidth; // Устанавливаем ширину для  столбцов
             }
-
+ 
             // Отключение автосортировки для всех столбцов
             foreach (DataGridViewColumn column in ParamGridView.Columns)
             {
@@ -805,11 +771,9 @@ namespace TESTAKVA
 
 
         public GridViewParams DrawAKVAtable(DataGridView AKVAparGridView, GridViewParams gridParams)
-        {//отрисовка таблицы на основе параметров GridViewParams
+        {
             // Устанавливаем локальную переменную равную текущему количеству строк в таблице
             int Numrow = rowHeaders.Length;
-
-
 
             // Проверяем количество столбцов и корректируем, если необходимо
             if (AKVAparGridView.ColumnCount < gridParams.numCol)
@@ -829,12 +793,11 @@ namespace TESTAKVA
                 }
             }
 
-            // Задаём размеры и расположение таблицы
-            // Не надо метять эти параметры!         AKVAparGridView.Location = new System.Drawing.Point(x, y);
+            // Устанавливаем размеры и расположение таблицы
+            // AKVAparGridView.Location = new System.Drawing.Point(x, y);
 
             // Разрешаем отображение полосы прокрутки
             AKVAparGridView.ScrollBars = ScrollBars.Horizontal;
-
 
             // Устанавливаем количество строк
             if (AKVAparGridView.RowCount != Numrow)
@@ -842,18 +805,16 @@ namespace TESTAKVA
                 AKVAparGridView.RowCount = Numrow;
             }
 
-            // Устанавливаем содержимое нулевого столбца (заголовки строк)
-
-
+            // Устанавливаем содержимое заголовков строк
             for (int i = 0; i < Math.Min(Numrow, rowHeaders.Length); i++)
             {
-                AKVAparGridView.Rows[i].Cells[0].Value = rowHeaders[i];
+                AKVAparGridView.Rows[i].HeaderCell.Value = rowHeaders[i];
             }
 
             // Заполняем остальные ячейки "0"
             for (int row = 0; row < AKVAparGridView.RowCount; row++)
             {
-                for (int col = 1; col < AKVAparGridView.ColumnCount; col++)
+                for (int col = 0; col < AKVAparGridView.ColumnCount; col++)
                 {
                     AKVAparGridView.Rows[row].Cells[col].Value = "0";
                 }
@@ -910,40 +871,9 @@ namespace TESTAKVA
             {
                 MessageBox.Show("Неправильный индекс колонки.");
             }
-
-
-            #endregion
-
-            /*            // Очистим все предыдущие выделения
-                        DGV.ClearSelection();
-
-                        // Убедимся, что индекс колонки допустимый
-                        if (columnIndex >= 0 && columnIndex < DGV.Columns.Count)
-                        {
-                            // Проверим, находится ли колонка в видимой области
-                             Rectangle columnRect = DGV.GetColumnDisplayRectangle(columnIndex, true);
-
-                            if (columnRect.Right > DGV.DisplayRectangle.Right)
-                            {
-                                // Прокручиваем влево, если колонка выходит за пределы видимой области
-                                DGV.FirstDisplayedScrollingColumnIndex = columnIndex;
-                            }
-                            else if (columnRect.Left < 0)
-                            {
-                                // Прокручиваем вправо, если колонка находится слева видимой области
-                                DGV.FirstDisplayedScrollingColumnIndex = columnIndex;
-                            }
-
-                            // Программно выделим всю колонку вместе с заголовком
-                            DGV.Columns[columnIndex].Selected = true;
-                        }
-                        else
-                        {
-                            MessageBox.Show("Неправильный индекс колонки.");
-                        }*/
         }
 
-
+        #endregion
 
 
         public void saveAKVAparTable(string fileName, DataGridView AKVAparGridView)

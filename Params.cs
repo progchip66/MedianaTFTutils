@@ -411,100 +411,10 @@ namespace TFTprog
 
 #endregion
 
-//******************   ЧАТ GPT
-/*
- * 
- * 
- * enum
-public class SParFlow
-{
-    public float ImpFreq { get; set; }
-    public float AllLitr { get; set; }
-    public float LitrPerHour { get; set; }
-    public float LitrPerMinute { get; set; }
-}
-
-public class SParAnal
-{
-    public float Val { get; set; }
-    public float ValFilt { get; set; }
-}
-
-public enum ErejAKVA
-{
-    // Enum values for ErejAKVA
-}
-
-public class SAKVApar
-{
-    public ErejAKVA Rej { get; set; }
-
-    public SParFlow[] FM { get; } = new SParFlow[3];
-    public SParAnal[] PT { get; } = new SParAnal[2];
-    public SParAnal[] QT { get; } = new SParAnal[3];
-
-    public struct Flags
-    {
-        public bool K1, K2, K3, K4, K5, K6, H1, H2, LED1, RELE;
-        public int Unuse;
-    }
-
-    public Flags OUTs;
-
-    public struct Inputs
-    {
-        public int Unus0;
-        public bool InONOFF, InESC, InPressRazd;
-        public int InFlowMeters;
-        public int Unus1;
-    }
-
-    public Inputs INs;
-
-    public uint TimeStampSec { get; set; }
 
 
 
-    public byte[] PackData()
-    {
-        int size = Marshal.SizeOf(typeof(SAKVApar));
-        byte[] data = new byte[size];
-
-        IntPtr ptr = Marshal.AllocHGlobal(size);
-        Marshal.StructureToPtr(this, ptr, true);
-        Marshal.Copy(ptr, data, 0, size);
-        Marshal.FreeHGlobal(ptr);
-
-        return data;
-    }
-
-    public static SAKVApar UnpackData(byte[] data)
-    {
-        int size = Marshal.SizeOf(typeof(SAKVApar));
-
-        if (data.Length != size)
-        {
-            throw new ArgumentException("Invalid data length");
-        }
-
-        IntPtr ptr = Marshal.AllocHGlobal(size);
-        Marshal.Copy(data, 0, ptr, size);
-
-        try
-        {
-            return (SAKVApar)Marshal.PtrToStructure(ptr, typeof(SAKVApar));
-        }
-        finally
-        {
-            Marshal.FreeHGlobal(ptr);
-        }
-    }
-}
-
-*/
-
-
-public class SoutsClass
+    public class SoutsClass
 {
     public bool K1 { get; set; }
     public bool K2 { get; set; }

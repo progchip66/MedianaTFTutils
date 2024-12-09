@@ -126,7 +126,7 @@ namespace COMMAND
 		cmd_TFTmenu = 0x5B,//вывод меню на TFT панели
 
 		cmd_SetRTCDateTime = 0x5C,////Установка (считывание если параметр равен нулю) нового системного времени и даты путём отправки в плату управления
-		cmd_extTimers = 0x5D,///Отправка(приём) пакета данных, содержащих информацию о всех восьми таймерах
+		cmd_exhSimulator = 0x5D,//Обмен информации с симулятором PC (описание режимов в DecodeSimulData
 		cmd_StartTFTcalibr = 0x5E,//Запуск режима калибровки TFT панели
 		cmd_USER = 0x70,
 		cmd_TimeAccelerat = 0x71,
@@ -360,32 +360,7 @@ namespace COMMAND
 
 	}
 
-	/*
 
-	class SWR_RAMtoMEM
-	{//класс поддержки процесса передачи по CAN и записи потоковых данных в память внешних устройств
-
-		public S_subComOp subCom = new S_subComOp();//Класс установки субкоманды
-
-		public int FnoNeeddAnswer = 0;// если равен 1 то в целях экономии времени команды в случае успешной записи ответ на подкоманду загрузки данных от микроконтролера не поступает
-
-		public int SourceFileAddr = 0;
-		public int Length = 0;//длина записываемой последовательности
-		public int Counter = 0;
-		public int max_commDatalen = 252;
-		//---------------------------------
-		public int StartAddr=0;//стартовый адрес внешнего устройства в которое записываются данные	
-		public ETypeMem TypeMem;//тип записываемой памяти
-		public int AllignBytes;//величина на которую необходимо выравнить записываемый пакет с байтах
-		public int proCRC16;
-		public int OptExtAdr = 0;//Option for write from buffer (buffer GRAM for TFT FLASH as example)
-		public ETypeMem OptTypeMem;
-
-		public EMemPRO Fpro = EMemPRO.eopmpro_none;
-	}
-	*/
-
-	//class SHeadCom
 
 
 
@@ -553,17 +528,6 @@ namespace COMMAND
 										receivingMutex.ReleaseMutex();//освобождаем мьютекс
 										mutexAcquired = false;
 									}
-	/*		Убрал бредовый? код						if ((buffer.Length >= expectedLength) && (res_buf.Length == expectedLength))
-									{
-										Array.Copy(buffer, res_buf, expectedLength);
-									}
-									else
-									{
-										throw new InvalidOperationException(
-											$"Ошибка: длина буферов недопустима. " +
-											$"Длина buffer: {buffer.Length}, длина res_buf: {res_buf.Length}, ожидаемая длина: {expectedLength}.");
-									}
-	*/
 
 									OnDataReceived(res_buf);//вызываем событие в которое передаём данные из буфера
 															//DataReceivedEvent?.Invoke(this, new DataReceivedEventArgs(res_buf));

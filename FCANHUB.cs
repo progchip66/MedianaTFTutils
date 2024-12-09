@@ -298,22 +298,6 @@ namespace TFTprog
             LBoxInterface.Items.Clear();
             LoadDefaultSetting();
 
-            // Отрисовка таблицы dGparam
-            /* похоже надо убрать        WORKAKVATEST.AdjustRowHeights(dGparam);
-
-                     // Устанавливаем режим сортировки для всех столбцов
-                     foreach (DataGridViewColumn column in dGparam.Columns)
-                     {
-                         column.SortMode = DataGridViewColumnSortMode.NotSortable;
-                     }
-
-                     // Устанавливаем режим выделения колонок с заголовком
-                     dGparam.SelectionMode = DataGridViewSelectionMode.ColumnHeaderSelect;
-
-                     //Инициализируем таблицу с таймерами
-                     WORKAKVATEST.FormatTimersGridView( 120, 30, new string[]{ "Rej", "CountSec", "LastStamp_mSec", "MaxCountSec", "DamageSec" }, WORKAKVATEST.GetTextHead(0, 7));
-              */
-
             cBrej.SelectedIndex = 0;
             cBrejSimulator.SelectedIndex = 0;
 
@@ -324,36 +308,59 @@ namespace TFTprog
             }
 
 
-           }
+         }
 
 
 
         private void OnDataReceived(object sender, DataReceivedEventArgs e)
-        {
+        {//СЧИТЫВАНИЕ И ОБРАБОТКА ДАННЫХ, ПРИНЯТЫХ В РЕЖИМЕ SLAVE
 
             // Поскольку событие может быть вызвано из другого потока, используем Invoke
             if (InvokeRequired)
             {
-                byte[] RXdata = new byte[e.Data.Length-6];//создаём массив для хранения данных
-                Array.Copy(e.Data,4, RXdata,0, e.Data.Length - 6);//копируем в него принятые данные без заголовка и CRC
+                byte[] RXdata = new byte[e.Data.Length-7];//создаём массив для хранения данных
+                ECommand Comm =(ECommand)(e.Data[1]);
+                if (Comm == ECommand.cmd_exhSimulator)
+                {//принимаем данные от симулятора
+                    int Rejim = e.Data[4];//копируем режим принятых данных
+                    Array.Copy(e.Data, 5, RXdata, 0, e.Data.Length - 7);//копируем в него ЧИСТЫЕ принятые данные без заголовка CRC и режима
+                    switch (Rejim)
+                    {
+                        case 9://приём и установка нового режима работы
+
+                            break;
+                        case 10://приём и отображение данных о всех таймерах
+                            if (WORKAKVATEST.boolChangeTimersVol)
+                            {//обновление вручную значения в таблице таймеров произведено
+                                // надо отправить обновлённые данные о таймере в который были внесены изменения
+                                byte[] byteArray = WORKAKVATEST.OneTimerToBytes(WORKAKVATEST.T[WORKAKVATEST.xChangeTimersVol]);
+                                WORKAKVATEST.boolChangeTimersVol = false;//сбрасываем флаг ручного изменения данных
+                                int LenTIM = System.Runtime.InteropServices.Marshal.SizeOf(typeof(SATIMER));
+                                byte[] Senddata = new byte[LenTIM + 1];
+                                Senddata[0] = (byte)WORKAKVATEST.xChangeTimersVol;//номер таймера в котором были внесены изменения
+                                Array.Copy(byteArray, 0, Senddata, 1, LenTIM);
+                                CANHUB.CommSendAnsv(ECommand.cmd_exhSimulator, Efl_DEV.fld_TFTboard, Senddata, 0);//отправляем команду которая не предусматривает ответа
+                            }
+                            else
+                            {//обновление производим только в случае, если не было изменений вручную, если были изменения будут учтены при следующем приходе данных через секунду
+                                WORKAKVATEST.TimersParFromByteArray(RXdata);//обновление структуры таймеров
+                                Invoke(new Action(() => WORKAKVATEST.DisplayInTimersGridView()));//отображение данных в таблице
+                            }
+                            
+                            break;
+                    }
+                }
+                
+                
 
                 //извлекаем данные из таймеров
 
-                if (WORKAKVATEST.boolChangeTimersVol)//обновление вручную значения в таблице таймеров произведено
-                {
-                    WORKAKVATEST.UpdateTimersArr(ref RXdata);//модифицируем полученное по COM изменённое значение
-                    WORKAKVATEST.boolChangeTimersVol = false;//сбрасываем флаг ручного изменения данных
-                    //public void CommSendAnsv(ECommand command, Efl_DEV _RecDev = Efl_DEV.fld_none, byte[] data = null, int TimeOutStartAnsv = 50)
-                    CANHUB.CommSendAnsv(ECommand.cmd_extTimers, Efl_DEV.fld_TFTboard, RXdata, 0);//отправляем команду которая не предусматривает ответа
-                }    
 
-                WORKAKVATEST.TimersParFromByteArray(RXdata);//обновление структуры таймеров
-                Invoke(new Action(() => WORKAKVATEST.DisplayInDataGridView()));//отображение данных в таблице
 
             }
             else
             {
-                WORKAKVATEST.DisplayInDataGridView();
+                Invoke(new Action(() => WORKAKVATEST.DisplayInTimersGridView()));
 
             }
         }
@@ -1882,9 +1889,10 @@ namespace TFTprog
     public static class LoadSaveTable
     {
 
-
         public static void LoadDataGridViewFromCsv(DataGridView dataGridView, bool loadHeader)
         {
+            dataGridView.AllowUserToAddRows = false;
+
             using (OpenFileDialog openFileDialog = new OpenFileDialog())
             {
                 openFileDialog.Filter = "CSV files (*.csv)|*.csv";
@@ -1910,20 +1918,40 @@ namespace TFTprog
 
                                 if (isFirstLine && loadHeader)
                                 {
-                                    foreach (string header in values)
-                                        dataGridView.Columns.Add(header, header);
+                                    // Добавляем столбцы (верхний заголовок)
+                                    for (int i = 1; i < values.Length; i++) // Начинаем с 1, чтобы пропустить левый заголовок
+                                    {
+                                        dataGridView.Columns.Add(values[i], values[i]);
+                                    }
                                     isFirstLine = false;
                                 }
                                 else
                                 {
-                                    if (dataGridView.Columns.Count == 0)
+                                    // Создаем новую строку
+                                    DataGridViewRow newRow = new DataGridViewRow();
+                                    newRow.CreateCells(dataGridView);
+
+                                    // Устанавливаем левый заголовок строки
+                                    if (values.Length > 0)
                                     {
-                                        for (int i = 0; i < values.Length; i++)
-                                            dataGridView.Columns.Add($"Column{i + 1}", $"Column{i + 1}");
+                                        newRow.HeaderCell.Value = values[0]; // Левый заголовок строки
                                     }
-                                    dataGridView.Rows.Add(values);
+
+                                    // Заполняем данные строки
+                                    for (int i = 1; i < values.Length; i++) // Начинаем с 1, чтобы пропустить левый заголовок
+                                    {
+                                        newRow.Cells[i - 1].Value = values[i];
+                                    }
+
+                                    dataGridView.Rows.Add(newRow);
                                 }
                             }
+                        }
+
+                        // Отключаем сортировку для всех столбцов
+                        foreach (DataGridViewColumn column in dataGridView.Columns)
+                        {
+                            column.SortMode = DataGridViewColumnSortMode.NotSortable;
                         }
 
                         Properties.Settings.Default.LastTableFile = filePath;
@@ -1937,6 +1965,46 @@ namespace TFTprog
                 }
             }
         }
+
+        public static void SaveDataGridViewToCsv(DataGridView dataGridView, bool saveHeader, string filePath)
+        {
+            using (StreamWriter writer = new StreamWriter(filePath, false, Encoding.UTF8))
+            {
+                // Сохраняем верхний заголовок (столбцы)
+                if (saveHeader)
+                {
+                    writer.Write(";"); // Пустая ячейка для заголовка строк
+                    for (int i = 0; i < dataGridView.Columns.Count; i++)
+                    {
+                        writer.Write(dataGridView.Columns[i].HeaderText);
+                        if (i < dataGridView.Columns.Count - 1)
+                            writer.Write(";");
+                    }
+                    writer.WriteLine();
+                }
+
+                // Сохраняем данные строк
+                foreach (DataGridViewRow row in dataGridView.Rows)
+                {
+                    if (!row.IsNewRow)
+                    {
+                        // Левый заголовок строки
+                        writer.Write(row.HeaderCell.Value?.ToString() ?? string.Empty);
+                        writer.Write(";");
+
+                        // Данные строки
+                        for (int i = 0; i < dataGridView.Columns.Count; i++)
+                        {
+                            writer.Write(row.Cells[i].Value?.ToString() ?? string.Empty);
+                            if (i < dataGridView.Columns.Count - 1)
+                                writer.Write(";");
+                        }
+                        writer.WriteLine();
+                    }
+                }
+            }
+        }
+
 
         public static void SaveTableWithFileDialog(DataGridView dataGridView, bool saveHeader)
         {
@@ -1978,46 +2046,10 @@ namespace TFTprog
             }
         }
 
-        private static void SaveDataGridViewToCsv(DataGridView dataGridView, bool saveHeader, string filePath)
-        {
-            using (StreamWriter writer = new StreamWriter(filePath, false, Encoding.UTF8))
-            {
-                // Сохранение заголовков
-                if (saveHeader)
-                {
-                    for (int i = 0; i < dataGridView.Columns.Count; i++)
-                    {
-                        writer.Write(dataGridView.Columns[i].HeaderText);
-                        if (i < dataGridView.Columns.Count - 1)
-                        {
-                            writer.Write(";");
-                        }
-                    }
-                    writer.WriteLine();
-                }
-
-                // Сохранение данных
-                foreach (DataGridViewRow row in dataGridView.Rows)
-                {
-                    if (!row.IsNewRow)
-                    {
-                        for (int i = 0; i < dataGridView.Columns.Count; i++)
-                        {
-                            writer.Write(row.Cells[i].Value?.ToString() ?? string.Empty);
-                            if (i < dataGridView.Columns.Count - 1)
-                            {
-                                writer.Write(";");
-                            }
-                        }
-                        writer.WriteLine();
-                    }
-                }
-            }
-        }
-
-
-        #endregion
-
-
     }
- }
+
+    #endregion
+
+
+
+}
