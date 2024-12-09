@@ -241,10 +241,10 @@ namespace TESTAKVA
             FormatTimersGridView(120, 30, new string[] { "Rej", "CountSec", "LastStamp_mSec", "MaxCountSec", "DamageSec" }, GetTextHead(0, 7));
             TimersParPerminEdit();
             // Отключаем сортировку столбцов
-            TimersGridView.ColumnHeaderMouseClick += (s, e) =>
+ /*           TimersGridView.ColumnHeaderMouseClick += (s, e) =>
             {
                 TimersGridView.Sort(TimersGridView.Columns[0], System.ComponentModel.ListSortDirection.Ascending);
-            };
+            };*/
 
             TimersGridView.CellMouseDoubleClick += (s, e) =>
             {//подключаемся к событию двойного клика - событие изменения состояния таймера on/off
