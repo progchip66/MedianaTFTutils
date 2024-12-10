@@ -241,12 +241,38 @@ namespace TESTAKVA
             FormatTimersGridView(120, 30, new string[] { "Rej", "CountSec", "LastStamp_mSec", "MaxCountSec", "DamageSec" }, GetTextHead(0, 7));
             TimersParPerminEdit();
             // Отключаем сортировку столбцов
- /*           TimersGridView.ColumnHeaderMouseClick += (s, e) =>
-            {
-                TimersGridView.Sort(TimersGridView.Columns[0], System.ComponentModel.ListSortDirection.Ascending);
-            };*/
+            /*           TimersGridView.ColumnHeaderMouseClick += (s, e) =>
+                       {
+                           TimersGridView.Sort(TimersGridView.Columns[0], System.ComponentModel.ListSortDirection.Ascending);
+                       };*/
 
-            TimersGridView.CellMouseDoubleClick += (s, e) =>
+
+            ParamGridView.ColumnHeaderMouseClick += (s, e) =>
+            {
+                // Получаем индекс столбца, на который кликнули
+                int clickedColumnIndex = e.ColumnIndex;
+
+                // Проходим по всем ячейкам таблицы
+                foreach (DataGridViewRow row in ParamGridView.Rows)
+                {
+                    foreach (DataGridViewCell cell in row.Cells)
+                    {
+                        // Если ячейка в том же столбце, что и заголовок, на который кликнули
+                        if (cell.ColumnIndex == clickedColumnIndex)
+                        {
+                            // Устанавливаем цвет на DefaultCellStyle.BackColor
+                            cell.Style.BackColor = ParamGridView.DefaultCellStyle.BackColor;
+                        }
+                        else
+                        {
+                            // Устанавливаем цвет на LightGray
+                            cell.Style.BackColor = Color.LightGray;
+                        }
+                    }
+                }
+            };
+
+        TimersGridView.CellMouseDoubleClick += (s, e) =>
             {//подключаемся к событию двойного клика - событие изменения состояния таймера on/off
                 // Проверяем, что двойной клик произошел в области первой строки
                 if (e.RowIndex == 0 && e.ColumnIndex >= 0)

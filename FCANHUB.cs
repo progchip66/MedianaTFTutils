@@ -1857,30 +1857,6 @@ namespace TFTprog
 
         }
 
-        private void dGparam_ColumnHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
-        {
-            // Получаем индекс столбца, на который кликнули
-            int clickedColumnIndex = e.ColumnIndex;
-
-            // Проходим по всем ячейкам таблицы
-            foreach (DataGridViewRow row in dGparam.Rows)
-            {
-                foreach (DataGridViewCell cell in row.Cells)
-                {
-                    // Если ячейка в том же столбце, что и заголовок, на который кликнули
-                    if (cell.ColumnIndex == clickedColumnIndex)
-                    {
-                        // Устанавливаем цвет на DefaultCellStyle.BackColor
-                        cell.Style.BackColor = dGparam.DefaultCellStyle.BackColor;
-                    }
-                    else
-                    {
-                        // Устанавливаем цвет на LightGray
-                        cell.Style.BackColor = Color.LightGray;
-                    }
-                }
-            }
-        }
     }
 
 

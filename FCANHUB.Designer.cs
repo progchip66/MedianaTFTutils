@@ -1089,7 +1089,6 @@
             this.dGparam.Name = "dGparam";
             this.dGparam.Size = new System.Drawing.Size(776, 345);
             this.dGparam.TabIndex = 1;
-            this.dGparam.ColumnHeaderMouseClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.dGparam_ColumnHeaderMouseClick);
             // 
             // WRpro
             // 
