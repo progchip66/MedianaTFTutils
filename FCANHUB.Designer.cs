@@ -578,16 +578,7 @@
             this.tabPageBTAddr.TabIndex = 1;
             this.tabPageBTAddr.Text = "Тест";
             this.tabPageBTAddr.UseVisualStyleBackColor = true;
-            // 
-            // button2
-            // 
-            this.button2.Location = new System.Drawing.Point(339, 560);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(158, 43);
-            this.button2.TabIndex = 8;
-            this.button2.Text = "TableRdWr Test";
-            this.button2.UseVisualStyleBackColor = true;
-            this.button2.Click += new System.EventHandler(this.button2_Click_1);
+
             // 
             // dataGridTimers
             // 

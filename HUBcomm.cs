@@ -104,7 +104,9 @@ namespace ExtHubComm
     class SCANHUB : SCommStruct
     {
 
-       
+        
+
+
         public int adrBASEMenuGPUpict
         {
             get { return Resurs.GetAlignVol(0x100000 - (480 * 272 * 2), 64, 0); }
@@ -140,7 +142,7 @@ namespace ExtHubComm
         public BoardVer CAN_HUB = new BoardVer();
         //      BoardVer Device = new BoardVer();
 
-        public BoardVer MAIN_Board = new BoardVer();
+        public BoardVer MainBoard = new BoardVer();
         //      BoardVer Device = new BoardVer();
 
         public BoardVer TFT_Board = new BoardVer();
@@ -175,8 +177,8 @@ namespace ExtHubComm
                     CAN_HUB.GetBoardVer(RxBuff);
                     return CAN_HUB.Version;
                 case Efl_DEV.fld_MainBoard:
-                    MAIN_Board.GetBoardVer(RxBuff);
-                    return CAN_HUB.Version;
+                    MainBoard.GetBoardVer(RxBuff);
+                    return MainBoard.Version;
                 case Efl_DEV.fld_TFTboard:
                     TFT_Board.GetBoardVer(RxBuff);
                     return TFT_Board.Version;

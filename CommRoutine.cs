@@ -559,6 +559,7 @@ namespace COMMAND
 
 							if (BytesToRead == 0)
 							{//за 10 миллисекунд должен был прийти хотя бы один байт
+								receivingMutex.ReleaseMutex();//освобождаем мьютекс
 								throw new InvalidOperationException("Превышен таймаут в процессе фонового приёма данных.");
 							}
 

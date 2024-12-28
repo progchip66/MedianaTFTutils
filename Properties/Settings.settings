@@ -11,49 +11,49 @@
     <Setting Name="DirGrafFiles" Type="System.String" Scope="User">
       <Value Profile="(Default)">c:\Projects\WaterMassProd1\NEWAKVAimage\</Value>
     </Setting>
-    <Setting Name="Version" Type="System.String" Scope="User">
+    <Setting Name="Version" Type="System.String" Scope="Application">
       <Value Profile="(Default)">V1.1</Value>
     </Setting>
-    <Setting Name="CodeFilename" Type="System.String" Scope="User">
+    <Setting Name="CodeFilename" Type="System.String" Scope="Application">
       <Value Profile="(Default)">CodeFilename</Value>
     </Setting>
-    <Setting Name="StartFLASHadr" Type="System.String" Scope="User">
+    <Setting Name="StartFLASHadr" Type="System.String" Scope="Application">
       <Value Profile="(Default)">0</Value>
     </Setting>
-    <Setting Name="EndFLASHadr" Type="System.String" Scope="User">
+    <Setting Name="EndFLASHadr" Type="System.String" Scope="Application">
       <Value Profile="(Default)">0</Value>
     </Setting>
-    <Setting Name="NameBaseFile" Type="System.String" Scope="User">
+    <Setting Name="NameBaseFile" Type="System.String" Scope="Application">
       <Value Profile="(Default)">ReverdyFLASHfile</Value>
     </Setting>
-    <Setting Name="NameInsFile" Type="System.String" Scope="User">
+    <Setting Name="NameInsFile" Type="System.String" Scope="Application">
       <Value Profile="(Default)">InsertFile</Value>
     </Setting>
-    <Setting Name="StartInsAddr" Type="System.String" Scope="User">
+    <Setting Name="StartInsAddr" Type="System.String" Scope="Application">
       <Value Profile="(Default)">0x80000</Value>
     </Setting>
-    <Setting Name="COMportName" Type="System.String" Scope="User">
-      <Value Profile="(Default)">COM1</Value>
+    <Setting Name="COMportName" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">COM9</Value>
     </Setting>
-    <Setting Name="COMportBaud" Type="System.Int32" Scope="User">
+    <Setting Name="COMportBaud" Type="System.Int32" Scope="Application">
       <Value Profile="(Default)">115200</Value>
     </Setting>
-    <Setting Name="FolderGRAF" Type="System.String" Scope="User">
+    <Setting Name="FolderGRAF" Type="System.String" Scope="Application">
       <Value Profile="(Default)">c:\Projects\WaterMassProd1\NEWAKVAimage\</Value>
     </Setting>
-    <Setting Name="Interface" Type="System.String" Scope="User">
+    <Setting Name="Interface" Type="System.String" Scope="Application">
       <Value Profile="(Default)">UART</Value>
     </Setting>
-    <Setting Name="EnServMess" Type="System.Boolean" Scope="User">
+    <Setting Name="EnServMess" Type="System.Boolean" Scope="Application">
       <Value Profile="(Default)">False</Value>
     </Setting>
-    <Setting Name="ParamFileName" Type="System.String" Scope="User">
+    <Setting Name="ParamFileName" Type="System.String" Scope="Application">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="LastTableFile" Type="System.String" Scope="User">
+    <Setting Name="LastTableFile" Type="System.String" Scope="Application">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="TablesFolder" Type="System.String" Scope="User">
+    <Setting Name="TablesFolder" Type="System.String" Scope="Application">
       <Value Profile="(Default)" />
     </Setting>
   </Settings>

@@ -229,26 +229,24 @@ namespace TESTAKVA
     {
         private DataGridView TimersGridView;
         private DataGridView ParamGridView;
+        public int AKVArej = 0;//текущее значение режима работы устройства
+        public int NewAKVArej = 0;//новое значение режима работы устройства
+
 
         public SWORKAKVATEST(DataGridView _TimersGridView, DataGridView _ParamGridView)
         {//конструктор в котором происходит формирование таблиц таймеров и параметров
             TimersGridView = _TimersGridView ?? throw new ArgumentNullException(nameof(_TimersGridView));
+
             ParamGridView = _ParamGridView ?? throw new ArgumentNullException(nameof(_ParamGridView));
             FormatParamsGridView();//установка параметров таблицы параметров
-            DrawAKVAtable(ParamGridView, FormatParamsGV);
+            DrawAKVAtable(ParamGridView, FormatParamsGV);//установка основных параметров таблицы и заполнение значений нулями
             ParamSetHeaders();//форматирование таблицы параметров
             //форматирование таблицы таймеров
             FormatTimersGridView(120, 30, new string[] { "Rej", "CountSec", "LastStamp_mSec", "MaxCountSec", "DamageSec" }, GetTextHead(0, 7));
             TimersParPerminEdit();
-            // Отключаем сортировку столбцов
-            /*           TimersGridView.ColumnHeaderMouseClick += (s, e) =>
-                       {
-                           TimersGridView.Sort(TimersGridView.Columns[0], System.ComponentModel.ListSortDirection.Ascending);
-                       };*/
-
 
             ParamGridView.ColumnHeaderMouseClick += (s, e) =>
-            {
+            {//одиночный клик на верхнем ЗАГОЛОВКЕ таблицы параметров
                 // Получаем индекс столбца, на который кликнули
                 int clickedColumnIndex = e.ColumnIndex;
 
@@ -270,9 +268,12 @@ namespace TESTAKVA
                         }
                     }
                 }
+                NewAKVArej = clickedColumnIndex;//выбран новый режим в таблице параметров
+  //              UpdateDataFloatFromColumn(ParamGridView, NewAKVArej, float[][] dataFloat)
+
             };
 
-        TimersGridView.CellMouseDoubleClick += (s, e) =>
+            TimersGridView.CellMouseDoubleClick += (s, e) =>
             {//подключаемся к событию двойного клика - событие изменения состояния таймера on/off
                 // Проверяем, что двойной клик произошел в области первой строки
                 if (e.RowIndex == 0 && e.ColumnIndex >= 0)
@@ -332,6 +333,8 @@ namespace TESTAKVA
                     MessageBox.Show(ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             };
+
+            floatParamsGridView = new float[rejheaders.Length, rowHeaders.Length] ;
         }
 
         public GridViewParams FormatParamsGV;//структура хранения параметров форматирования таблицы ParamGridView
@@ -341,21 +344,23 @@ namespace TESTAKVA
 
 
 
-        public readonly string[] rejheaders = { "Wait", "Wash", "Fabric", "prepWash", "newWash", "Damage", "Sanitar", "FirstStart", "speedWash", "Stop",
+        public  string[] rejheaders = { "Wait", "Wash", "Fabric", "prepWash", "newWash", "Damage", "Sanitar", "FirstStart", "speedWash", "Stop",
                          "WaitRazd", "WashRazd", "FabricRazd", "prepWashSteep1", "prepWashSteep2", "prepWashSteep3", "prepWashSteep4",
                          "newWashSteep1", "newWashSteep2", "SanitarSteep1", "SanitarSteep2", "SanitarSteep3", "SanitarSteep4", "SanitarSteep5", "SanitarSteep6",
                          "SanitarSteep7", "SanitarSteep8", "FirstStartSteep1", "FirstStartSteep2", "FirstStartSteep3", "FirstStartSteep4" };
 
-        public readonly string[] rowHeaders = { "FM[0]", "FM[1]", "FM[2]", "PT[0]", "PT[1]", "QT[0]", "QT[1]", "QT[2]",
+        public  string[] rowHeaders = { "FM[0]", "FM[1]", "FM[2]", "PT[0]", "PT[1]", "QT[0]", "QT[1]", "QT[2]",
                             "InONOFF", "InESC", "InPressRazd", "InFlowMeters" };
 
+        public float[,] floatParamsGridView;
 
+
+        
 
 
         #region Timers
-        public bool boolChangeTimersVol = false;
+        public bool boolChangeTimersVol = false;//вручную изменили параметры работы таймера
         public int xChangeTimersVol = -1;
-        private uint ChangeTimersVol = 0;
         private const int ArraySize = 8;
 
         private byte[] tmpbufTimersData = new byte[Marshal.SizeOf(typeof(SATIMER)) * ArraySize];//массив в который копируются считанные данные таймеров
@@ -492,8 +497,8 @@ namespace TESTAKVA
 
 
 
-        #region SimplFormatTibles
-        //ТАБЛИЦА ПАРАМЕТРОВ
+        #region FormatTIMERtible
+        //ТАБЛИЦА ПАРАМЕТРОВ ТАЙМЕРОВ
 
         //выдаёт последовательность строк соедержащих числа увеличивающиеся на 1 для формирования заголовков
         public string[] GetTextHead(int Start, int End)
@@ -664,8 +669,9 @@ namespace TESTAKVA
 
 
 
-        #region ScrollTable
+        #region FORMATparamsScrollAKVAtable
 
+        
 
         public void FormatParamsGridView()
         {//форматируем таблицу структуры GVstruct
@@ -819,9 +825,6 @@ namespace TESTAKVA
                 }
             }
 
-            // Устанавливаем размеры и расположение таблицы
-            // AKVAparGridView.Location = new System.Drawing.Point(x, y);
-
             // Разрешаем отображение полосы прокрутки
             AKVAparGridView.ScrollBars = ScrollBars.Horizontal;
 
@@ -849,7 +852,7 @@ namespace TESTAKVA
             // Сделать редактируемыми все ячейки, кроме первого столбца и первой строки
             for (int row = 0; row < AKVAparGridView.RowCount; row++)
             {
-                for (int col = 1; col < AKVAparGridView.ColumnCount; col++)
+                for (int col = 0; col < AKVAparGridView.ColumnCount; col++)
                 {
                     AKVAparGridView.Rows[row].Cells[col].ReadOnly = false;
                 }
@@ -901,9 +904,82 @@ namespace TESTAKVA
 
         #endregion
 
+        #region WORKwithScrollAKVAtable
 
-        public void saveAKVAparTable(string fileName, DataGridView AKVAparGridView)
-        {
+/*
+
+        string filePath = openFileDialog.FileName;
+
+                    try
+                    {
+                        dataGridView.Rows.Clear();
+                        if (loadHeader)
+                            dataGridView.Columns.Clear();
+
+                        using (StreamReader reader = new StreamReader(filePath, Encoding.UTF8))
+                        {
+                            bool isFirstLine = true;
+                            while (!reader.EndOfStream)
+                            {
+                                string line = reader.ReadLine();
+    string[] values = line.Split(';');
+
+                                if (isFirstLine && loadHeader)
+                                {
+                                    // Добавляем столбцы (верхний заголовок)
+                                    for (int i = 1; i<values.Length; i++) // Начинаем с 1, чтобы пропустить левый заголовок
+                                    {
+                                        dataGridView.Columns.Add(values[i], values[i]);
+                                    }
+isFirstLine = false;
+                                }
+                                else
+{
+    // Создаем новую строку
+    DataGridViewRow newRow = new DataGridViewRow();
+    newRow.CreateCells(dataGridView);
+
+    // Устанавливаем левый заголовок строки
+    if (values.Length > 0)
+    {
+        newRow.HeaderCell.Value = values[0]; // Левый заголовок строки
+    }
+
+    // Заполняем данные строки
+    for (int i = 1; i < values.Length; i++) // Начинаем с 1, чтобы пропустить левый заголовок
+    {
+        newRow.Cells[i - 1].Value = values[i];
+    }
+
+    dataGridView.Rows.Add(newRow);
+}
+                            }
+                        }
+
+                        // Отключаем сортировку для всех столбцов
+                        foreach (DataGridViewColumn column in dataGridView.Columns)
+{
+    column.SortMode = DataGridViewColumnSortMode.NotSortable;
+}
+
+Properties.Settings.Default.LastTableFile = filePath;
+Properties.Settings.Default.Save();
+MessageBox.Show("File loaded successfully.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    catch (Exception ex)
+{
+    MessageBox.Show("An error occurred while loading the file: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+}
+
+
+*/
+
+
+
+
+
+public void saveAKVAparTable(string fileName, DataGridView AKVAparGridView)
+        {//сохранение таблицы в файле
             using (StreamWriter writer = new StreamWriter(fileName))
             {
                 // Сохраняем заголовки столбцов
@@ -924,7 +1000,7 @@ namespace TESTAKVA
             }
         }
 
-
+        //Загрузка таблицы из файла
         public void LoadAKVAparTable(string fileName, DataGridView AKVAparGridView)
         {
             using (System.IO.StreamReader reader = new StreamReader(fileName))
@@ -947,6 +1023,108 @@ namespace TESTAKVA
                 }
             }
         }
+
+        #endregion
+
+
+            // Метод для считывания столбца в массив float
+            public  float[] GetColumnValues(DataGridView gridView, int column)
+            {
+                if (column < 0 || column >= gridView.ColumnCount)
+                    throw new ArgumentOutOfRangeException(nameof(column), "Указан недопустимый номер столбца.");
+
+                float[] result = new float[gridView.RowCount];
+                for (int i = 0; i < gridView.RowCount; i++)
+                {
+                    var cellValue = gridView[column, i].Value?.ToString()?.Trim();
+                    try
+                    {
+                        result[i] = string.IsNullOrEmpty(cellValue)
+                            ? 0
+                            : float.Parse(cellValue, NumberStyles.Float, CultureInfo.InvariantCulture);
+                    }
+                    catch (FormatException)
+                    {
+                        string rowHeader = gridView.Rows[i].HeaderCell.Value?.ToString() ?? $"Row {i + 1}";
+                        string columnHeader = gridView.Columns[column].HeaderText ?? $"Column {column + 1}";
+                        throw new FormatException($"Не удалось конвертировать значение '{cellValue}' в ячейке ({rowHeader}, {columnHeader}).");
+                    }
+                }
+                return result;
+            }
+
+        // Метод для считывания всей таблицы в массив float[][]
+        public float[][] GetTableValues(DataGridView gridView)
+        {
+            float[][] result = new float[gridView.RowCount][];
+            for (int i = 0; i < gridView.RowCount; i++)
+            {
+                result[i] = new float[gridView.ColumnCount];
+                for (int j = 0; j < gridView.ColumnCount; j++)
+                {
+                    var cellValue = gridView[j, i].Value?.ToString()?.Trim();
+                    try
+                    {
+                        result[i][j] = string.IsNullOrEmpty(cellValue)
+                            ? 0
+                            : float.Parse(cellValue, NumberStyles.Float, CultureInfo.InvariantCulture);
+                    }
+                    catch (FormatException)
+                    {
+                        string rowHeader = gridView.Rows[i].HeaderCell.Value?.ToString() ?? $"Row {i + 1}";
+                        string columnHeader = gridView.Columns[j].HeaderText ?? $"Column {j + 1}";
+                        throw new FormatException($"Не удалось конвертировать значение '{cellValue}' в ячейке ({rowHeader}, {columnHeader}).");
+                    }
+                }
+            }
+            return result;
+        }
+            // Метод для заполнения столбца таблицы из массива float[]
+            public  void SetColumnValues(DataGridView gridView, int column, float[] values)
+            {
+                if (column < 0 || column >= gridView.ColumnCount)
+                    throw new ArgumentOutOfRangeException(nameof(column), "Указан недопустимый номер столбца.");
+                if (values.Length != gridView.RowCount)
+                    throw new ArgumentException("Размер массива значений не соответствует числу строк в таблице.");
+
+                for (int i = 0; i < gridView.RowCount; i++)
+                {
+                    gridView[column, i].Value = values[i].ToString(CultureInfo.InvariantCulture);
+                }
+            }
+
+            // Метод для заполнения массива DataFloat из столбца таблицы
+            public  void UpdateDataFloatFromColumn(DataGridView gridView, int column, float[][] dataFloat)
+            {
+                if (column < 0 || column >= gridView.ColumnCount)
+                    throw new ArgumentOutOfRangeException(nameof(column), "Указан недопустимый номер столбца.");
+                if (dataFloat.Length != gridView.RowCount)
+                    throw new ArgumentException("Количество строк в DataFloat не соответствует числу строк в таблице.");
+
+                for (int i = 0; i < gridView.RowCount; i++)
+                {
+                    dataFloat[i][column] = float.Parse(gridView[column, i].Value?.ToString() ?? "0", CultureInfo.InvariantCulture);
+                }
+            }
+
+            // Метод для конвертации одномерного массива float в массив byte
+            public  byte[] FloatArrayToByteArray(float[] array)
+            {
+                byte[] result = new byte[array.Length * sizeof(float)];
+                Buffer.BlockCopy(array, 0, result, 0, result.Length);
+                return result;
+            }
+
+            // Метод для конвертации массива byte в массив float
+            public  float[] ByteArrayToFloatArray(byte[] byteArray)
+            {
+                if (byteArray.Length % sizeof(float) != 0)
+                    throw new ArgumentException("Размер массива byte некорректен для конвертации в массив float.");
+
+                float[] result = new float[byteArray.Length / sizeof(float)];
+                Buffer.BlockCopy(byteArray, 0, result, 0, byteArray.Length);
+                return result;
+            }
 
         #region ComboBoxRejak
 

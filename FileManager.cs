@@ -1063,6 +1063,447 @@ namespace FileCreater
         }
 
     }
+    //**********************************************************************************
+
+    public class SParameterManager
+    {//КЛАСС ДЛЯ ХРАНЕНИЯ ПАРАМЕТРОВ В ТЕКСТОВОМ ИНИФАЙЛЕ
+
+        public SParameterManager()
+        {
+            _filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, IniFileName);
+            if (!File.Exists(_filePath))
+            {
+                InitializeDefaultParameters();
+                SaveParameters();
+            }
+            else
+            {
+                LoadParameters();
+            }
+        }
+
+
+        private const string IniFileName = "IniFile.ini";
+        private readonly string _filePath;
+
+        private int _parameter1;
+        private string _parameter2;
+        private float _parameter3;
+        private bool _EnServMess = false;
+        private int _COMportBaud = 115200;
+        private string _NameResultFile = "NameResultFile";
+        private string _DirResultGrafFile = "c:\\Projects\\WaterMassProd1\\NEWAKVAimage\\";
+        private string _DirGrafFiles = "c:\\Projects\\WaterMassProd1\\NEWAKVAimage\\";
+        private string _Version = "V1.1";
+        private string _CodeFilename = "CodeFilename";
+        private string _StartFLASHadr = "0";
+        private string _EndFLASHadr = "0";
+        private string _FolderGRAF = "c:\\Projects\\WaterMassProd1\\NEWAKVAimage\\";
+        private string _NameBaseFile = "ReverdyFLASHfile";
+        private string _NameInsFile = "InsertFile";
+        private string _StartInsAddr = "0x80000";
+        private string _COMportName = "COM1";
+        private string _Interface = "UART";
+        private string _ParamFileName = "";
+        private string _LastTableFile = "";
+        private string _TablesFolder = "";
+
+        public int Parameter1
+        {
+            get => _parameter1;
+            set
+            {
+                _parameter1 = value;
+                SaveParameters();
+            }
+        }
+
+        public string Parameter2
+        {
+            get => _parameter2;
+            set
+            {
+                _parameter2 = value;
+                SaveParameters();
+            }
+        }
+
+        public float Parameter3
+        {
+            get => _parameter3;
+            set
+            {
+                _parameter3 = value;
+                SaveParameters();
+            }
+        }
+
+        public bool EnServMess
+        {
+            get => _EnServMess;
+            set
+            {
+                _EnServMess = value;
+                SaveParameters();
+            }
+        }
+
+        public int COMportBaud
+        {
+            get => _COMportBaud;
+            set
+            {
+                _COMportBaud = value;
+                SaveParameters();
+            }
+        }
+
+        
+
+        public string NameResultFile
+        {
+            get => _NameResultFile;
+            set
+            {
+                _NameResultFile = value;
+                SaveParameters();
+            }
+        }
+
+
+        public string DirResultGrafFile
+        {
+            get => _DirResultGrafFile;
+            set
+            {
+                _DirResultGrafFile = value;
+                SaveParameters();
+            }
+        }
+
+        public string DirGrafFiles
+        {
+            get => _DirGrafFiles;
+            set
+            {
+                _DirGrafFiles = value;
+                SaveParameters();
+            }
+        }
+
+        public string Version
+        {
+            get => _Version;
+            set
+            {
+                _Version = value;
+                SaveParameters();
+            }
+        }
+
+        public string CodeFilename
+        {
+            get => _CodeFilename;
+            set
+            {
+                _CodeFilename = value;
+                SaveParameters();
+            }
+        }
+
+        public string StartFLASHadr
+        {
+            get => _StartFLASHadr;
+            set
+            {
+                _StartFLASHadr = value;
+                SaveParameters();
+            }
+        }
+
+        public string EndFLASHadr
+        {
+            get => _EndFLASHadr;
+            set
+            {
+                _EndFLASHadr = value;
+                SaveParameters();
+            }
+        }
+
+        public string FolderGRAF
+        {
+            get => _FolderGRAF;
+            set
+            {
+                _FolderGRAF = value;
+                SaveParameters();
+            }
+        }
+
+        public string NameBaseFile
+        {
+            get => _NameBaseFile;
+            set
+            {
+                _NameBaseFile = value;
+                SaveParameters();
+            }
+        }
+
+        public string NameInsFile
+        {
+            get => _NameInsFile;
+            set
+            {
+                _NameInsFile = value;
+                SaveParameters();
+            }
+        }
+
+        public string StartInsAddr
+        {
+            get => _StartInsAddr;
+            set
+            {
+                _StartInsAddr = value;
+                SaveParameters();
+            }
+        }
+
+        public string COMportName
+        {
+            get => _COMportName;
+            set
+            {
+                _COMportName = value;
+                SaveParameters();
+            }
+        }
+
+        public string Interface
+        {
+            get => _Interface;
+            set
+            {
+                _Interface = value;
+                SaveParameters();
+            }
+        }
+
+        public string ParamFileName
+        {
+            get => _ParamFileName;
+            set
+            {
+                _ParamFileName = value;
+                SaveParameters();
+            }
+        }
+
+        public string LastTableFile
+        {
+            get => _LastTableFile;
+            set
+            {
+                _LastTableFile = value;
+                SaveParameters();
+            }
+        }
+
+        public string TablesFolder
+        {
+            get => _TablesFolder;
+            set
+            {
+                _TablesFolder = value;
+                SaveParameters();
+            }
+        }
+
+
+
+        private void InitializeDefaultParameters()
+        {// первые три параметра можно в дальнейшем заменить на свои, которые требуются
+            _parameter1 = 10;
+            _parameter2 = "default";
+            _parameter3 = 3.14f;
+
+
+            _EnServMess = false;
+            _COMportBaud = 115200;
+            _DirResultGrafFile = "c:\\Projects\\WaterMassProd1\\NEWAKVAimage\\";
+            _DirGrafFiles = "c:\\Projects\\WaterMassProd1\\NEWAKVAimage\\";
+            _Version = "V1.1";
+            _CodeFilename = "CodeFilename";
+            _StartFLASHadr = "0";
+            _EndFLASHadr = "0";
+            _FolderGRAF = "c:\\Projects\\WaterMassProd1\\NEWAKVAimage\\";
+            _NameBaseFile = "ReverdyFLASHfile";
+            _NameInsFile = "InsertFile";
+            _StartInsAddr = "0x80000";
+            _COMportName = "COM1";
+            _Interface = "UART";
+            _ParamFileName = "";
+            _LastTableFile = "";
+            _TablesFolder = "";
+        }
+
+        private void LoadParameters()
+        {
+            var parameters = new Dictionary<string, string>();
+
+            foreach (var line in File.ReadAllLines(_filePath))
+            {
+                var parts = line.Split(';');
+                if (parts.Length == 2)
+                {
+                    parameters[parts[0]] = parts[1];
+                }
+            }
+
+            if (parameters.TryGetValue("Parameter1", out var param1) && int.TryParse(param1, out var intVal1))
+            {
+                _parameter1 = intVal1;
+            }
+            if (parameters.TryGetValue("Parameter2", out var param2))
+            {
+                _parameter2 = param2;
+            }
+            if (parameters.TryGetValue("Parameter3", out var param3) && float.TryParse(param3, out var floatVal3))
+            {
+                _parameter3 = floatVal3;
+            }
+            if (parameters.TryGetValue("EnServMess", out var enServMess) && bool.TryParse(enServMess, out var boolVal))
+            {
+                _EnServMess = boolVal;
+            }
+            if (parameters.TryGetValue("COMportBaud", out var comBaud) && int.TryParse(comBaud, out var intValBaud))
+            {
+                _COMportBaud = intValBaud;
+            }
+            if (parameters.TryGetValue("DirResultGrafFile", out var dirResult))
+            {
+                _DirResultGrafFile = dirResult;
+            }
+            if (parameters.TryGetValue("DirGrafFiles", out var dirGraf))
+            {
+                _DirGrafFiles = dirGraf;
+            }
+            if (parameters.TryGetValue("Version", out var version))
+            {
+                _Version = version;
+            }
+            if (parameters.TryGetValue("CodeFilename", out var codeFilename))
+            {
+                _CodeFilename = codeFilename;
+            }
+            if (parameters.TryGetValue("StartFLASHadr", out var startFlash))
+            {
+                _StartFLASHadr = startFlash;
+            }
+            if (parameters.TryGetValue("EndFLASHadr", out var endFlash))
+            {
+                _EndFLASHadr = endFlash;
+            }
+            if (parameters.TryGetValue("FolderGRAF", out var folderGraf))
+            {
+                _FolderGRAF = folderGraf;
+            }
+            if (parameters.TryGetValue("NameBaseFile", out var nameBase))
+            {
+                _NameBaseFile = nameBase;
+            }
+            if (parameters.TryGetValue("NameInsFile", out var nameIns))
+            {
+                _NameInsFile = nameIns;
+            }
+            if (parameters.TryGetValue("StartInsAddr", out var startIns))
+            {
+                _StartInsAddr = startIns;
+            }
+            if (parameters.TryGetValue("COMportName", out var comPort))
+            {
+                _COMportName = comPort;
+            }
+            if (parameters.TryGetValue("Interface", out var iface))
+            {
+                _Interface = iface;
+            }
+            if (parameters.TryGetValue("ParamFileName", out var paramFile))
+            {
+                _ParamFileName = paramFile;
+            }
+            if (parameters.TryGetValue("LastTableFile", out var lastTable))
+            {
+                _LastTableFile = lastTable;
+            }
+            if (parameters.TryGetValue("TablesFolder", out var tablesFolder))
+            {
+                _TablesFolder = tablesFolder;
+            }
+        }
+
+
+        private void SaveParameters()
+        {
+            var lines = new List<string>
+        {
+            $"Parameter1;{_parameter1}",
+            $"Parameter2;{_parameter2}",
+            $"Parameter3;{_parameter3}",
+            $"EnServMess;{_EnServMess}",
+            $"COMportBaud;{_COMportBaud}",
+            $"DirResultGrafFile;{_DirResultGrafFile}",
+            $"DirGrafFiles;{_DirGrafFiles}",
+            $"Version;{_Version}",
+            $"CodeFilename;{_CodeFilename}",
+            $"StartFLASHadr;{_StartFLASHadr}",
+            $"EndFLASHadr;{_EndFLASHadr}",
+            $"FolderGRAF;{_FolderGRAF}",
+            $"NameBaseFile;{_NameBaseFile}",
+            $"NameInsFile;{_NameInsFile}",
+            $"StartInsAddr;{_StartInsAddr}",
+            $"COMportName;{_COMportName}",
+            $"Interface;{_Interface}",
+            $"ParamFileName;{_ParamFileName}",
+            $"LastTableFile;{_LastTableFile}",
+            $"TablesFolder;{_TablesFolder}"
+        };
+
+            File.WriteAllLines(_filePath, lines);
+        }
+
+        public void PrintAllParameters()
+        {
+            Console.WriteLine($"Parameter1: {_parameter1} (int)");
+            Console.WriteLine($"Parameter2: {_parameter2} (string)");
+            Console.WriteLine($"Parameter3: {_parameter3} (float)");
+            Console.WriteLine($"EnServMess: {_EnServMess} (bool)");
+            Console.WriteLine($"COMportBaud: {_COMportBaud} (int)");
+            Console.WriteLine($"DirResultGrafFile: {_DirResultGrafFile} (string)");
+            Console.WriteLine($"DirGrafFiles: {_DirGrafFiles} (string)");
+            Console.WriteLine($"Version: {_Version} (string)");
+            Console.WriteLine($"CodeFilename: {_CodeFilename} (string)");
+            Console.WriteLine($"StartFLASHadr: {_StartFLASHadr} (string)");
+            Console.WriteLine($"EndFLASHadr: {_EndFLASHadr} (string)");
+            Console.WriteLine($"FolderGRAF: {_FolderGRAF} (string)");
+            Console.WriteLine($"NameBaseFile: {_NameBaseFile} (string)");
+            Console.WriteLine($"NameInsFile: {_NameInsFile} (string)");
+            Console.WriteLine($"StartInsAddr: {_StartInsAddr} (string)");
+            Console.WriteLine($"COMportName: {_COMportName} (string)");
+            Console.WriteLine($"Interface: {_Interface} (string)");
+            Console.WriteLine($"ParamFileName: {_ParamFileName} (string)");
+            Console.WriteLine($"LastTableFile: {_LastTableFile} (string)");
+            Console.WriteLine($"TablesFolder: {_TablesFolder} (string)");
+        }
+
+        public void ResetToDefault()
+        {
+            InitializeDefaultParameters();
+            SaveParameters();
+        }
+    }
 
 
 
@@ -1073,5 +1514,4 @@ namespace FileCreater
 
 
 
- 
- 
+

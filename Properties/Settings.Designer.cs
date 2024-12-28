@@ -59,183 +59,138 @@ namespace TFTprog.Properties {
             }
         }
         
-        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("V1.1")]
         public string Version {
             get {
                 return ((string)(this["Version"]));
             }
-            set {
-                this["Version"] = value;
-            }
         }
         
-        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("CodeFilename")]
         public string CodeFilename {
             get {
                 return ((string)(this["CodeFilename"]));
             }
-            set {
-                this["CodeFilename"] = value;
-            }
         }
         
-        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("0")]
         public string StartFLASHadr {
             get {
                 return ((string)(this["StartFLASHadr"]));
             }
-            set {
-                this["StartFLASHadr"] = value;
-            }
         }
         
-        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("0")]
         public string EndFLASHadr {
             get {
                 return ((string)(this["EndFLASHadr"]));
             }
-            set {
-                this["EndFLASHadr"] = value;
-            }
         }
         
-        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("ReverdyFLASHfile")]
         public string NameBaseFile {
             get {
                 return ((string)(this["NameBaseFile"]));
             }
-            set {
-                this["NameBaseFile"] = value;
-            }
         }
         
-        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("InsertFile")]
         public string NameInsFile {
             get {
                 return ((string)(this["NameInsFile"]));
             }
-            set {
-                this["NameInsFile"] = value;
-            }
         }
         
-        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("0x80000")]
         public string StartInsAddr {
             get {
                 return ((string)(this["StartInsAddr"]));
             }
-            set {
-                this["StartInsAddr"] = value;
-            }
         }
         
-        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("COM1")]
+        [global::System.Configuration.DefaultSettingValueAttribute("COM9")]
         public string COMportName {
             get {
                 return ((string)(this["COMportName"]));
             }
-            set {
-                this["COMportName"] = value;
-            }
         }
         
-        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("115200")]
         public int COMportBaud {
             get {
                 return ((int)(this["COMportBaud"]));
             }
-            set {
-                this["COMportBaud"] = value;
-            }
         }
         
-        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("c:\\Projects\\WaterMassProd1\\NEWAKVAimage\\")]
         public string FolderGRAF {
             get {
                 return ((string)(this["FolderGRAF"]));
             }
-            set {
-                this["FolderGRAF"] = value;
-            }
         }
         
-        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("UART")]
         public string Interface {
             get {
                 return ((string)(this["Interface"]));
             }
-            set {
-                this["Interface"] = value;
-            }
         }
         
-        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
         public bool EnServMess {
             get {
                 return ((bool)(this["EnServMess"]));
             }
-            set {
-                this["EnServMess"] = value;
-            }
         }
         
-        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
         public string ParamFileName {
             get {
                 return ((string)(this["ParamFileName"]));
             }
-            set {
-                this["ParamFileName"] = value;
-            }
         }
         
-        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
         public string LastTableFile {
             get {
                 return ((string)(this["LastTableFile"]));
             }
-            set {
-                this["LastTableFile"] = value;
-            }
         }
         
-        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
         public string TablesFolder {
             get {
                 return ((string)(this["TablesFolder"]));
-            }
-            set {
-                this["TablesFolder"] = value;
             }
         }
     }

@@ -25,37 +25,31 @@ namespace TFTprog
     
     public partial class FormHUB : Form
     {
-        private SWORKAKVATEST WORKAKVATEST;
+        public  SParameterManager Proper = new SParameterManager();
+        public SWORKAKVATEST WORKAKVATEST;
         TFileManager fcreater = new TFileManager();
+        
         SCANHUB CANHUB = new SCANHUB();
         
         SGRAF_FILES GRAF_FILES = new SGRAF_FILES();
         
         bool isInitComboSpeed = false;
 
-        public void LoadDefaultSetting()
+ /*       public void LoadDefaultSetting()
         {
-            tBresultFilename.Text = Properties.Settings.Default.NameResultFile;
-            TBSourseDir.Text = Properties.Settings.Default.DirGrafFiles;
-            tBresultPath.Text = Properties.Settings.Default.DirResultGrafFile;
-            tBcodefilename.Text = Properties.Settings.Default.CodeFilename;
+            tBresultFilename.Text = Proper.NameResultFile;
+            TBSourseDir.Text = Proper.DirGrafFiles;
+            tBresultPath.Text = Proper.DirResultGrafFile;
+            tBcodefilename.Text = Proper.CodeFilename;
 
-            tBgrafDIR.Text=Properties.Settings.Default.FolderGRAF;
+            tBgrafDIR.Text= Proper.FolderGRAF;
 
 
-            tBstartAdr.Text = Properties.Settings.Default.StartFLASHadr;
-            tBendAdr.Text = Properties.Settings.Default.EndFLASHadr;
-            cBoxEnMess.Checked = Properties.Settings.Default.EnServMess;
+            tBstartAdr.Text = Proper.StartFLASHadr;
+            tBendAdr.Text = Proper.EndFLASHadr;
+            cBoxEnMess.Checked = Proper.EnServMess;
 
-            /*        else
-                    {
-                        index = LBoxInterface.SelectedIndex;
-                        Properties.Settings.Default.Interface = LBoxInterface.Items[index].ToString();
-                    }
 
-                    /*  tBbasefile.Text = Properties.Settings.Default.NameBaseFile;
-                      tBinsFile.Text = Properties.Settings.Default.NameInsFile;
-                      tBadrins.Text = Properties.Settings.Default.StartInsAddr;*/
 
         }
 
@@ -63,20 +57,7 @@ namespace TFTprog
 
 
 
-        public void SaveDefaultSetting()
-        {
-            Properties.Settings.Default.NameResultFile = tBresultFilename.Text;
-            Properties.Settings.Default.DirGrafFiles = TBSourseDir.Text;
-            Properties.Settings.Default.DirResultGrafFile = tBresultPath.Text;
-            Properties.Settings.Default.CodeFilename = tBcodefilename.Text;
-
-            Properties.Settings.Default.StartFLASHadr= tBstartAdr.Text;
-            Properties.Settings.Default.EndFLASHadr= tBendAdr.Text;
-            Properties.Settings.Default.EnServMess = cBoxEnMess.Checked;
-
-            Properties.Settings.Default.Save();
-
-        }
+*/
 
         public void EnDisComponent(bool En)
         {
@@ -116,7 +97,7 @@ namespace TFTprog
             string ret;
             try
             {
-                SLprocess.Text = Properties.Settings.Default.COMportName + "  Baud:" + CANHUB.BaudRate.ToString();
+                SLprocess.Text = CANHUB.PortName + "  Baud:" + CANHUB.BaudRate.ToString();
                 ret = CANHUB.GetVerDev(Dev, DevType);
                 if (ShowMess)
                     switch (DevType)
@@ -170,22 +151,25 @@ namespace TFTprog
                 {
                     int i = 0;
                     string tmpStr;
+  //                  CANHUB.PortName = ComPortName;
 
-                    tmpStr = TryOpenDev(CANHUB.CAN_HUB, Efl_DEV.fld_HUB, false);
-                    if (tmpStr != "")
-                    {
-                        tmpStr=CANHUB.ConcatenateStrings(tmpStr, "", "");
-                        LBoxInterface.Items.Add(tmpStr);
-                        i++;
-                    }
-
-                    tmpStr = TryOpenDev(CANHUB.MAIN_Board, Efl_DEV.fld_MainBoard, false);
+                    tmpStr = TryOpenDev(CANHUB.MainBoard, Efl_DEV.fld_MainBoard, false);
                     if (tmpStr != "")
                     {
                         tmpStr = CANHUB.ConcatenateStrings(tmpStr, "", "");
                         LBoxInterface.Items.Add(tmpStr);
                         i++;
                     }
+
+                    tmpStr = TryOpenDev(CANHUB.CAN_HUB, Efl_DEV.fld_HUB, false);
+                    if (tmpStr != "")
+                    {
+                        tmpStr =CANHUB.ConcatenateStrings(tmpStr, "", "");
+                        LBoxInterface.Items.Add(tmpStr);
+                        i++;
+                    }
+
+
 
                     
                     SLprocess.Text = ComPortName + "  Baud:" + baudrate.ToString();
@@ -222,18 +206,19 @@ namespace TFTprog
                 {
                     string sport = listComPort.Items[i].ToString();
                     if (ComPortName == sport)
-                        break;//этот компорт мы уже ранее опросил
+                        continue;//этот компорт мы уже ранее опросил
 
-                    if (CANHUB.GetOpenComport(sport, Properties.Settings.Default.COMportBaud, false))                   
+                    if (CANHUB.GetOpenComport(sport, Proper.COMportBaud, false))                   
                     {//пытаемся установить связь с устройством с помощью очередного COM порта из списка
 
                         try
 
                         {
-                            CANHUB.GetVerDev(CANHUB.TFT_Board, Efl_DEV.fld_TFTboard);
+                            CANHUB.GetVerDev(CANHUB.MainBoard, Efl_DEV.fld_MainBoard);
+                            //CANHUB.GetVerDev(CANHUB.TFT_Board, Efl_DEV.fld_TFTboard);
+
                             //если получили отклик через COM порт запоминаем его номер
-                            Properties.Settings.Default.COMportName = CANHUB.PortName;
-                            Properties.Settings.Default.Save();
+                            Proper.COMportName = CANHUB.PortName;
                             this.Text = "ProgChip " + CANHUB.TFT_Board.Version;
 
                             MessageBox.Show("Определено устройство - USB HUB", "USB HUB успешно подключен подключен", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -294,20 +279,19 @@ namespace TFTprog
             WORKAKVATEST.UpdateComboBoxRejak(cBrej);
 
 
-            this.Text = "DrawConfig  " + Properties.Settings.Default.Version;
+            this.Text = "DrawConfig  " + Proper.Version;
             LBoxInterface.Items.Clear();
-            LoadDefaultSetting();
 
             cBrej.SelectedIndex = 0;
             cBrejSimulator.SelectedIndex = 0;
 
             if (CANHUB.IsPortOpen(listComPort.Items))
             {
-                Scan_and_OpenHUBTFTCOMport(Properties.Settings.Default.COMportName, Properties.Settings.Default.COMportBaud, cBoxEnMess.Checked);
-                SelectComPort(Properties.Settings.Default.COMportName, listComPort);
+                Scan_and_OpenHUBTFTCOMport(Proper.COMportName, Proper.COMportBaud, cBoxEnMess.Checked);
+                SelectComPort(Proper.COMportName, listComPort);
             }
 
-
+           // WORKAKVATEST
          }
 
 
@@ -329,23 +313,44 @@ namespace TFTprog
                         case 9://приём и установка нового режима работы
 
                             break;
-                        case 10://приём и отображение данных о всех таймерах
+                        case 10://приём и отображение данных о всех таймерах и ответ в зависимости от того какие параметры были изменены
+                            if (WORKAKVATEST.NewAKVArej >=0)
+                            {//здесь же в качестве ответа организуем РУЧНУЮ смену режима работы таймера
+                                byte[] array = { 10, 0 };
+                                array[1] = (byte)WORKAKVATEST.NewAKVArej;
+                                CANHUB.CommSendAnsv(ECommand.cmd_exhSimulator, Efl_DEV.fld_TFTboard, array, 0);//отправляем команду которая не предусматривает ответа
+                            }
+
+
                             if (WORKAKVATEST.boolChangeTimersVol)
                             {//обновление вручную значения в таблице таймеров произведено
-                                // надо отправить обновлённые данные о таймере в который были внесены изменения
-                                byte[] byteArray = WORKAKVATEST.OneTimerToBytes(WORKAKVATEST.T[WORKAKVATEST.xChangeTimersVol]);
-                                WORKAKVATEST.boolChangeTimersVol = false;//сбрасываем флаг ручного изменения данных
+                             // надо отправить обновлённые данные о таймере в который были внесены изменения
                                 int LenTIM = System.Runtime.InteropServices.Marshal.SizeOf(typeof(SATIMER));
                                 byte[] Senddata = new byte[LenTIM + 1];
                                 Senddata[0] = (byte)WORKAKVATEST.xChangeTimersVol;//номер таймера в котором были внесены изменения
+
+                                byte[] byteArray = WORKAKVATEST.OneTimerToBytes(WORKAKVATEST.T[WORKAKVATEST.xChangeTimersVol]);
+                                WORKAKVATEST.boolChangeTimersVol = false;//сбрасываем флаг ручного изменения данных
                                 Array.Copy(byteArray, 0, Senddata, 1, LenTIM);
                                 CANHUB.CommSendAnsv(ECommand.cmd_exhSimulator, Efl_DEV.fld_TFTboard, Senddata, 0);//отправляем команду которая не предусматривает ответа
                             }
                             else
-                            {//обновление производим только в случае, если не было изменений вручную, если были изменения будут учтены при следующем приходе данных через секунду
-                                WORKAKVATEST.TimersParFromByteArray(RXdata);//обновление структуры таймеров
-                                Invoke(new Action(() => WORKAKVATEST.DisplayInTimersGridView()));//отображение данных в таблице
+                            {
+                                if (WORKAKVATEST.NewAKVArej >= 0)
+                                {
+  //                                  byte[] Senddata = new byte[LenTIM + 1];
+                                    WORKAKVATEST.AKVArej = WORKAKVATEST.NewAKVArej;//устанавливаем новый режим работы
+                                    WORKAKVATEST.NewAKVArej = -1;
+                                    //обновляем данные в столбце 
+
+                                }
+                                else
+                                {//ОБНОВЛЕНИЕ СТРУКТУРЫ ТАЙМЕРОВ производим только в случае, если не было изменений вручную, если были изменения будут учтены при следующем приходе данных через секунду
+                                    WORKAKVATEST.TimersParFromByteArray(RXdata);//обновление структуры таймеров
+                                    Invoke(new Action(() => WORKAKVATEST.DisplayInTimersGridView()));//отображение данных в таблице
+                                }
                             }
+
                             
                             break;
                     }
@@ -412,8 +417,7 @@ namespace TFTprog
             if (FolderDialog1.ShowDialog() == DialogResult.OK)
             {
                 TBSourseDir.Text = FolderDialog1.SelectedPath;
-                Properties.Settings.Default.DirGrafFiles = TBSourseDir.Text;
-                Properties.Settings.Default.Save();
+                Proper.DirGrafFiles = TBSourseDir.Text;
             }
 
             /*
@@ -479,8 +483,7 @@ namespace TFTprog
             if (FolderResult.ShowDialog() == DialogResult.OK)
             {
                 tBresultPath.Text = FolderResult.SelectedPath;
-                Properties.Settings.Default.DirResultGrafFile = tBresultPath.Text;
-                Properties.Settings.Default.Save();
+                Proper.DirResultGrafFile = tBresultPath.Text;
             }
 
         }
@@ -489,12 +492,11 @@ namespace TFTprog
         {
 
  FolderBrowserDialog FolderResult = new FolderBrowserDialog();
-             string dirName = Properties.Settings.Default.FolderGRAF;
+             string dirName = Proper.FolderGRAF;
              if (FolderResult.ShowDialog() == DialogResult.OK)
              {
                  tBgrafDIR.Text = FolderResult.SelectedPath;
-                 Properties.Settings.Default.FolderGRAF = tBgrafDIR.Text;
-                 Properties.Settings.Default.Save();
+                Proper.FolderGRAF = tBgrafDIR.Text;
              }
         }
 
@@ -502,7 +504,7 @@ namespace TFTprog
 
         private void bSaveConf_Click(object sender, EventArgs e)
         {
-            SaveDefaultSetting();
+           // SaveDefaultSetting();
         }
 
         private void backWorkDo(object sender, DoWorkEventArgs e)
@@ -642,7 +644,7 @@ namespace TFTprog
         private void bCOMselect_Click(object sender, EventArgs e)
         {
 
-            int index = listComPort.Items.IndexOf(Properties.Settings.Default.COMportName);
+            int index = listComPort.Items.IndexOf(Proper.COMportName);
             if (index == -1)
             {
                 listComPort.SelectedIndex = 0;
@@ -652,12 +654,11 @@ namespace TFTprog
                 listComPort.SelectedIndex = index;
             }
 
-            if (CANHUB.GetOpenComport(listComPort.SelectedItem.ToString(), Properties.Settings.Default.COMportBaud, true))
+            if (CANHUB.GetOpenComport(listComPort.SelectedItem.ToString(), Proper.COMportBaud, true))
             //    if (Sens.GetOpenComport(Properties.Settings.Default.COMportName, Properties.Settings.Default.COMportBaud, false))
             {
-                Properties.Settings.Default.COMportName = CANHUB.PortName;
-                Properties.Settings.Default.Save();
-                SLprocess.Text = Properties.Settings.Default.COMportName + "  Baud:" + CANHUB.BaudRate.ToString();
+                Proper.COMportName = CANHUB.PortName;
+                SLprocess.Text = Proper.COMportName + "  Baud:" + CANHUB.BaudRate.ToString();
                 try
 
                 {
@@ -684,7 +685,7 @@ namespace TFTprog
                           bTest.Visible = false;
                           labelRsens.Visible = false;
                       }*/
-                    this.Text = "TFTprog " + Properties.Settings.Default.Version + " ©С - Progchip" + " (" + "версия платы: " + 1.00/*DCOM.parBoardVerHard*/ + "  версия микрокода: " + 1.00/*DCOM.parBoardVerSoft*/ + " )";
+                    this.Text = "TFTprog " + Proper.Version + " ©С - Progchip" + " (" + "версия платы: " + 1.00/*DCOM.parBoardVerHard*/ + "  версия микрокода: " + 1.00/*DCOM.parBoardVerSoft*/ + " )";
                 }
 
                 catch (Exception ex)
@@ -703,17 +704,17 @@ namespace TFTprog
 
         private void listComPort_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (CANHUB.GetOpenComport(listComPort.SelectedItem.ToString(), Properties.Settings.Default.COMportBaud, false))
+            if (CANHUB.GetOpenComport(listComPort.SelectedItem.ToString(), Proper.COMportBaud, false))
 
             {
 
-                SLprocess.Text = Properties.Settings.Default.COMportName + "  Baud:" + CANHUB.BaudRate.ToString();
+                SLprocess.Text = Proper.COMportName + "  Baud:" + CANHUB.BaudRate.ToString();
                 try
 
                 {
                    // вставить сюда команду считывания версии  DCOM.WRUFComm(0);
-                    if (Properties.Settings.Default.COMportName != CANHUB.PortName)
-                        Properties.Settings.Default.Save();
+                    if (Proper.COMportName != CANHUB.PortName)
+                        Proper.COMportName= CANHUB.PortName;
 
                 }
                 catch (Exception)
@@ -742,12 +743,21 @@ namespace TFTprog
             }
             
 
-            if (CANHUB.GetOpenComport(itemText, Properties.Settings.Default.COMportBaud, false))
+            if (CANHUB.GetOpenComport(itemText, Proper.COMportBaud, false))
             {// пытаемся соединиться с устройством посредством выделенного порта
                 try
                 {
                     int i = 0;
                     string tmpStr;
+
+                    tmpStr = TryOpenDev(CANHUB.MainBoard, Efl_DEV.fld_MainBoard, false);
+                    if (tmpStr != "")
+                    {
+                        tmpStr = CANHUB.ConcatenateStrings(tmpStr, "", "");
+                        LBoxInterface.Items.Add(tmpStr);
+                        i++;
+                    }
+
 
                     tmpStr = TryOpenDev(CANHUB.CAN_HUB, Efl_DEV.fld_HUB, false);
                     if (tmpStr != "")
@@ -755,18 +765,13 @@ namespace TFTprog
                         tmpStr = CANHUB.ConcatenateStrings(tmpStr, "", "");
                         LBoxInterface.Items.Add(tmpStr);
                         i++;
-                    }
-
-                    tmpStr = TryOpenDev(CANHUB.MAIN_Board, Efl_DEV.fld_MainBoard, false);
-                    if (tmpStr != "")
-                    {
-                        tmpStr = CANHUB.ConcatenateStrings(tmpStr, "", "");
-                        LBoxInterface.Items.Add(tmpStr);
-                        i++;
+                        Proper.COMportName= itemText;
                     }
 
 
-                    SLprocess.Text = itemText + "  Baud:" + Properties.Settings.Default.COMportBaud;
+
+
+                    SLprocess.Text = itemText + "  Baud:" + Proper.COMportBaud;
                     tmpStr = TryOpenDev(CANHUB.TFT_Board, Efl_DEV.fld_TFTboard, false);
                     if (tmpStr != "")
                     {
@@ -809,12 +814,11 @@ namespace TFTprog
                         listComPort.SelectedIndex = index;
                     }*/
 
-            if (CANHUB.GetOpenComport(listComPort.SelectedItem.ToString(), Properties.Settings.Default.COMportBaud, true))
+            if (CANHUB.GetOpenComport(listComPort.SelectedItem.ToString(), Proper.COMportBaud, true))
             //    if (Sens.GetOpenComport(Properties.Settings.Default.COMportName, Properties.Settings.Default.COMportBaud, false))
             {
-                Properties.Settings.Default.COMportName = CANHUB.PortName;
-                Properties.Settings.Default.Save();
-                SLprocess.Text = Properties.Settings.Default.COMportName + "  Baud:" + CANHUB.BaudRate.ToString();
+                Proper.COMportName = CANHUB.PortName;
+                SLprocess.Text = Proper.COMportName + "  Baud:" + CANHUB.BaudRate.ToString();
                 try
 
                 {
@@ -1143,7 +1147,7 @@ namespace TFTprog
                 CANHUB.enProAddOneMenuFile = 0;
 
                 string filename = tBNameOneFile.Text;
-                string DIR_FlowPro = Properties.Settings.Default.FolderGRAF;//директория;
+                string DIR_FlowPro = Proper.FolderGRAF;//директория;
                 if (!GRAF_FILES.CheckFileExist(filename, DIR_FlowPro, "MENU"))
                     return;//файл либо путь к нему указан не правильно
                 CANHUB.OneFileName = filename;//имя файла подлежит записи
@@ -1176,7 +1180,7 @@ namespace TFTprog
             e.Result = "Все операции выполнены успешно";
             EMemPRO statMemPRO = EMemPRO.eopmpro_setpar;
             int NumFile = 0;
-            string DIR_FlowPro = Properties.Settings.Default.FolderGRAF;
+            string DIR_FlowPro = Proper.FolderGRAF;
             string MENUfileFLASHadr = DIR_FlowPro + "\\DOC\\defAdrMENU.txt";
             int[] MENUfilesStartAdr = CANHUB.GetNumbersFromFile(MENUfileFLASHadr);//формируем массив длин файлов на основе файла описания
 
@@ -1318,8 +1322,8 @@ namespace TFTprog
                     CANHUB.DirFlowPro = "FONT";
                     int NumPICT = 0; ;
                     int FLASHwrFileStartAdr = CANHUB.StartFLASHadrFlowPro;
-                    string[] FONTfilenames = GRAF_FILES.Init_WRtoFLASHfiles(Properties.Settings.Default.FolderGRAF, "FONT");//получаем список файлов директории c фонтами
-                    string[] PICTfilenames = GRAF_FILES.Init_WRtoFLASHfiles(Properties.Settings.Default.FolderGRAF, "PICT");//получаем список файлов директории с картинками
+                    string[] FONTfilenames = GRAF_FILES.Init_WRtoFLASHfiles(Proper.FolderGRAF, "FONT");//получаем список файлов директории c фонтами
+                    string[] PICTfilenames = GRAF_FILES.Init_WRtoFLASHfiles(Proper.FolderGRAF, "PICT");//получаем список файлов директории с картинками
 
 
                     int FONTfilecount = FONTfilenames.Length;
@@ -1476,11 +1480,11 @@ namespace TFTprog
         public int FLASHalign { get { return FM.FLASHalign; } }
         public int RAMalign { get { return FM.RAMalign; } } */
 
-                GRAF_FILES.Init_ArrFLASHaddr_MENU(Properties.Settings.Default.FolderGRAF, CANHUB.StartFLASHadr, GRAF_FILES.const_sizeTFTFLASHalign, GRAF_FILES.const_AddLenFileSize);
-                GRAF_FILES.Init_FONTE_PICT(Properties.Settings.Default.FolderGRAF, CANHUB.StartFLASHadr, CANHUB.adrBASEMenuGPUpict);
+                GRAF_FILES.Init_ArrFLASHaddr_MENU(Proper.FolderGRAF, CANHUB.StartFLASHadr, GRAF_FILES.const_sizeTFTFLASHalign, GRAF_FILES.const_AddLenFileSize);
+                GRAF_FILES.Init_FONTE_PICT(Proper.FolderGRAF, CANHUB.StartFLASHadr, CANHUB.adrBASEMenuGPUpict);
 
  //               GRAF_FILES.Init_MENU_enum(Properties.Settings.Default.FolderGRAF, 0x100000);//load filenames
-                GRAF_FILES.codeMENUcreater_(Properties.Settings.Default.FolderGRAF);
+                GRAF_FILES.codeMENUcreater_(Proper.FolderGRAF);
 
                 /*
                 EnDisComponent(false);
@@ -1498,21 +1502,14 @@ namespace TFTprog
             }
         }
 
-        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
-        {
-
-        }
 
         private void bParamRead_Click(object sender, EventArgs e)
         {
 
-            LoadSaveTable.LoadDataGridViewFromCsv(dGparam, true);
+            LoadSaveTable.LoadDataGridViewFromCsv(dGparam, true,Proper);
         }
 
-        private void button2_Click_1(object sender, EventArgs e)
-        {
-            
-        }
+
 
         private void button3_Click(object sender, EventArgs e)
         {
@@ -1602,7 +1599,7 @@ namespace TFTprog
 
         private void bParamWrite_Click(object sender, EventArgs e)
         {
-            LoadSaveTable.SaveTableWithFileDialog(dGparam, true);
+            LoadSaveTable.SaveTableWithFileDialog(dGparam, true,Proper);
         }
 
         private void listComPort_SelectedIndexChanged_1(object sender, EventArgs e)
@@ -1612,7 +1609,7 @@ namespace TFTprog
 
         private void checkBox1_CheckedChanged(object sender, EventArgs e)
         {
-            SaveDefaultSetting();
+//            SaveDefaultSetting();
         }
 
         private void buttestSw_Click(object sender, EventArgs e)
@@ -1865,14 +1862,14 @@ namespace TFTprog
     public static class LoadSaveTable
     {
 
-        public static void LoadDataGridViewFromCsv(DataGridView dataGridView, bool loadHeader)
+        public static void LoadDataGridViewFromCsv(DataGridView dataGridView, bool loadHeader, SParameterManager Prop)
         {
             dataGridView.AllowUserToAddRows = false;
 
             using (OpenFileDialog openFileDialog = new OpenFileDialog())
             {
                 openFileDialog.Filter = "CSV files (*.csv)|*.csv";
-                openFileDialog.FileName = Properties.Settings.Default.LastTableFile;
+                openFileDialog.FileName = Prop.LastTableFile;
 
                 if (openFileDialog.ShowDialog() == DialogResult.OK)
                 {
@@ -1930,8 +1927,7 @@ namespace TFTprog
                             column.SortMode = DataGridViewColumnSortMode.NotSortable;
                         }
 
-                        Properties.Settings.Default.LastTableFile = filePath;
-                        Properties.Settings.Default.Save();
+                        Prop.LastTableFile = filePath;
                         MessageBox.Show("File loaded successfully.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
                     catch (Exception ex)
@@ -1982,7 +1978,7 @@ namespace TFTprog
         }
 
 
-        public static void SaveTableWithFileDialog(DataGridView dataGridView, bool saveHeader)
+        public static void SaveTableWithFileDialog(DataGridView dataGridView, bool saveHeader, SParameterManager Prop)
         {
             string defaultFolder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Tables");
             string defaultFileName = "ParamTable.csv";
@@ -2009,8 +2005,7 @@ namespace TFTprog
                         SaveDataGridViewToCsv(dataGridView, saveHeader, selectedFilePath);
 
                         // Сохранить имя файла в настройках
-                        Properties.Settings.Default.LastTableFile = selectedFilePath;
-                        Properties.Settings.Default.Save();
+                        Prop.LastTableFile = selectedFilePath;
 
                         MessageBox.Show("File saved successfully.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
