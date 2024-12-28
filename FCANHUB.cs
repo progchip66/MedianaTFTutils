@@ -115,7 +115,7 @@ namespace TFTprog
                             return ("");//ответ неизвестного устройства
                     }
 
-                return Dev.Version;
+                return ret;// Dev.Version;
             }
             catch (Exception)
             {
@@ -161,14 +161,14 @@ namespace TFTprog
                         i++;
                     }
 
-                    tmpStr = TryOpenDev(CANHUB.CAN_HUB, Efl_DEV.fld_HUB, false);
+  /*                  tmpStr = TryOpenDev(CANHUB.CAN_HUB, Efl_DEV.fld_HUB, false);
                     if (tmpStr != "")
                     {
                         tmpStr =CANHUB.ConcatenateStrings(tmpStr, "", "");
                         LBoxInterface.Items.Add(tmpStr);
                         i++;
                     }
-
+  */
 
 
                     

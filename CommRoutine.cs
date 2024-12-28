@@ -785,7 +785,7 @@ namespace COMMAND
 
 
 
-		public void CommSendAnsv(ECommand command, Efl_DEV _RecDev = Efl_DEV.fld_none, byte[] data = null, int TimeOutStartAnsv = 50)
+		public byte[] CommSendAnsv(ECommand command, Efl_DEV _RecDev = Efl_DEV.fld_none, byte[] data = null, int TimeOutStartAnsv = 50)
 		{//команда отправляет данные и принимает отклик, при этом заполняет Структуры хеадеров как приёма, так и ответа
 		 //ВНИМАНИЕ!!!! БЕРЁТ ДЛИНУ ДАННЫХ ИЗ МАССИВА data - ЕГО ДЛИНА ДОЛЖНА БЫТЬ РАВНА ДЛИНЕ ДАННЫХ, ТАМ НЕ ДОЛЖНО БЫТЬ ЛИШНИХ ЭЛЕМЕНТОВ!!!
 			RtsEnable = true;
@@ -806,12 +806,13 @@ namespace COMMAND
 			byte[] bytesAnsv = SendCommand(datasend, TimeOutStartAnsv);//отправка данных команды и приём ответа с переключением RTS
 
 			if ((bytesAnsv.Length == 0)||(TimeOutStartAnsv==0))
-				return;//ответа на команду не требуется
+				return new byte[0] ;//ответа на команду не требуется
 			if (!CRC.check0CRC16(bytesAnsv, bytesAnsv.Length))
 				throw new Exception("Ошибка контрольной суммы при чтении данных");
 			//считывание полученных данных во внутреннюю структуру устройства
 			RxHeadCom.getFromCommandArr(bytesAnsv);
 			Array.Copy(bytesAnsv, 4, RxBuff, 0, bytesAnsv.Length - 6);
+			return bytesAnsv;
 		}
 
 /*

@@ -170,16 +170,23 @@ namespace ExtHubComm
 
         public string GetVerDev(BoardVer Dev, Efl_DEV DevType)
         {
-            CommSendAnsv(ECommand.cmd_get_Ver, DevType,null,500);
+            byte[] bytesAnsv = CommSendAnsv(ECommand.cmd_get_Ver, DevType,null,500);
+            
             switch (DevType)
             {
                 case Efl_DEV.fld_HUB:
+                    if (bytesAnsv.Length==0)
+                        return ("  CAN_HUB Board not detected");
                     CAN_HUB.GetBoardVer(RxBuff);
                     return CAN_HUB.Version;
                 case Efl_DEV.fld_MainBoard:
+                    if (bytesAnsv.Length == 0)
+                        return ("  MAIN Board not detected");
                     MainBoard.GetBoardVer(RxBuff);
                     return MainBoard.Version;
                 case Efl_DEV.fld_TFTboard:
+                    if (bytesAnsv.Length == 0)
+                        return ("  TFTCAN Board not detected");
                     TFT_Board.GetBoardVer(RxBuff);
                     return TFT_Board.Version;
                 default:
