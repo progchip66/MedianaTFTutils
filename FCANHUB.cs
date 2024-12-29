@@ -314,17 +314,22 @@ namespace TFTprog
 
                             break;
                         case 10://приём и отображение данных о всех таймерах и ответ в зависимости от того какие параметры были изменены
-                            if (WORKAKVATEST.NewAKVArej >=0)
-                            {//здесь же в качестве ответа организуем РУЧНУЮ смену режима работы таймера
-                                byte[] array = { 10, 0 };
-                                array[1] = (byte)WORKAKVATEST.NewAKVArej;
-                                CANHUB.CommSendAnsv(ECommand.cmd_exhSimulator, Efl_DEV.fld_TFTboard, array, 0);//отправляем команду которая не предусматривает ответа
+
+                            if (WORKAKVATEST.NewAKVArej >= 0)//если была произведена ручная смена режима работы Прибора, то вместо отображения пришедших значений таймера
+                            {//изменяем режим работы прибора
+                                byte[] arrRej = new byte[5];
+                                arrRej[0] = 10;
+                                Buffer.BlockCopy(BitConverter.GetBytes(WORKAKVATEST.NewAKVArej), 0, arrRej, 1, 4);
+                                CANHUB.CommSendAnsv(ECommand.cmd_exhSimulator, Efl_DEV.fld_TFTboard, arrRej, 0);//отправляем команду которая не предусматривает ответа
+                                WORKAKVATEST.AKVArej = WORKAKVATEST.NewAKVArej;//устанавливаем новый режим работы
+                                WORKAKVATEST.NewAKVArej = -1;
+                                break;
                             }
 
 
-                            if (WORKAKVATEST.boolChangeTimersVol)
+                            if (WORKAKVATEST.boolChangeTimersVol)//если была произведена ручная смена значения таймера, то вместо отображения пришедших значений таймера
                             {//обновление вручную значения в таблице таймеров произведено
-                             // надо отправить обновлённые данные о таймере в который были внесены изменения
+                             // надо отправить обновлённые данные ОБ ОДНОМ таймере В КОТОРЫЙ были внесены изменения
                                 int LenTIM = System.Runtime.InteropServices.Marshal.SizeOf(typeof(SATIMER));
                                 byte[] Senddata = new byte[LenTIM + 1];
                                 Senddata[0] = (byte)WORKAKVATEST.xChangeTimersVol;//номер таймера в котором были внесены изменения
@@ -333,25 +338,12 @@ namespace TFTprog
                                 WORKAKVATEST.boolChangeTimersVol = false;//сбрасываем флаг ручного изменения данных
                                 Array.Copy(byteArray, 0, Senddata, 1, LenTIM);
                                 CANHUB.CommSendAnsv(ECommand.cmd_exhSimulator, Efl_DEV.fld_TFTboard, Senddata, 0);//отправляем команду которая не предусматривает ответа
-                            }
-                            else
-                            {
-                                if (WORKAKVATEST.NewAKVArej >= 0)
-                                {
-  //                                  byte[] Senddata = new byte[LenTIM + 1];
-                                    WORKAKVATEST.AKVArej = WORKAKVATEST.NewAKVArej;//устанавливаем новый режим работы
-                                    WORKAKVATEST.NewAKVArej = -1;
-                                    //обновляем данные в столбце 
-
-                                }
-                                else
-                                {//ОБНОВЛЕНИЕ СТРУКТУРЫ ТАЙМЕРОВ производим только в случае, если не было изменений вручную, если были изменения будут учтены при следующем приходе данных через секунду
-                                    WORKAKVATEST.TimersParFromByteArray(RXdata);//обновление структуры таймеров
-                                    Invoke(new Action(() => WORKAKVATEST.DisplayInTimersGridView()));//отображение данных в таблице
-                                }
+                                break;
                             }
 
-                            
+                            //ОБНОВЛЕНИЕ СТРУКТУРЫ ТАЙМЕРОВ производим только в случае, если не было изменений вручную, если были изменения будут учтены при следующем приходе данных через секунду
+                            WORKAKVATEST.TimersParFromByteArray(RXdata);//обновление структуры таймер
+                            Invoke(new Action(() => WORKAKVATEST.DisplayInTimersGridView()));
                             break;
                     }
                 }
@@ -365,7 +357,7 @@ namespace TFTprog
             }
             else
             {
-                Invoke(new Action(() => WORKAKVATEST.DisplayInTimersGridView()));
+               
 
             }
         }
