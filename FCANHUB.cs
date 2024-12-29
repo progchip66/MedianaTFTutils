@@ -318,7 +318,7 @@ namespace TFTprog
                             if (WORKAKVATEST.NewAKVArej >= 0)//если была произведена ручная смена режима работы Прибора, то вместо отображения пришедших значений таймера
                             {//изменяем режим работы прибора
                                 byte[] arrRej = new byte[5];
-                                arrRej[0] = 10;
+                                arrRej[0] = 9;
                                 Buffer.BlockCopy(BitConverter.GetBytes(WORKAKVATEST.NewAKVArej), 0, arrRej, 1, 4);
                                 CANHUB.CommSendAnsv(ECommand.cmd_exhSimulator, Efl_DEV.fld_TFTboard, arrRej, 0);//отправляем команду которая не предусматривает ответа
                                 WORKAKVATEST.AKVArej = WORKAKVATEST.NewAKVArej;//устанавливаем новый режим работы
@@ -1796,27 +1796,7 @@ namespace TFTprog
         {
             WORKAKVATEST.selectedMode = WORKAKVATEST.SetRejakFromComboBox((ComboBox)sender);
             WORKAKVATEST.SelectColumn(dGparam, cBrej.SelectedIndex);
-
-            // Проходим по всем ячейкам таблицы
-            foreach (DataGridViewRow row in dGparam.Rows)
-            {
-                foreach (DataGridViewCell cell in row.Cells)
-                {
-                    // Если ячейка в том же столбце, что и заголовок, на который кликнули
-                    if (cell.ColumnIndex == cBrej.SelectedIndex)
-                    {
-                        // Устанавливаем цвет на DefaultCellStyle.BackColor
-                        cell.Style.BackColor = dGparam.DefaultCellStyle.BackColor;
-                    }
-                    else
-                    {
-                        // Устанавливаем цвет на LightGray
-                        cell.Style.BackColor = Color.LightGray;
-                    }
-                }
-            }
-
-
+            WORKAKVATEST.SetNewRej(cBrej.SelectedIndex);
         }
 
         private void cBrejSimulator_SelectedIndexChanged(object sender, EventArgs e)

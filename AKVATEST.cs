@@ -233,6 +233,32 @@ namespace TESTAKVA
         public int NewAKVArej = -1;//новое значение режима работы устройства
 
 
+
+        public void SetNewRej(int ColumnIndex)
+        {
+            // Проходим по всем ячейкам таблицы
+            foreach (DataGridViewRow row in ParamGridView.Rows)
+            {
+                foreach (DataGridViewCell cell in row.Cells)
+                {
+                    // Если ячейка в том же столбце, что и заголовок, на который кликнули
+                    if (cell.ColumnIndex == ColumnIndex)
+                    {
+                        // Устанавливаем цвет на DefaultCellStyle.BackColor
+                        cell.Style.BackColor = ParamGridView.DefaultCellStyle.BackColor;
+                    }
+                    else
+                    {
+                        // Устанавливаем цвет на LightGray
+                        cell.Style.BackColor = Color.LightGray;
+                    }
+                }
+            }
+            NewAKVArej = ColumnIndex + 1;//выбран новый режим в таблице параметров
+        }
+
+
+
         public SWORKAKVATEST(DataGridView _TimersGridView, DataGridView _ParamGridView)
         {//конструктор в котором происходит формирование таблиц таймеров и параметров
             TimersGridView = _TimersGridView ?? throw new ArgumentNullException(nameof(_TimersGridView));
@@ -245,30 +271,15 @@ namespace TESTAKVA
             FormatTimersGridView(120, 30, new string[] { "Rej", "CountSec", "LastStamp_mSec", "MaxCountSec", "DamageSec" }, GetTextHead(0, 7));
             TimersParPerminEdit();
 
+
+
+
             ParamGridView.ColumnHeaderMouseClick += (s, e) =>
             {//одиночный клик на верхнем ЗАГОЛОВКЕ таблицы параметров
                 // Получаем индекс столбца, на который кликнули
                 int clickedColumnIndex = e.ColumnIndex;
+                SetNewRej(clickedColumnIndex);
 
-                // Проходим по всем ячейкам таблицы
-                foreach (DataGridViewRow row in ParamGridView.Rows)
-                {
-                    foreach (DataGridViewCell cell in row.Cells)
-                    {
-                        // Если ячейка в том же столбце, что и заголовок, на который кликнули
-                        if (cell.ColumnIndex == clickedColumnIndex)
-                        {
-                            // Устанавливаем цвет на DefaultCellStyle.BackColor
-                            cell.Style.BackColor = ParamGridView.DefaultCellStyle.BackColor;
-                        }
-                        else
-                        {
-                            // Устанавливаем цвет на LightGray
-                            cell.Style.BackColor = Color.LightGray;
-                        }
-                    }
-                }
-                NewAKVArej = clickedColumnIndex;//выбран новый режим в таблице параметров
   //              UpdateDataFloatFromColumn(ParamGridView, NewAKVArej, float[][] dataFloat)
 
             };
