@@ -230,7 +230,7 @@ namespace TESTAKVA
         private DataGridView TimersGridView;
         private DataGridView ParamGridView;
         public int AKVArej = 0;//текущее значение режима работы устройства
-        public int NewAKVArej = 0;//новое значение режима работы устройства
+        public int NewAKVArej = -1;//новое значение режима работы устройства
 
 
         public SWORKAKVATEST(DataGridView _TimersGridView, DataGridView _ParamGridView)
