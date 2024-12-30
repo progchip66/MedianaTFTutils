@@ -121,6 +121,7 @@
             this.tB_PARfileMan = new System.Windows.Forms.TextBox();
             this.dGparam = new System.Windows.Forms.DataGridView();
             this.WRpro = new System.ComponentModel.BackgroundWorker();
+            this.button4 = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
             this.tabPagePack.SuspendLayout();
             this.statusStrip1.SuspendLayout();
@@ -578,7 +579,13 @@
             this.tabPageBTAddr.TabIndex = 1;
             this.tabPageBTAddr.Text = "Тест";
             this.tabPageBTAddr.UseVisualStyleBackColor = true;
-
+            // 
+            // button2
+            // 
+            this.button2.Location = new System.Drawing.Point(0, 0);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(75, 23);
+            this.button2.TabIndex = 0;
             // 
             // dataGridTimers
             // 
@@ -827,6 +834,7 @@
             // 
             // gBchangePar
             // 
+            this.gBchangePar.Controls.Add(this.button4);
             this.gBchangePar.Controls.Add(this.labRejSimulator);
             this.gBchangePar.Controls.Add(this.cBrejSimulator);
             this.gBchangePar.Controls.Add(this.bCalibr);
@@ -1089,6 +1097,16 @@
             this.WRpro.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.WRpro_ProgressChanged);
             this.WRpro.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.WRpro_RunWorkerCompleted);
             // 
+            // button4
+            // 
+            this.button4.Location = new System.Drawing.Point(16, 469);
+            this.button4.Name = "button4";
+            this.button4.Size = new System.Drawing.Size(75, 23);
+            this.button4.TabIndex = 11;
+            this.button4.Text = "butTest";
+            this.button4.UseVisualStyleBackColor = true;
+            this.button4.Click += new System.EventHandler(this.button4_Click_1);
+            // 
             // FormHUB
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1222,6 +1240,7 @@
         private System.Windows.Forms.Label lspeederTIME;
         private System.Windows.Forms.ComboBox cBrejSimulator;
         private System.Windows.Forms.Label labRejSimulator;
+        private System.Windows.Forms.Button button4;
     }
 }
 

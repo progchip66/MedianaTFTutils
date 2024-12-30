@@ -88,6 +88,8 @@ namespace TESTAKVA
     }
 
 
+
+
     public class SAKVApar
     {
         public ErejAKVA Rej { get; set; }
@@ -115,21 +117,19 @@ namespace TESTAKVA
         public bool InESC { get; private set; }
         public bool InPressRazd { get; private set; }
         public uint InFlowMeters { get; private set; }
-
         public uint TimeStampSec { get; set; }
 
         // Метод для загрузки из массива байт
-        public static SAKVApar FromByteArray(byte[] data)
+        public void LoadFromByteArray(byte[] data)
         {
             if (data.Length != Marshal.SizeOf(typeof(SAKVAparRaw)))
                 throw new ArgumentException("Размер массива не соответствует размеру структуры SAKVApar");
 
-            // Преобразование массива байт в сырую структуру
             var handle = GCHandle.Alloc(data, GCHandleType.Pinned);
             try
             {
                 var raw = (SAKVAparRaw)Marshal.PtrToStructure(handle.AddrOfPinnedObject(), typeof(SAKVAparRaw));
-                return ConvertFromRaw(raw);
+                LoadFromRaw(raw);
             }
             finally
             {
@@ -155,22 +155,74 @@ namespace TESTAKVA
             return result;
         }
 
-        // Конвертация сырых данных в объект SAKVApar
-        private static SAKVApar ConvertFromRaw(SAKVAparRaw raw)
+        // Метод для передачи данных в таблицу
+        public void PutGridViewColumn(DataGridView paramGridView, int columnIndex)
         {
-            var obj = new SAKVApar
+            if (paramGridView == null || columnIndex < 0 || columnIndex >= paramGridView.ColumnCount)
+                throw new ArgumentException("Invalid DataGridView or column index.");
+
+            var values = new List<string>
+        {
+            FM[0].ToString(CultureInfo.InvariantCulture),
+            FM[1].ToString(CultureInfo.InvariantCulture),
+            FM[2].ToString(CultureInfo.InvariantCulture),
+            PT[0].ToString(CultureInfo.InvariantCulture),
+            PT[1].ToString(CultureInfo.InvariantCulture),
+            QT[0].ToString(CultureInfo.InvariantCulture),
+            QT[1].ToString(CultureInfo.InvariantCulture),
+            QT[2].ToString(CultureInfo.InvariantCulture),
+            InONOFF ? "1" : "0",
+            InESC ? "1" : "0",
+            InPressRazd ? "1" : "0",
+            InFlowMeters.ToString()
+        };
+
+            if (paramGridView.RowCount < values.Count)
+                paramGridView.RowCount = values.Count;
+
+            for (int i = 0; i < values.Count; i++)
             {
-                Rej = (ErejAKVA)raw.Rej,
-                FM = raw.FM,
-                PT = raw.PT,
-                QT = raw.QT,
-                INs = raw.INs,
-                TimeStampSec = raw.TimeStampSec
-            };
-            return obj;
+                paramGridView.Rows[i].Cells[columnIndex].Value = values[i];
+            }
         }
 
-        // Конвертация объекта SAKVApar в сырые данные
+        // Метод для загрузки данных из таблицы
+        public void LoadFromDataGridViewColumn(DataGridView paramGridView, int columnIndex)
+        {
+            if (paramGridView == null || columnIndex < 0 || columnIndex >= paramGridView.ColumnCount)
+                throw new ArgumentException("Invalid DataGridView or column index.");
+
+            var values = new List<string>();
+            for (int i = 0; i < paramGridView.RowCount; i++)
+            {
+                var cellValue = paramGridView.Rows[i].Cells[columnIndex].Value?.ToString() ?? string.Empty;
+                values.Add(cellValue);
+            }
+
+            FM[0] = float.Parse(values[0], CultureInfo.InvariantCulture);
+            FM[1] = float.Parse(values[1], CultureInfo.InvariantCulture);
+            FM[2] = float.Parse(values[2], CultureInfo.InvariantCulture);
+            PT[0] = float.Parse(values[3], CultureInfo.InvariantCulture);
+            PT[1] = float.Parse(values[4], CultureInfo.InvariantCulture);
+            QT[0] = float.Parse(values[5], CultureInfo.InvariantCulture);
+            QT[1] = float.Parse(values[6], CultureInfo.InvariantCulture);
+            QT[2] = float.Parse(values[7], CultureInfo.InvariantCulture);
+            INs = (uint)((values[8] == "1" ? 1U << 4 : 0U) |
+                         (values[9] == "1" ? 1U << 5 : 0U) |
+                         (values[10] == "1" ? 1U << 6 : 0U) |
+                         (uint.Parse(values[11]) << 7));
+        }
+
+        private void LoadFromRaw(SAKVAparRaw raw)
+        {
+            Rej = (ErejAKVA)raw.Rej;
+            FM = raw.FM;
+            PT = raw.PT;
+            QT = raw.QT;
+            INs = raw.INs;
+            TimeStampSec = raw.TimeStampSec;
+        }
+
         private SAKVAparRaw ConvertToRaw()
         {
             return new SAKVAparRaw
@@ -184,7 +236,6 @@ namespace TESTAKVA
             };
         }
 
-        // Описание сырой структуры
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         private struct SAKVAparRaw
         {
@@ -199,8 +250,6 @@ namespace TESTAKVA
             public uint TimeStampSec;
         }
     }
-
-
 
 
 
