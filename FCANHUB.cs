@@ -35,29 +35,6 @@ namespace TFTprog
         
         bool isInitComboSpeed = false;
 
- /*       public void LoadDefaultSetting()
-        {
-            tBresultFilename.Text = Proper.NameResultFile;
-            TBSourseDir.Text = Proper.DirGrafFiles;
-            tBresultPath.Text = Proper.DirResultGrafFile;
-            tBcodefilename.Text = Proper.CodeFilename;
-
-            tBgrafDIR.Text= Proper.FolderGRAF;
-
-
-            tBstartAdr.Text = Proper.StartFLASHadr;
-            tBendAdr.Text = Proper.EndFLASHadr;
-            cBoxEnMess.Checked = Proper.EnServMess;
-
-
-
-        }
-
- 
-
-
-
-*/
 
         public void EnDisComponent(bool En)
         {
@@ -269,7 +246,9 @@ namespace TFTprog
         {
             InitializeComponent();
            
-            WORKAKVATEST = new SWORKAKVATEST(dGtimers, dGparam);
+            WORKAKVATEST = new SWORKAKVATEST(dGtimers, dGparam);//инициализация таблиц таймеров и таблиц параметров
+            LoadSaveTable.LoadDataGridViewFromCsv(dGparam, true, Proper,true);//загрузка последнего сохранённого варианта таблицы параметров
+
             // Подписываемся на событие DataReceivedEvent
             CANHUB.DataReceivedEvent += OnDataReceived;
             // Обработчик события
@@ -1498,7 +1477,7 @@ namespace TFTprog
         private void bParamRead_Click(object sender, EventArgs e)
         {
 
-            LoadSaveTable.LoadDataGridViewFromCsv(dGparam, true,Proper);
+            LoadSaveTable.LoadDataGridViewFromCsv(dGparam, true,Proper,false);
         }
 
 
@@ -1834,81 +1813,177 @@ namespace TFTprog
     public static class LoadSaveTable
     {
 
-        public static void LoadDataGridViewFromCsv(DataGridView dataGridView, bool loadHeader, SParameterManager Prop)
+        public static void LoadDataGridViewFromCsv(DataGridView dataGridView, bool loadHeader, SParameterManager Prop, bool AvtoLoad)
         {
             dataGridView.AllowUserToAddRows = false;
 
-            using (OpenFileDialog openFileDialog = new OpenFileDialog())
+            string filePath = Prop.LastTableFile;
+
+            if (AvtoLoad && File.Exists(filePath))
             {
-                openFileDialog.Filter = "CSV files (*.csv)|*.csv";
-                openFileDialog.FileName = Prop.LastTableFile;
-
-                if (openFileDialog.ShowDialog() == DialogResult.OK)
+                // Если AvtoLoad == true и файл существует, загружаем его без показа диалога
+                LoadFile(filePath, dataGridView, loadHeader, Prop, AvtoLoad);
+            }
+            else
+            {
+                using (OpenFileDialog openFileDialog = new OpenFileDialog())
                 {
-                    string filePath = openFileDialog.FileName;
+                    openFileDialog.Filter = "CSV files (*.csv)|*.csv";
+                    openFileDialog.FileName = Prop.LastTableFile;
 
-                    try
+                    if (openFileDialog.ShowDialog() == DialogResult.OK)
                     {
-                        dataGridView.Rows.Clear();
-                        if (loadHeader)
-                            dataGridView.Columns.Clear();
-
-                        using (StreamReader reader = new StreamReader(filePath, Encoding.UTF8))
-                        {
-                            bool isFirstLine = true;
-                            while (!reader.EndOfStream)
-                            {
-                                string line = reader.ReadLine();
-                                string[] values = line.Split(';');
-
-                                if (isFirstLine && loadHeader)
-                                {
-                                    // Добавляем столбцы (верхний заголовок)
-                                    for (int i = 1; i < values.Length; i++) // Начинаем с 1, чтобы пропустить левый заголовок
-                                    {
-                                        dataGridView.Columns.Add(values[i], values[i]);
-                                    }
-                                    isFirstLine = false;
-                                }
-                                else
-                                {
-                                    // Создаем новую строку
-                                    DataGridViewRow newRow = new DataGridViewRow();
-                                    newRow.CreateCells(dataGridView);
-
-                                    // Устанавливаем левый заголовок строки
-                                    if (values.Length > 0)
-                                    {
-                                        newRow.HeaderCell.Value = values[0]; // Левый заголовок строки
-                                    }
-
-                                    // Заполняем данные строки
-                                    for (int i = 1; i < values.Length; i++) // Начинаем с 1, чтобы пропустить левый заголовок
-                                    {
-                                        newRow.Cells[i - 1].Value = values[i];
-                                    }
-
-                                    dataGridView.Rows.Add(newRow);
-                                }
-                            }
-                        }
-
-                        // Отключаем сортировку для всех столбцов
-                        foreach (DataGridViewColumn column in dataGridView.Columns)
-                        {
-                            column.SortMode = DataGridViewColumnSortMode.NotSortable;
-                        }
-
-                        Prop.LastTableFile = filePath;
-                        MessageBox.Show("File loaded successfully.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show("An error occurred while loading the file: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        filePath = openFileDialog.FileName;
+                        LoadFile(filePath, dataGridView, loadHeader, Prop, AvtoLoad);
                     }
                 }
             }
         }
+
+        private static void LoadFile(string filePath, DataGridView dataGridView, bool loadHeader, SParameterManager Prop, bool AvtoLoad)
+        {
+            try
+            {
+                dataGridView.Rows.Clear();
+                if (loadHeader)
+                    dataGridView.Columns.Clear();
+
+                using (StreamReader reader = new StreamReader(filePath, Encoding.UTF8))
+                {
+                    bool isFirstLine = true;
+                    while (!reader.EndOfStream)
+                    {
+                        string line = reader.ReadLine();
+                        string[] values = line.Split(';');
+
+                        if (isFirstLine && loadHeader)
+                        {
+                            // Добавляем столбцы (верхний заголовок)
+                            for (int i = 1; i < values.Length; i++) // Начинаем с 1, чтобы пропустить левый заголовок
+                            {
+                                dataGridView.Columns.Add(values[i], values[i]);
+                            }
+                            isFirstLine = false;
+                        }
+                        else
+                        {
+                            // Создаем новую строку
+                            DataGridViewRow newRow = new DataGridViewRow();
+                            newRow.CreateCells(dataGridView);
+
+                            // Устанавливаем левый заголовок строки
+                            if (values.Length > 0)
+                            {
+                                newRow.HeaderCell.Value = values[0]; // Левый заголовок строки
+                            }
+
+                            // Заполняем данные строки
+                            for (int i = 1; i < values.Length; i++) // Начинаем с 1, чтобы пропустить левый заголовок
+                            {
+                                newRow.Cells[i - 1].Value = values[i];
+                            }
+
+                            dataGridView.Rows.Add(newRow);
+                        }
+                    }
+                }
+
+                // Отключаем сортировку для всех столбцов
+                foreach (DataGridViewColumn column in dataGridView.Columns)
+                {
+                    column.SortMode = DataGridViewColumnSortMode.NotSortable;
+                }
+
+                Prop.LastTableFile = filePath;
+
+                if (!AvtoLoad)
+                {
+                    MessageBox.Show("File loaded successfully.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("An error occurred while loading the file: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+
+
+        /*      public static void LoadDataGridViewFromCsv(DataGridView dataGridView, bool loadHeader, SParameterManager Prop )
+              {
+                  dataGridView.AllowUserToAddRows = false;
+
+                  using (OpenFileDialog openFileDialog = new OpenFileDialog())
+                  {
+                      openFileDialog.Filter = "CSV files (*.csv)|*.csv";
+                      openFileDialog.FileName = Prop.LastTableFile;
+
+                      if (openFileDialog.ShowDialog() == DialogResult.OK)
+                      {
+                          string filePath = openFileDialog.FileName;
+
+                          try
+                          {
+                              dataGridView.Rows.Clear();
+                              if (loadHeader)
+                                  dataGridView.Columns.Clear();
+
+                              using (StreamReader reader = new StreamReader(filePath, Encoding.UTF8))
+                              {
+                                  bool isFirstLine = true;
+                                  while (!reader.EndOfStream)
+                                  {
+                                      string line = reader.ReadLine();
+                                      string[] values = line.Split(';');
+
+                                      if (isFirstLine && loadHeader)
+                                      {
+                                          // Добавляем столбцы (верхний заголовок)
+                                          for (int i = 1; i < values.Length; i++) // Начинаем с 1, чтобы пропустить левый заголовок
+                                          {
+                                              dataGridView.Columns.Add(values[i], values[i]);
+                                          }
+                                          isFirstLine = false;
+                                      }
+                                      else
+                                      {
+                                          // Создаем новую строку
+                                          DataGridViewRow newRow = new DataGridViewRow();
+                                          newRow.CreateCells(dataGridView);
+
+                                          // Устанавливаем левый заголовок строки
+                                          if (values.Length > 0)
+                                          {
+                                              newRow.HeaderCell.Value = values[0]; // Левый заголовок строки
+                                          }
+
+                                          // Заполняем данные строки
+                                          for (int i = 1; i < values.Length; i++) // Начинаем с 1, чтобы пропустить левый заголовок
+                                          {
+                                              newRow.Cells[i - 1].Value = values[i];
+                                          }
+
+                                          dataGridView.Rows.Add(newRow);
+                                      }
+                                  }
+                              }
+
+                              // Отключаем сортировку для всех столбцов
+                              foreach (DataGridViewColumn column in dataGridView.Columns)
+                              {
+                                  column.SortMode = DataGridViewColumnSortMode.NotSortable;
+                              }
+
+                              Prop.LastTableFile = filePath;
+                              MessageBox.Show("File loaded successfully.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                          }
+                          catch (Exception ex)
+                          {
+                              MessageBox.Show("An error occurred while loading the file: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                          }
+                      }
+                  }
+              } */
 
         public static void SaveDataGridViewToCsv(DataGridView dataGridView, bool saveHeader, string filePath)
         {

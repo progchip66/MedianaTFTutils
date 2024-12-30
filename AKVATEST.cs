@@ -1241,6 +1241,24 @@ public void saveAKVAparTable(string fileName, DataGridView AKVAparGridView)
             }
         }
 
+        public int SetTimersMult(ComboBox comboBox)
+        {//возвращает коэффициент ускорения таймеров
+
+            switch (comboBox.SelectedIndex)
+            {
+                case 0:
+                    return 1;
+                case 1:
+                    return 2;
+                case 2:
+                    return 10;
+                case 3:
+                    return 60;
+                default:
+                    return -1;
+            }
+        }
+
 
         public ErejAKVA SetRejakFromComboBox(ComboBox comboBox)
         {
