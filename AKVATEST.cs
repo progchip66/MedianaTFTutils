@@ -119,7 +119,7 @@ namespace TESTAKVA
         public uint InFlowMeters { get; private set; }
         public uint TimeStampSec { get; set; }
 
-        // Метод для загрузки из массива байт
+        // Метод для загрузки структуры из массива байт
         public void LoadFromByteArray(byte[] data)
         {
             if (data.Length != Marshal.SizeOf(typeof(SAKVAparRaw)))
@@ -137,8 +137,8 @@ namespace TESTAKVA
             }
         }
 
-        // Метод для преобразования в массив байт
-        public byte[] ToByteArray()
+        // Метод для преобразования структуры в массив байт
+        public byte[] AKVAPARtoByteArray()
         {
             var raw = ConvertToRaw();
             int size = Marshal.SizeOf(raw);
@@ -151,11 +151,22 @@ namespace TESTAKVA
             finally
             {
                 handle.Free();
+                //В финале добавим извлечённое из Windows количество секунд
+                long WinNowTime = TimeConverter.WindowsTimeTosec("00:00:00 01.01.2000");
+                // Преобразуем long в uint
+                uint uintValue = (uint)WinNowTime;
+
+                // Получаем байты uint в формате little-endian
+                byte[] uintBytes = BitConverter.GetBytes(uintValue);
+
+                // Копируем байты uint в последние 4 байта массива result
+                Array.Copy(uintBytes, 0, result, result.Length - 4, 4);
+
             }
             return result;
         }
 
-        // Метод для передачи данных в таблицу
+        // Метод для передачи данных структуры в таблицу
         public void PutGridViewColumn(DataGridView paramGridView, int columnIndex)
         {
             if (paramGridView == null || columnIndex < 0 || columnIndex >= paramGridView.ColumnCount)
@@ -186,7 +197,7 @@ namespace TESTAKVA
             }
         }
 
-        // Метод для загрузки данных из таблицы
+        // Метод для загрузки данных структуры из таблицы
         public void LoadFromDataGridViewColumn(DataGridView paramGridView, int columnIndex)
         {
             if (paramGridView == null || columnIndex < 0 || columnIndex >= paramGridView.ColumnCount)
@@ -222,6 +233,66 @@ namespace TESTAKVA
             INs = raw.INs;
             TimeStampSec = raw.TimeStampSec;
         }
+//***********************************************************************************************
+        // Метод преобразования ErejAKVA в номер выделенного столбца ему соответствующее
+        public  int GetNumVol(ErejAKVA rej)
+        {
+            var values = Enum.GetValues(typeof(ErejAKVA));
+            int index = 0;
+            foreach (var value in values)
+            {
+                if ((ErejAKVA)value == rej)
+                {
+                    return index;
+                }
+                index++;
+            }
+            throw new ArgumentException($"Value {rej} not found in enumeration.");
+        }
+
+
+        // Метод преобразования номера выделенного столбца в ErejAKVA ему соотуетствующее
+        public  ErejAKVA GetErejAKVA(int num)
+        {
+            var values = Enum.GetValues(typeof(ErejAKVA));
+            if (num >= 0 && num < values.Length)
+            {
+                return (ErejAKVA)values.GetValue(num);
+            }
+            throw new ArgumentOutOfRangeException($"Number {num} is out of range for ErejAKVA.");
+        }
+
+        // Преобразование массива байтов в значение перечисления ErejAKVA
+        public  ErejAKVA ByteArrayToEnum(byte[] byteArray)
+        {
+            if (byteArray == null || byteArray.Length != 4)
+            {
+                throw new ArgumentException("Массив должен содержать ровно 4 байта.");
+            }
+
+            // Конвертируем массив байтов в 32-битное целое число
+            int value = BitConverter.ToInt32(byteArray, 0);
+
+            // Проверяем, существует ли такое значение в перечислении
+            if (Enum.IsDefined(typeof(ErejAKVA), value))
+            {
+                return (ErejAKVA)value;
+            }
+
+            throw new ArgumentException("Значение массива не соответствует допустимому значению ErejAKVA.");
+        }
+
+        // Преобразование значения перечисления ErejAKVA в массив байтов
+        public  byte[] EnumToByteArray(ErejAKVA enumValue)
+        {
+            // Преобразуем значение перечисления в 32-битное целое число
+            int value = (int)enumValue;
+
+            // Конвертируем число в массив из 4 байтов
+            return BitConverter.GetBytes(value);
+        }
+
+
 
         private SAKVAparRaw ConvertToRaw()
         {
@@ -278,10 +349,10 @@ namespace TESTAKVA
     {
         private DataGridView TimersGridView;
         private DataGridView ParamGridView;
-        public int AKVArej = 0;//текущее значение режима работы устройства
-        public int NewAKVArej = -1;//новое значение режима работы устройства
-
-
+        public int AKVAint = 0;// номер столбца таблицы соответствующий текущему значению режима работы устройства
+        public int NewAKVAint = -1;//номер столбца таблицы соответствующий новому значению режима работы устройства
+        public bool isUpdating = false; // Флаг для предотвращения самоблокировки
+        public ErejAKVA selectedMode = ErejAKVA.rejak_Stop;//номер выделенного столбца
 
         public void SetNewRej(int ColumnIndex)
         {
@@ -303,7 +374,7 @@ namespace TESTAKVA
                     }
                 }
             }
-            NewAKVArej = ColumnIndex + 1;//выбран новый режим в таблице параметров
+            NewAKVAint = ColumnIndex + 1;//выбран новый режим в таблице параметров
         }
 
 
@@ -321,7 +392,7 @@ namespace TESTAKVA
             TimersParPerminEdit();
 
 
-
+/*
 
             ParamGridView.ColumnHeaderMouseClick += (s, e) =>
             {//одиночный клик на верхнем ЗАГОЛОВКЕ таблицы параметров
@@ -329,9 +400,10 @@ namespace TESTAKVA
                 int clickedColumnIndex = e.ColumnIndex;
                 SetNewRej(clickedColumnIndex);
 
-  //              UpdateDataFloatFromColumn(ParamGridView, NewAKVArej, float[][] dataFloat)
+                //              UpdateDataFloatFromColumn(ParamGridView, NewAKVAint, float[][] dataFloat)
 
             };
+*/
 
             TimersGridView.CellMouseDoubleClick += (s, e) =>
             {//подключаемся к событию двойного клика - событие изменения состояния таймера on/off
@@ -399,7 +471,7 @@ namespace TESTAKVA
 
         public GridViewParams FormatParamsGV;//структура хранения параметров форматирования таблицы ParamGridView
         public SATIMER[] T = new SATIMER[ArraySize];
-        public ErejAKVA selectedMode = ErejAKVA.rejak_Stop;
+
 
 
 
@@ -966,73 +1038,7 @@ namespace TESTAKVA
 
         #region WORKwithScrollAKVAtable
 
-/*
 
-        string filePath = openFileDialog.FileName;
-
-                    try
-                    {
-                        dataGridView.Rows.Clear();
-                        if (loadHeader)
-                            dataGridView.Columns.Clear();
-
-                        using (StreamReader reader = new StreamReader(filePath, Encoding.UTF8))
-                        {
-                            bool isFirstLine = true;
-                            while (!reader.EndOfStream)
-                            {
-                                string line = reader.ReadLine();
-    string[] values = line.Split(';');
-
-                                if (isFirstLine && loadHeader)
-                                {
-                                    // Добавляем столбцы (верхний заголовок)
-                                    for (int i = 1; i<values.Length; i++) // Начинаем с 1, чтобы пропустить левый заголовок
-                                    {
-                                        dataGridView.Columns.Add(values[i], values[i]);
-                                    }
-isFirstLine = false;
-                                }
-                                else
-{
-    // Создаем новую строку
-    DataGridViewRow newRow = new DataGridViewRow();
-    newRow.CreateCells(dataGridView);
-
-    // Устанавливаем левый заголовок строки
-    if (values.Length > 0)
-    {
-        newRow.HeaderCell.Value = values[0]; // Левый заголовок строки
-    }
-
-    // Заполняем данные строки
-    for (int i = 1; i < values.Length; i++) // Начинаем с 1, чтобы пропустить левый заголовок
-    {
-        newRow.Cells[i - 1].Value = values[i];
-    }
-
-    dataGridView.Rows.Add(newRow);
-}
-                            }
-                        }
-
-                        // Отключаем сортировку для всех столбцов
-                        foreach (DataGridViewColumn column in dataGridView.Columns)
-{
-    column.SortMode = DataGridViewColumnSortMode.NotSortable;
-}
-
-Properties.Settings.Default.LastTableFile = filePath;
-Properties.Settings.Default.Save();
-MessageBox.Show("File loaded successfully.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    }
-                    catch (Exception ex)
-{
-    MessageBox.Show("An error occurred while loading the file: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-}
-
-
-*/
 
 
 

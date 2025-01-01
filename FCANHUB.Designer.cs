@@ -97,6 +97,7 @@
             this.bfindPort = new System.Windows.Forms.Button();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.gBchangePar = new System.Windows.Forms.GroupBox();
+            this.butTest = new System.Windows.Forms.Button();
             this.labRejSimulator = new System.Windows.Forms.Label();
             this.cBrejSimulator = new System.Windows.Forms.ComboBox();
             this.bCalibr = new System.Windows.Forms.Button();
@@ -121,7 +122,6 @@
             this.tB_PARfileMan = new System.Windows.Forms.TextBox();
             this.dGparam = new System.Windows.Forms.DataGridView();
             this.WRpro = new System.ComponentModel.BackgroundWorker();
-            this.button4 = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
             this.tabPagePack.SuspendLayout();
             this.statusStrip1.SuspendLayout();
@@ -834,7 +834,7 @@
             // 
             // gBchangePar
             // 
-            this.gBchangePar.Controls.Add(this.button4);
+            this.gBchangePar.Controls.Add(this.butTest);
             this.gBchangePar.Controls.Add(this.labRejSimulator);
             this.gBchangePar.Controls.Add(this.cBrejSimulator);
             this.gBchangePar.Controls.Add(this.bCalibr);
@@ -849,6 +849,16 @@
             this.gBchangePar.TabIndex = 8;
             this.gBchangePar.TabStop = false;
             this.gBchangePar.Text = "Действия";
+            // 
+            // butTest
+            // 
+            this.butTest.Location = new System.Drawing.Point(16, 469);
+            this.butTest.Name = "butTest";
+            this.butTest.Size = new System.Drawing.Size(75, 23);
+            this.butTest.TabIndex = 11;
+            this.butTest.Text = "butTest";
+            this.butTest.UseVisualStyleBackColor = true;
+            this.butTest.Click += new System.EventHandler(this.butTest_Click_1);
             // 
             // labRejSimulator
             // 
@@ -1097,16 +1107,6 @@
             this.WRpro.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.WRpro_ProgressChanged);
             this.WRpro.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.WRpro_RunWorkerCompleted);
             // 
-            // button4
-            // 
-            this.button4.Location = new System.Drawing.Point(16, 469);
-            this.button4.Name = "button4";
-            this.button4.Size = new System.Drawing.Size(75, 23);
-            this.button4.TabIndex = 11;
-            this.button4.Text = "butTest";
-            this.button4.UseVisualStyleBackColor = true;
-            this.button4.Click += new System.EventHandler(this.button4_Click_1);
-            // 
             // FormHUB
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1240,7 +1240,7 @@
         private System.Windows.Forms.Label lspeederTIME;
         private System.Windows.Forms.ComboBox cBrejSimulator;
         private System.Windows.Forms.Label labRejSimulator;
-        private System.Windows.Forms.Button button4;
+        private System.Windows.Forms.Button butTest;
     }
 }
 

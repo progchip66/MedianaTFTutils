@@ -279,17 +279,19 @@ namespace TFTprog
 
 
         private void OnDataReceived(object sender, DataReceivedEventArgs e)
-        {//СЧИТЫВАНИЕ И ОБРАБОТКА ДАННЫХ, ПРИНЯТЫХ В РЕЖИМЕ SLAVE
+        {//СЧИТЫВАНИЕ И ОБРАБОТКА ДАННЫХ, ПРИНЯТЫХ В РЕЖИМЕ SLAVE по по RS-485
 
             // Поскольку событие может быть вызвано из другого потока, используем Invoke
             if (InvokeRequired)
             {
-                byte[] RXdata = new byte[e.Data.Length-7];//создаём массив для хранения данных
-                ECommand Comm =(ECommand)(e.Data[1]);
+                byte[] RXdata = new byte[e.Data.Length - 6];//создаём массив для хранения данных
+                ECommand Comm = (ECommand)(e.Data[1]);//извлекаем команду
+
                 if (Comm == ECommand.cmd_exhSimulator)
-                {//принимаем данные от симулятора
+                {//обрабатываем принятую по RS-485 посылку данных                   
                     int Rejim = e.Data[4];//копируем режим принятых данных
-                    Array.Copy(e.Data, 5, RXdata, 0, e.Data.Length - 7);//копируем в него ЧИСТЫЕ принятые данные без заголовка CRC и режима
+                    byte[] SIMULdata = new byte[e.Data.Length - 6];//массив для "чистых данных" симулятора
+                    Array.Copy(e.Data, 5, SIMULdata, 0, e.Data.Length - 7);//копируем в него ЧИСТЫЕ принятые данные без заголовка CRC и режима
                     switch (Rejim)
                     {
                         case 9://приём и установка нового режима работы
@@ -297,51 +299,53 @@ namespace TFTprog
                             break;
                         case 10://приём и отображение данных о всех таймерах и ответ в зависимости от того какие параметры были изменены
 
-                            if (WORKAKVATEST.NewAKVArej >= 0)//если была произведена ручная смена режима работы Прибора, то вместо отображения пришедших значений таймера
-                            {//изменяем режим работы прибора
-                                byte[] arrRej = new byte[5];
-                                arrRej[0] = 9;
-                                Buffer.BlockCopy(BitConverter.GetBytes(WORKAKVATEST.NewAKVArej), 0, arrRej, 1, 4);
-                                CANHUB.CommSendAnsv(ECommand.cmd_exhSimulator, Efl_DEV.fld_TFTboard, arrRej, 0);//отправляем команду которая не предусматривает ответа
-                                WORKAKVATEST.AKVArej = WORKAKVATEST.NewAKVArej;//устанавливаем новый режим работы
-                                WORKAKVATEST.NewAKVArej = -1;
-                                break;
-                            }
-
-
-                            if (WORKAKVATEST.boolChangeTimersVol)//если была произведена ручная смена значения таймера, то вместо отображения пришедших значений таймера
-                            {//обновление вручную значения в таблице таймеров произведено
-                             // надо отправить обновлённые данные ОБ ОДНОМ таймере В КОТОРЫЙ были внесены изменения
-                                int LenTIM = System.Runtime.InteropServices.Marshal.SizeOf(typeof(SATIMER));
-                                byte[] Senddata = new byte[LenTIM + 1];
-                                Senddata[0] = (byte)WORKAKVATEST.xChangeTimersVol;//номер таймера в котором были внесены изменения
-
-                                byte[] byteArray = WORKAKVATEST.OneTimerToBytes(WORKAKVATEST.T[WORKAKVATEST.xChangeTimersVol]);
-                                WORKAKVATEST.boolChangeTimersVol = false;//сбрасываем флаг ручного изменения данных
-                                Array.Copy(byteArray, 0, Senddata, 1, LenTIM);
-                                CANHUB.CommSendAnsv(ECommand.cmd_exhSimulator, Efl_DEV.fld_TFTboard, Senddata, 0);//отправляем команду которая не предусматривает ответа
-                                break;
-                            }
-
                             //ОБНОВЛЕНИЕ СТРУКТУРЫ ТАЙМЕРОВ производим только в случае, если не было изменений вручную, если были изменения будут учтены при следующем приходе данных через секунду
-                            WORKAKVATEST.TimersParFromByteArray(RXdata);//обновление структуры таймер
+                            WORKAKVATEST.TimersParFromByteArray(SIMULdata);//обновление структуры таймеров
                             Invoke(new Action(() => WORKAKVATEST.DisplayInTimersGridView()));
                             break;
                     }
                 }
-                
-                
+                if (Comm == ECommand.cmd_ExhParams)
+                {//выполнение команды содержащей текущий режим работы  TFT контроллера от TFT контроллера
+                 //данная команда передаёт режим работы Прибора ErejAKVA
+                    if (WORKAKVATEST.NewAKVAint >= 0)//если была произведена ручная смена режима работы Прибора,
+                                                     //то вместо отображения пришедших значений таймера
+                    {//изменяем режим работы прибора поскольку ручное изменение имеет больший приоритет
+                        WORKAKVATEST.AKVAint = WORKAKVATEST.NewAKVAint;//устанавливаем новый режим работы
+                    }
+                    else
+                    {//данные из пришедшей посылки от TFT контроллера находятся в RXdata
+                     // Конвертируем массив байтов в 32-битное целое число
+                        int _Rejim = BitConverter.ToInt32(RXdata, 0);//считывание начиная с первого байта, в нулевом хранится адрес команды
+                        if (_Rejim != WORKAKVATEST.AKVAint)
+                            WORKAKVATEST.NewAKVAint = _Rejim;// плата TFT контроллера изменила режим работы, устанавливаем его
+                    }
 
-                //извлекаем данные из таймеров
+                    if (WORKAKVATEST.NewAKVAint >= 0)
+                    {
+                        
+                        WORKAKVATEST.selectedMode = (ErejAKVA)WORKAKVATEST.NewAKVAint;//преобразование целого числа в ErejAKVA
+                        WORKAKVATEST.SelectColumn(dGparam, WORKAKVATEST.NewAKVAint);
+                        WORKAKVATEST.SetNewRej(WORKAKVATEST.NewAKVAint);
+                        WORKAKVATEST.NewAKVAint = -1;
 
+                        byte[] arrRejAKVAPAR = AKVApar.EnumToByteArray(WORKAKVATEST.selectedMode);
 
+                        CANHUB.CommSendAnsv(ECommand.cmd_ExhParams, Efl_DEV.fld_TFTboard, arrRejAKVAPAR, 0);
+                    }
+                    else
+                    {//необходимо извлечь данные структуры AKVAPAR из таблицы и отправить в прибор
+                        WORKAKVATEST.NewAKVAint = -1;
+                        AKVApar.LoadFromDataGridViewColumn(dGparam, 0);// извлекаем  данные из таблицы в структуру AKVAPAR 
+                        byte[] arrAKVAPAR = AKVApar.AKVAPARtoByteArray();                      
+                        //отправляем структуру в TFT контроллер без требования ответа
+                        CANHUB.CommSendAnsv(ECommand.cmd_ExhParams, Efl_DEV.fld_TFTboard, arrAKVAPAR, 0);
+                    }
+
+                }
 
             }
-            else
-            {
-               
 
-            }
         }
 
 
@@ -379,7 +383,7 @@ namespace TFTprog
             tBCode.Clear();
 
             bCreatCode.Enabled = true;
- 
+
         }
 
 
@@ -1718,10 +1722,7 @@ namespace TFTprog
 
         #endregion
 
-        private void button4_Click(object sender, EventArgs e)
-        {
-           
-        }
+
 
         private void lBrejak_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -1776,10 +1777,52 @@ namespace TFTprog
 
         private void cBrej_SelectedIndexChanged(object sender, EventArgs e)
         {
-            WORKAKVATEST.selectedMode = WORKAKVATEST.SetRejakFromComboBox((ComboBox)sender);
-            WORKAKVATEST.SelectColumn(dGparam, cBrej.SelectedIndex);
-            WORKAKVATEST.SetNewRej(cBrej.SelectedIndex);
+            if (WORKAKVATEST.isUpdating) return; // Предотвращаем самоблокировку
+
+            ComboBox sBrej = sender as ComboBox;
+            DataGridView dGparam = Controls["dGparam"] as DataGridView;
+
+            int selectedColumn = sBrej.SelectedIndex;
+
+            if (selectedColumn != WORKAKVATEST.AKVAint)
+            {
+                WORKAKVATEST.AKVAint = selectedColumn; // Обновляем глобальную переменную
+                WORKAKVATEST.NewAKVAint = WORKAKVATEST.AKVAint;//обновляем переменную для передачи данных об изменении режима работы в прибор
+                WORKAKVATEST.isUpdating = true;
+                dGparam.ClearSelection();
+                if (selectedColumn >= 0 && selectedColumn < dGparam.ColumnCount)
+                {
+                    dGparam.Columns[selectedColumn].Selected = true; // Выделяем столбец
+                }
+                WORKAKVATEST.isUpdating = false;
+            }
         }
+
+        /*
+
+                    WORKAKVATEST.selectedMode = WORKAKVATEST.SetRejakFromComboBox((ComboBox)sender);
+                    WORKAKVATEST.SelectColumn(dGparam, cBrej.SelectedIndex);
+                    WORKAKVATEST.SetNewRej(cBrej.SelectedIndex);
+                }*/
+
+        private void DGparam_ColumnHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
+        {
+            if (WORKAKVATEST.isUpdating) return; // Предотвращаем самоблокировку
+
+ //           DataGridView dGparam = sender as DataGridView;
+            ComboBox sBrej = Controls["sBrej"] as ComboBox;
+
+            if (e.ColumnIndex != WORKAKVATEST.AKVAint)
+            {
+                WORKAKVATEST.AKVAint = e.ColumnIndex; // Обновляем глобальную переменную
+                WORKAKVATEST.NewAKVAint = WORKAKVATEST.AKVAint;//обновляем переменную для передачи данных об изменении режима работы в прибор
+                WORKAKVATEST.isUpdating = true;
+                sBrej.SelectedIndex = WORKAKVATEST.AKVAint; // Синхронизируем ComboBox
+
+                WORKAKVATEST.isUpdating = false;
+            }
+        }
+
 
         private void cBrejSimulator_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -1808,7 +1851,7 @@ namespace TFTprog
 
         }
 
-        private void button4_Click_1(object sender, EventArgs e)
+        private void butTest_Click_1(object sender, EventArgs e)
         {
             AKVApar.LoadFromDataGridViewColumn(dGparam, 0);
             AKVApar.PutGridViewColumn(dGparam, 0);
