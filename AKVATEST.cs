@@ -352,7 +352,7 @@ namespace TESTAKVA
         public int AKVAint = 0;// номер столбца таблицы соответствующий текущему значению режима работы устройства
         public int NewAKVAint = -1;//номер столбца таблицы соответствующий новому значению режима работы устройства
         public bool isUpdating = false; // Флаг для предотвращения самоблокировки
-        public ErejAKVA selectedMode = ErejAKVA.rejak_Stop;//номер выделенного столбца
+        public ErejAKVA selectedMode = ErejAKVA.rejak_Stop;//Выбранный режим работы
 
         public void SetNewRej(int ColumnIndex)
         {
