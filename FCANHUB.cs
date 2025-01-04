@@ -280,10 +280,27 @@ namespace TFTprog
 
         private void OnDataReceived(object sender, DataReceivedEventArgs e)
         {//СЧИТЫВАНИЕ И ОБРАБОТКА ДАННЫХ, ПРИНЯТЫХ В РЕЖИМЕ SLAVE по по RS-485
-
+            ErejAKVA receiveAKVA= WORKAKVATEST.selectedMode;
             // Поскольку событие может быть вызвано из другого потока, используем Invoke
             if (InvokeRequired)
             {
+            // *************  !!!  РУЧНОЕ ИЗМЕНЕНИЕ ДАННЫХ ИМЕЕТ АБСОЛЮТНЫЙ ПРИОРИТЕТ  !!! *********
+                if (WORKAKVATEST.HandlAKVAchange >= 0) 
+                {//попыка ВРУЧНУЮ с помощью ComboBox sBrej изменить режим работы
+                 //отрисовка выеделения нового столбца таблицы
+                    Invoke(new Action(() => WORKAKVATEST.SelectColumn(dGparam, WORKAKVATEST.HandlAKVAchange)));
+                    Invoke(new Action(() => WORKAKVATEST.SetNewRej(WORKAKVATEST.HandlAKVAchange)));
+                 // извлечение данных структуры AKVAPAR из таблицы и отправка в TFT контроллер
+                        Invoke(new Action(() => AKVApar.LoadFromDataGridViewColumn(dGparam, WORKAKVATEST.HandlAKVAchange)));// извлекаем  данные из таблицы в структуру AKVAPAR 
+                        byte[] arrAKVAPAR = AKVApar.AKVAPARtoByteArray();//копируем данные в массив
+                                                                         
+                        WORKAKVATEST.HandlAKVAchange = -1;
+                    //отправляем структуру в TFT контроллер без требования ответа
+                    CANHUB.CommSendAnsv(ECommand.cmd_ExhParams, Efl_DEV.fld_TFTboard, arrAKVAPAR, 0);
+                    return;
+                }
+                
+                //обработка данных пришедших от TFT контроллера
                 byte[] RXdata = new byte[e.Data.Length - 6];//создаём массив для хранения данных
                 Array.Copy(e.Data, 4, RXdata, 0, e.Data.Length - 6);
                 ECommand Comm = (ECommand)(e.Data[1]);//извлекаем команду
@@ -291,7 +308,7 @@ namespace TFTprog
                 if (Comm == ECommand.cmd_exhSimulator)
                 {//обрабатываем принятую по RS-485 посылку данных                   
                     int Rejim = e.Data[4];//копируем режим принятых данных
-                    byte[] SIMULdata = new byte[e.Data.Length - 6];//массив для "чистых данных" симулятора
+                    byte[] SIMULdata = new byte[e.Data.Length - 7];//массив для "чистых данных" симулятора
                     Array.Copy(e.Data, 5, SIMULdata, 0, e.Data.Length - 7);//копируем в него ЧИСТЫЕ принятые данные без заголовка CRC и режима
                     switch (Rejim)
                     {
@@ -305,38 +322,25 @@ namespace TFTprog
                             Invoke(new Action(() => WORKAKVATEST.DisplayInTimersGridView()));
                             break;
                     }
+                    return;
                 }
                 if (Comm == ECommand.cmd_ExhParams)
                 {//выполнение команды содержащей текущий режим работы  TFT контроллера от TFT контроллера
-                 //данная команда передаёт режим работы Прибора ErejAKVA
-                    if (WORKAKVATEST.NewAKVAint >= 0)//если была произведена ручная смена режима работы Прибора,
-                                                     //то вместо отображения пришедших значений таймера
-                    {//изменяем режим работы прибора поскольку ручное изменение имеет больший приоритет
-                        WORKAKVATEST.AKVAint = WORKAKVATEST.NewAKVAint;//устанавливаем новый режим работы
-                        WORKAKVATEST.selectedMode = AKVApar.GetErejAKVA(WORKAKVATEST.AKVAint);
-                    }
-                    else
                     {//данные из пришедшей посылки от TFT контроллера находятся в RXdata
                      // Конвертируем массив байтов в 32-битное целое число
                         int _Rejim = BitConverter.ToInt32(RXdata, 0);
-                        ErejAKVA receiveAKVA = (ErejAKVA)_Rejim;
+                        receiveAKVA = (ErejAKVA)_Rejim;
                         if (WORKAKVATEST.selectedMode != receiveAKVA)
                         {//TFTконтроллер сменил режим работы
                             WORKAKVATEST.AKVAint = AKVApar.GetNumVol(receiveAKVA);//устанавливаем новый номер строки в таблице
                             WORKAKVATEST.NewAKVAint = WORKAKVATEST.AKVAint;//требуется выделить в таблице новый столбец!
                             WORKAKVATEST.selectedMode = receiveAKVA;//устанавливаем новый режим работы
+                            //режим работы сменили
+
                         }
-                    }
-                    // !!! поскольку ручная смена режима может быть произведена не только из таблицы, но и комбобокса произведём операцию выделения столбца здесь    
-                    if (WORKAKVATEST.NewAKVAint>=0)
-                    {//отрисовка выеделения нового столбца таблицы
-                        Invoke(new Action(() => WORKAKVATEST.SelectColumn(dGparam, WORKAKVATEST.NewAKVAint)));
-                        Invoke(new Action(() => WORKAKVATEST.SetNewRej(WORKAKVATEST.NewAKVAint)));
-                        WORKAKVATEST.NewAKVAint = -1;
-                    }
-                    else
-                    { // извлечение данных структуры AKVAPAR из таблицы и отправка в TFT контроллер
-                        Invoke(new Action(() => AKVApar.LoadFromDataGridViewColumn(dGparam, 0)));// извлекаем  данные из таблицы в структуру AKVAPAR 
+
+                     // извлечение данных структуры AKVAPAR из таблицы и отправка в TFT контроллер
+                        Invoke(new Action(() => AKVApar.LoadFromDataGridViewColumn(dGparam, AKVApar.GetNumVol(WORKAKVATEST.selectedMode))));// извлекаем  данные из таблицы в структуру AKVAPAR 
                         byte[] arrAKVAPAR = AKVApar.AKVAPARtoByteArray();//копируем данные в массив
                                                                          //отправляем структуру в TFT контроллер без требования ответа
                         WORKAKVATEST.NewAKVAint = -1;
@@ -1777,37 +1781,28 @@ namespace TFTprog
 
         private void cBrej_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (WORKAKVATEST.isUpdating) return; // Предотвращаем самоблокировку
+  //          if (WORKAKVATEST.isUpdating) return; // Предотвращаем самоблокировку
 
             ComboBox sBrej = sender as ComboBox;
-            DataGridView dGparam = Controls["dGparam"] as DataGridView;
+ //           DataGridView dGparam = Controls["dGparam"] as DataGridView;
 
             int selectedColumn = sBrej.SelectedIndex;
 
             if (selectedColumn != WORKAKVATEST.AKVAint)
             {
-                WORKAKVATEST.AKVAint = selectedColumn; // Обновляем глобальную переменную
-                WORKAKVATEST.NewAKVAint = WORKAKVATEST.AKVAint;//обновляем переменную для передачи данных об изменении режима работы в прибор
-                WORKAKVATEST.isUpdating = true;
-                dGparam.ClearSelection();
                 if (selectedColumn >= 0 && selectedColumn < dGparam.ColumnCount)
                 {
-                    dGparam.Columns[selectedColumn].Selected = true; // Выделяем столбец
+ //              !!! ВСЕ ОТРИСОВКИ ТАБЛИЦЫ ПАРАМЕТРОВ ПРОИВЗОДЯТСЯ В СОБЫИИ ОБНОВЛЕНИЯ !!!     WORKAKVATEST.SelectColumn(dGparam, selectedColumn);
+ //                   WORKAKVATEST.SetNewRej(selectedColumn);
+                    WORKAKVATEST.HandlAKVAchange = selectedColumn; // Обновляем глобальную переменну
                 }
-                WORKAKVATEST.isUpdating = false;
             }
         }
 
-        /*
-
-                    WORKAKVATEST.selectedMode = WORKAKVATEST.SetRejakFromComboBox((ComboBox)sender);
-                    WORKAKVATEST.SelectColumn(dGparam, cBrej.SelectedIndex);
-                    WORKAKVATEST.SetNewRej(cBrej.SelectedIndex);
-                }*/
 
         private void DGparam_ColumnHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
         {
-            if (WORKAKVATEST.isUpdating) return; // Предотвращаем самоблокировку
+ /*           if (WORKAKVATEST.isUpdating) return; // Предотвращаем самоблокировку
 
  //           DataGridView dGparam = sender as DataGridView;
             ComboBox sBrej = Controls["sBrej"] as ComboBox;
@@ -1820,7 +1815,7 @@ namespace TFTprog
                 sBrej.SelectedIndex = WORKAKVATEST.AKVAint; // Синхронизируем ComboBox
 
                 WORKAKVATEST.isUpdating = false;
-            }
+            }*/
         }
 
 

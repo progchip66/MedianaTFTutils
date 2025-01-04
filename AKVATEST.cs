@@ -210,6 +210,8 @@ namespace TESTAKVA
                 values.Add(cellValue);
             }
 
+            Rej = GetErejAKVA(columnIndex);
+
             FM[0] = float.Parse(values[0], CultureInfo.InvariantCulture);
             FM[1] = float.Parse(values[1], CultureInfo.InvariantCulture);
             FM[2] = float.Parse(values[2], CultureInfo.InvariantCulture);
@@ -351,6 +353,7 @@ namespace TESTAKVA
         private DataGridView ParamGridView;
         public int AKVAint = 0;// номер столбца таблицы соответствующий текущему значению режима работы устройства
         public int NewAKVAint = -1;//номер столбца таблицы соответствующий новому значению режима работы устройства
+        public int HandlAKVAchange = -1;//руное обновление режима из Комбобокса
         public bool isUpdating = false; // Флаг для предотвращения самоблокировки
         public ErejAKVA selectedMode = ErejAKVA.rejak_Stop;//Выбранный режим работы
 
