@@ -168,10 +168,16 @@ namespace ExtHubComm
 
 
 
-        public string GetVerDev(BoardVer Dev, Efl_DEV DevType)
+        public string GetVerDev(BoardVer Dev, Efl_DEV DevType, bool showException)
         {
-            byte[] bytesAnsv = CommSendAnsv(ECommand.cmd_get_Ver, DevType,null,500);
+            byte[] bytesAnsv;
+            if (showException)
+                bytesAnsv = CommSendAnsv(ECommand.cmd_get_Ver, DevType,null,500);
+            else
+                bytesAnsv = CommSendAnsv_NO_showException(ECommand.cmd_get_Ver, DevType, null, 500);
             
+
+
             switch (DevType)
             {
                 case Efl_DEV.fld_HUB:

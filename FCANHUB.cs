@@ -77,7 +77,7 @@ namespace TFTprog
             try
             {
                 SLprocess.Text = CANHUB.PortName + "  Baud:" + CANHUB.BaudRate.ToString();
-                ret = CANHUB.GetVerDev(Dev, DevType);
+                ret = CANHUB.GetVerDev(Dev, DevType, ShowMess);
                 if (ShowMess)
                     switch (DevType)
                     {
@@ -120,40 +120,30 @@ namespace TFTprog
 
         }
 
-        public void Scan_and_OpenHUBTFTCOMport(string ComPortName, int baudrate, bool ShowMessage)
+        public int Scan_and_OpenHUBTFTCOMport(string ComPortName, int baudrate, bool ShowMessage)
         {
             LBoxInterface.Items.Clear();
+            int i = 0;
             //определён хотя бы один порт
             if (CANHUB.GetOpenComport(ComPortName, baudrate, ShowMessage))
             {// пытаемся соединиться с устройством посредство порта, сохранённых в property по умолчанию
                 try
                 {
-                    int i = 0;
+                    
                     string tmpStr;
   //                  CANHUB.PortName = ComPortName;
 
                     tmpStr = TryOpenDev(CANHUB.MainBoard, Efl_DEV.fld_MainBoard, false);
-                    if (tmpStr != "")
+                    if ((tmpStr != "") && (!tmpStr.Contains(" not ")))
                     {
                         tmpStr = CANHUB.ConcatenateStrings(tmpStr, "", "");
                         LBoxInterface.Items.Add(tmpStr);
                         i++;
                     }
-
-  /*                  tmpStr = TryOpenDev(CANHUB.CAN_HUB, Efl_DEV.fld_HUB, false);
-                    if (tmpStr != "")
-                    {
-                        tmpStr =CANHUB.ConcatenateStrings(tmpStr, "", "");
-                        LBoxInterface.Items.Add(tmpStr);
-                        i++;
-                    }
-  */
-
-
                     
                     SLprocess.Text = ComPortName + "  Baud:" + baudrate.ToString();
                     tmpStr = TryOpenDev(CANHUB.TFT_Board, Efl_DEV.fld_TFTboard, false);
-                    if (tmpStr != "")
+                    if ((tmpStr != "") && (!tmpStr.Contains(" not ")))
                     {
                         tmpStr = CANHUB.ConcatenateStrings(tmpStr, "", "");
                         LBoxInterface.Items.Add(tmpStr);
@@ -169,11 +159,12 @@ namespace TFTprog
                             MessageBox.Show("Обнаружены устройства", "Обнаруженные устройства подключены", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
 
-
-                    return;
+                    if (i>0)
+                     return i;
                 }
                 catch (Exception)
                 {
+                    return 0;
                 }
             }
             //если не получается, пытаемся законнектиться посредством других определённых портов
@@ -181,43 +172,72 @@ namespace TFTprog
 
             try
             {
-                for (int i = 0; i < listComPort.Items.Count; i++)
+                for (int j = 0; j < listComPort.Items.Count; j++)
                 {
-                    string sport = listComPort.Items[i].ToString();
+                    string sport = listComPort.Items[j].ToString();
                     if (ComPortName == sport)
                         continue;//этот компорт мы уже ранее опросил
-
-                    if (CANHUB.GetOpenComport(sport, Proper.COMportBaud, false))                   
+                    if (CANHUB.GetOpenComport(sport, Proper.COMportBaud, false))
                     {//пытаемся установить связь с устройством с помощью очередного COM порта из списка
-
                         try
-
                         {
-                            CANHUB.GetVerDev(CANHUB.MainBoard, Efl_DEV.fld_MainBoard);
-                            //CANHUB.GetVerDev(CANHUB.TFT_Board, Efl_DEV.fld_TFTboard);
 
-                            //если получили отклик через COM порт запоминаем его номер
-                            Proper.COMportName = CANHUB.PortName;
-                            this.Text = "ProgChip " + CANHUB.TFT_Board.Version;
+                            i = 0;
+                            string tmpStr;
 
-                            MessageBox.Show("Определено устройство - USB HUB", "USB HUB успешно подключен подключен", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            tmpStr = TryOpenDev(CANHUB.MainBoard, Efl_DEV.fld_MainBoard, false);
+                            if ((tmpStr != "") && (!tmpStr.Contains(" not ")))
+                            {
+                                tmpStr = CANHUB.ConcatenateStrings(tmpStr, "", "");
+                                LBoxInterface.Items.Add(tmpStr);
+                                i++;
+                            }
 
-                            return;
+                            
+                            tmpStr = TryOpenDev(CANHUB.TFT_Board, Efl_DEV.fld_TFTboard, false);
+                            if ((tmpStr != "") && (!tmpStr.Contains(" not ")))
+                            {
+                                tmpStr = CANHUB.ConcatenateStrings(tmpStr, "", "");
+                                LBoxInterface.Items.Add(tmpStr);
+                                i++;
+                            }
+
+                            if (i>0)
+                            {//На COM портру определены рабочие устройства, значит далее работаем именно с ним!
+                                SLprocess.Text = ComPortName + "  Baud:" + baudrate.ToString();
+                                Proper.COMportName = CANHUB.PortName;
+                                MessageBox.Show( "Номер порта сохранён в файле инициализации", "Определено устройство", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                //new Thread(CANHUB.SlaveReceiveLoop) { IsBackground = true }.Start();
+                                return i;                
+                            }
+                            else
+                            {
+                                MessageBox.Show("Необходимо подсоединить устройство к COM порту и повторно запустить программу", "Устройство не обнаружено",
+                                   MessageBoxButtons.OKCancel, MessageBoxIcon.Error);
+                                // Закрываем приложение независимо от выбора пользователя
+                                Environment.Exit(0);
+
+                            }
+                            
                         }
                         catch (Exception)
                         {
                             if (ShowMessage)
                             {
-                                MessageBox.Show("Выберете номер подключенного COM потра, затем подключите датчик и нажмите на кнопку \"Выбрать порт\"", "Не удаётся связаться с прибором",
-                                       MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                MessageBox.Show("Необходимо подсоединить устройство к COM порту и повторно запустить программу", "Устройство не обнаружено",
+                                   MessageBoxButtons.OKCancel, MessageBoxIcon.Error);
+                                // Закрываем приложение независимо от выбора пользователя
+                                Environment.Exit(0);
                             }
                         }
                     }
                 }
-                MessageBox.Show("Проверьте подключение USBto CAN хаба, выберете строку подключенного COM потра, затем нажмите на кнопку \"Выбрать порт\"", "Не удаётся связаться с прибором", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Проверьте правильность подключение устройства, выберете строку подключенного COM потра, затем нажмите на кнопку \"Выбрать порт\"", "Не удаётся связаться с устройством!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return 0;
             }
             catch (Exception)
             {
+                return 0;
             }
 
         }
@@ -804,7 +824,7 @@ namespace TFTprog
                 try
 
                 {
-                    CANHUB.GetVerDev(CANHUB.TFT_Board, Efl_DEV.fld_TFTboard);
+                    CANHUB.GetVerDev(CANHUB.TFT_Board, Efl_DEV.fld_TFTboard,true);
                 }
                 catch (Exception)
                 {
@@ -833,7 +853,7 @@ namespace TFTprog
             try
 
             {
-                button1.Text=CANHUB.GetVerDev(CANHUB.TFT_Board, Efl_DEV.fld_TFTboard);
+                button1.Text=CANHUB.GetVerDev(CANHUB.TFT_Board, Efl_DEV.fld_TFTboard,true);
                 bTestProWRFLASH.Text = "TestProWRFLASH";
             }
             catch (Exception)

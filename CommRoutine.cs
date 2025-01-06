@@ -429,7 +429,7 @@ namespace COMMAND
 
 
 			// Запускаем фоновый поток для приёма данных
-			new Thread(SlaveReceiveLoop) { IsBackground = true }.Start();
+// ПОТОК НЕОБХОДИМО ЗАПУСТИТЬ ПОЗЖЕ /////////////			new Thread(SlaveReceiveLoop) { IsBackground = true }.Start();
 		}
 
 
@@ -617,7 +617,7 @@ namespace COMMAND
 
 
 
-		public byte[] SendCommand(byte[] data, int startTimeoutMs = 50)
+		public byte[] SendCommand(byte[] data, int startTimeoutMs = 50, bool ShowException = true  )
 		{
 			receivingMutex.WaitOne(); //приостанавливаем выполнение команды отправки-приёма до получения мьютекса
 
@@ -634,8 +634,8 @@ namespace COMMAND
 				RtsEnable = true;
 
 
-				string Pname = PortName;
-				int bbbb = BaudRate;
+//				string Pname = PortName;
+//				int bbbb = BaudRate;
 				int elapsedTime = 0;
 
 
@@ -694,14 +694,14 @@ namespace COMMAND
 						Thread.Sleep(interval);
 						elapsedTime += interval;
 					}
-
-					throw new TimeoutException("Тайм-аут при получении ответа на команду.");
+					if (!ShowException)
+						return new byte[0];
 				}
 				else
 				{
 					return new byte[0];
 				}
-
+				return new byte[0];
 			}
 			catch (Exception ex)
 			{
@@ -713,6 +713,7 @@ namespace COMMAND
 			{
 				RtsEnable = false;
 				receivingMutex.ReleaseMutex();//данные отправлены и считаны, освобождаем мьютекс
+
 			}
 		}
 
@@ -803,7 +804,7 @@ namespace COMMAND
 				tmpLen = data.Length;
 			byte[] datasend = GetCommFromHeader(data, tmpLen);//формируем посылку для отправки команды
 
-			byte[] bytesAnsv = SendCommand(datasend, TimeOutStartAnsv);//отправка данных команды и приём ответа с переключением RTS
+			byte[] bytesAnsv = SendCommand(datasend, TimeOutStartAnsv, true);//отправка данных команды и приём ответа с переключением RTS
 
 			if ((bytesAnsv.Length == 0)||(TimeOutStartAnsv==0))
 				return new byte[0] ;//ответа на команду не требуется
@@ -815,18 +816,52 @@ namespace COMMAND
 			return bytesAnsv;
 		}
 
-/*
-		public int GetFromSlaveCommand (byte[] data)
-        {//извлекаем данные из команды пришедшей в режиме Slave
-			if (!check0CRC16(data, data.Length))
-				return 1;//Ошибка контрольной суммы при чтении данных
-						 //throw new Exception("Ошибка контрольной суммы при чтении данных");
-						 //считывание полученных данных во внутреннюю структуру устройства
-			SlaveRxHeadCom.getFromCommandArr(data);//получаем заголовок
-			Array.Copy(_SlaveRxBuff, 4, RxBuff, 0, _SlaveRxBuff.Length - 6);//получаем данные
-			GetIntPar();
+
+		public byte[] CommSendAnsv_NO_showException(ECommand command, Efl_DEV _RecDev = Efl_DEV.fld_none, byte[] data = null, int TimeOutStartAnsv = 50)
+		{//ВНИМАНИЕ!!!! команда не вызывает исключительных ситуаций, просто возвращает пустой массив в случае исключительной ситуации
+		 //команда отправляет данные и принимает отклик, при этом заполняет Структуры хеадеров как приёма, так и ответа
+		 //ВНИМАНИЕ!!!! БЕРЁТ ДЛИНУ ДАННЫХ ИЗ МАССИВА data - ЕГО ДЛИНА ДОЛЖНА БЫТЬ РАВНА ДЛИНЕ ДАННЫХ, ТАМ НЕ ДОЛЖНО БЫТЬ ЛИШНИХ ЭЛЕМЕНТОВ!!!
+			RtsEnable = true;
+			TxHeadCom.Comm = command;
+			TxHeadCom.Rec = _RecDev;
+			if (data == null)
+			{
+				TxHeadCom.DataLength = 0;
+			}
+			else
+				TxHeadCom.DataLength = data.Length;
+			TxHeadCom.subCom.data = 0;
+			int tmpLen = 0;
+			if (data != null)
+				tmpLen = data.Length;
+			byte[] datasend = GetCommFromHeader(data, tmpLen);//формируем посылку для отправки команды
+
+			byte[] bytesAnsv = SendCommand(datasend, TimeOutStartAnsv, false);//отправка данных команды и приём ответа с переключением RTS
+
+			if ((bytesAnsv.Length == 0) || (TimeOutStartAnsv == 0))
+				return new byte[0];//ответа на команду не требуется
+			if (!CRC.check0CRC16(bytesAnsv, bytesAnsv.Length))
+				throw new Exception("Ошибка контрольной суммы при чтении данных");
+			//считывание полученных данных во внутреннюю структуру устройства
+			RxHeadCom.getFromCommandArr(bytesAnsv);
+			Array.Copy(bytesAnsv, 4, RxBuff, 0, bytesAnsv.Length - 6);
+			return bytesAnsv;
 		}
-*/
+
+
+
+		/*
+				public int GetFromSlaveCommand (byte[] data)
+				{//извлекаем данные из команды пришедшей в режиме Slave
+					if (!check0CRC16(data, data.Length))
+						return 1;//Ошибка контрольной суммы при чтении данных
+								 //throw new Exception("Ошибка контрольной суммы при чтении данных");
+								 //считывание полученных данных во внутреннюю структуру устройства
+					SlaveRxHeadCom.getFromCommandArr(data);//получаем заголовок
+					Array.Copy(_SlaveRxBuff, 4, RxBuff, 0, _SlaveRxBuff.Length - 6);//получаем данные
+					GetIntPar();
+				}
+		*/
 
 		public byte[] GetCommFromHeader(byte[] data, int dataLength)
 		{//формируем посылку для отправки команды
