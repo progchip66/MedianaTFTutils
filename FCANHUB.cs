@@ -272,9 +272,8 @@ namespace TFTprog
             AKVApar = new SAKVApar();
             LoadSaveTable.LoadDataGridViewFromCsv(dGparam, true, Proper,true);//загрузка последнего сохранённого варианта таблицы параметров
 
-            // Подписываемся на событие DataReceivedEvent
-            CANHUB.DataReceivedEvent += OnDataReceived;
-            // Обработчик события
+
+
 
             cBtimeSpeed.SelectedIndex = 0;
             tabControl1.SelectedIndex = 2;
@@ -291,6 +290,9 @@ namespace TFTprog
             {
                 Scan_and_OpenHUBTFTCOMport(Proper.COMportName, Proper.COMportBaud, cBoxEnMess.Checked);
                 SelectComPort(Proper.COMportName, listComPort);
+                // Подписываемся на событие DataReceivedEvent
+                CANHUB.DataReceivedEvent += OnDataReceived; // Обработчик события
+                CANHUB.StartReceiveThread();
             }
 
            // WORKAKVATEST
