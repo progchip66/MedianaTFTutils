@@ -308,7 +308,7 @@ namespace TFTprog
             {
             // *************  !!!  РУЧНОЕ ИЗМЕНЕНИЕ ДАННЫХ ИМЕЕТ АБСОЛЮТНЫЙ ПРИОРИТЕТ  !!! *********
                 if (WORKAKVATEST.HandlAKVAchange >= 0) 
-                {//попыка ВРУЧНУЮ с помощью ComboBox sBrej изменить режим работы
+                {// ВРУЧНУЮ с помощью ComboBox sBrej изменён режим работы
                  //отрисовка выеделения нового столбца таблицы
                     Invoke(new Action(() => WORKAKVATEST.SelectColumn(dGparam, WORKAKVATEST.HandlAKVAchange)));
                     Invoke(new Action(() => WORKAKVATEST.SetNewRej(WORKAKVATEST.HandlAKVAchange)));
@@ -321,9 +321,26 @@ namespace TFTprog
                     CANHUB.CommSendAnsv(ECommand.cmd_ExhParams, Efl_DEV.fld_TFTboard, arrAKVAPAR, 0);
                     return;
                 }
+                if (WORKAKVATEST.xChangeTimersVol >= 0)
+                {// ВРУЧНУЮ изменены параметры таймера и необходимо переслать новые значение в прибор
+                   
+
+                    // надо отправить обновлённые данные о таймере в который были внесены изменения
+                    int LenTIM = System.Runtime.InteropServices.Marshal.SizeOf(typeof(SATIMER));
+                    byte[] Senddata = new byte[LenTIM + 1];
+                    Senddata[0] = (byte)WORKAKVATEST.xChangeTimersVol;//номер таймера в котором были внесены изменения
+                    byte[] byteArray = WORKAKVATEST.OneTimerToBytes(WORKAKVATEST.T[WORKAKVATEST.xChangeTimersVol]);
+                    WORKAKVATEST.boolChangeTimersVol = false;//сбрасываем флаг ручного изменения данных
+                    Array.Copy(byteArray, 0, Senddata, 1, LenTIM);
+                    CANHUB.CommSendAnsv(ECommand.cmd_exhSimulator, Efl_DEV.fld_TFTboard, Senddata, 0);//отправляем команду которая не предусматривает ответа
+                    WORKAKVATEST.xChangeTimersVol = -1;
+                    return;
+                }
                 
-                //обработка данных пришедших от TFT контроллера
-                byte[] RXdata = new byte[e.Data.Length - 6];//создаём массив для хранения данных
+
+
+                    //обработка данных пришедших от TFT контроллера
+                    byte[] RXdata = new byte[e.Data.Length - 6];//создаём массив для хранения данных
                 Array.Copy(e.Data, 4, RXdata, 0, e.Data.Length - 6);
                 ECommand Comm = (ECommand)(e.Data[1]);//извлекаем команду
 
@@ -346,29 +363,34 @@ namespace TFTprog
                     }
                     return;
                 }
-                if (Comm == ECommand.cmd_ExhParams)
-                {//выполнение команды содержащей текущий режим работы  TFT контроллера от TFT контроллера
-                    {//данные из пришедшей посылки от TFT контроллера находятся в RXdata
-                     // Конвертируем массив байтов в 32-битное целое число
-                        int _Rejim = BitConverter.ToInt32(RXdata, 0);
-                        receiveAKVA = (ErejAKVA)_Rejim;
-                        if (WORKAKVATEST.selectedMode != receiveAKVA)
-                        {//TFTконтроллер сменил режим работы
-                            WORKAKVATEST.AKVAint = AKVApar.GetNumVol(receiveAKVA);//устанавливаем новый номер строки в таблице
-                            WORKAKVATEST.NewAKVAint = WORKAKVATEST.AKVAint;//требуется выделить в таблице новый столбец!
-                            WORKAKVATEST.selectedMode = receiveAKVA;//устанавливаем новый режим работы
-                            //режим работы сменили
 
+
+                {
+                    if (Comm == ECommand.cmd_ExhParams)
+                    {//выполнение команды содержащей текущий режим работы  TFT контроллера от TFT контроллера
+                        {//данные из пришедшей посылки от TFT контроллера находятся в RXdata
+                         // Конвертируем массив байтов в 32-битное целое число
+                            int _Rejim = BitConverter.ToInt32(RXdata, 0);
+                            receiveAKVA = (ErejAKVA)_Rejim;
+                            if (WORKAKVATEST.selectedMode != receiveAKVA)
+                            {//TFTконтроллер сменил режим работы
+                                WORKAKVATEST.AKVAint = AKVApar.GetNumVol(receiveAKVA);//устанавливаем новый номер строки в таблице
+                                WORKAKVATEST.NewAKVAint = WORKAKVATEST.AKVAint;//требуется выделить в таблице новый столбец!
+                                WORKAKVATEST.selectedMode = receiveAKVA;//устанавливаем новый режим работы
+                                                                        //режим работы сменили
+
+                            }
+
+                            // извлечение данных структуры AKVAPAR из таблицы и отправка в TFT контроллер
+                            Invoke(new Action(() => AKVApar.LoadFromDataGridViewColumn(dGparam, AKVApar.GetNumVol(WORKAKVATEST.selectedMode))));// извлекаем  данные из таблицы в структуру AKVAPAR 
+                            byte[] arrAKVAPAR = AKVApar.AKVAPARtoByteArray();//копируем данные в массив
+                                                                             //отправляем структуру в TFT контроллер без требования ответа
+                            WORKAKVATEST.NewAKVAint = -1;
+                            CANHUB.CommSendAnsv(ECommand.cmd_ExhParams, Efl_DEV.fld_TFTboard, arrAKVAPAR, 0);
                         }
-
-                     // извлечение данных структуры AKVAPAR из таблицы и отправка в TFT контроллер
-                        Invoke(new Action(() => AKVApar.LoadFromDataGridViewColumn(dGparam, AKVApar.GetNumVol(WORKAKVATEST.selectedMode))));// извлекаем  данные из таблицы в структуру AKVAPAR 
-                        byte[] arrAKVAPAR = AKVApar.AKVAPARtoByteArray();//копируем данные в массив
-                                                                         //отправляем структуру в TFT контроллер без требования ответа
-                        WORKAKVATEST.NewAKVAint = -1;
-                        CANHUB.CommSendAnsv(ECommand.cmd_ExhParams, Efl_DEV.fld_TFTboard, arrAKVAPAR, 0);
                     }
                 }
+
 
             }
 

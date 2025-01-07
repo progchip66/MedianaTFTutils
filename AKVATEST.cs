@@ -39,8 +39,6 @@ namespace TESTAKVA
     {
         public ErejTimer Rej;
         public uint CountSec;
-        public uint LastStamp_mSec;
-        public uint MaxCountSec;
         public uint DamageSec;
     }
 
@@ -435,7 +433,11 @@ namespace TESTAKVA
    //видимо необходимо вместо булевой переменной вносить тип возвращаемой посылке 
                     boolChangeTimersVol = UpdateOneTimerFromDataGridView(ref T[NumCol],NumCol);
                     if (boolChangeTimersVol)
+                    {
                         xChangeTimersVol = NumCol;
+                        boolChangeTimersVol = false;
+                    }
+                        
 
                 }
             };
@@ -456,9 +458,12 @@ namespace TESTAKVA
                         int NumCol = e.ColumnIndex;
                         boolChangeTimersVol = UpdateOneTimerFromDataGridView(ref T[NumCol],NumCol);//попытка обновить значения таймера введёнными данными
                         if (boolChangeTimersVol)
+                        {
                             xChangeTimersVol = NumCol;
+                            boolChangeTimersVol = false;
+                        }
                         // Запоминаем координаты изменённой вручную ячейки
-                       
+
                     }
 
                 }
@@ -563,8 +568,8 @@ namespace TESTAKVA
                 // Проверяем каждую ячейку перед записью
                 UpdateCellIfChanged(TimersGridView.Rows[0].Cells[i], T[i].Rej);
                 UpdateCellIfChanged(TimersGridView.Rows[1].Cells[i], T[i].CountSec);
-                UpdateCellIfChanged(TimersGridView.Rows[2].Cells[i], T[i].LastStamp_mSec);
-                UpdateCellIfChanged(TimersGridView.Rows[3].Cells[i], T[i].MaxCountSec);
+  //              UpdateCellIfChanged(TimersGridView.Rows[2].Cells[i], T[i].LastStamp_mSec);
+  //              UpdateCellIfChanged(TimersGridView.Rows[3].Cells[i], T[i].MaxCountSec);
                 UpdateCellIfChanged(TimersGridView.Rows[4].Cells[i], T[i].DamageSec);
             }
 
@@ -585,8 +590,6 @@ namespace TESTAKVA
                 // Попытка преобразовать данные во временный массив
                 Ttmp.Rej = (ErejTimer)Enum.Parse(typeof(ErejTimer), TimersGridView.Rows[0].Cells[TimerNum].Value.ToString());
                 Ttmp.CountSec = uint.Parse(TimersGridView.Rows[1].Cells[TimerNum].Value.ToString());
-                Ttmp.LastStamp_mSec = uint.Parse(TimersGridView.Rows[2].Cells[TimerNum].Value.ToString());
-                Ttmp.MaxCountSec = uint.Parse(TimersGridView.Rows[3].Cells[TimerNum].Value.ToString());
                 Ttmp.DamageSec = uint.Parse(TimersGridView.Rows[4].Cells[TimerNum].Value.ToString());
 
                 // Если все преобразования прошли успешно, копируем данные в структуру таймера
