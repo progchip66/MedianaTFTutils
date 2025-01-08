@@ -339,6 +339,7 @@ namespace TFTprog
                 
 
 
+
                     //обработка данных пришедших от TFT контроллера
                     byte[] RXdata = new byte[e.Data.Length - 6];//создаём массив для хранения данных
                 Array.Copy(e.Data, 4, RXdata, 0, e.Data.Length - 6);
@@ -372,13 +373,23 @@ namespace TFTprog
                          // Конвертируем массив байтов в 32-битное целое число
                             int _Rejim = BitConverter.ToInt32(RXdata, 0);
                             receiveAKVA = (ErejAKVA)_Rejim;
+
                             if (WORKAKVATEST.selectedMode != receiveAKVA)
                             {//TFTконтроллер сменил режим работы
-                                WORKAKVATEST.AKVAint = AKVApar.GetNumVol(receiveAKVA);//устанавливаем новый номер строки в таблице
-                                WORKAKVATEST.NewAKVAint = WORKAKVATEST.AKVAint;//требуется выделить в таблице новый столбец!
-                                WORKAKVATEST.selectedMode = receiveAKVA;//устанавливаем новый режим работы
-                                                                        //режим работы сменили
 
+                                //отрисовка выеделения нового столбца таблицы
+                                Invoke(new Action(() => WORKAKVATEST.SelectColumn(dGparam, AKVApar.GetNumVol(receiveAKVA))));
+                                Invoke(new Action(() => WORKAKVATEST.SetNewRej(AKVApar.GetNumVol(receiveAKVA))));
+                                // извлечение данных структуры AKVAPAR из таблицы и отправка в TFT контроллер
+                                Invoke(new Action(() => AKVApar.LoadFromDataGridViewColumn(dGparam, AKVApar.GetNumVol(receiveAKVA))));// извлекаем  данные из таблицы в структуру AKVAPAR 
+                                byte[] arrAKVAPAR1 = AKVApar.AKVAPARtoByteArray();//копируем данные в массив
+
+                                //отправляем структуру в TFT контроллер без требования ответа
+                                CANHUB.CommSendAnsv(ECommand.cmd_ExhParams, Efl_DEV.fld_TFTboard, arrAKVAPAR1, 0);
+
+
+                                return;                                        //режим работы сменили
+                                
                             }
 
                             // извлечение данных структуры AKVAPAR из таблицы и отправка в TFT контроллер
