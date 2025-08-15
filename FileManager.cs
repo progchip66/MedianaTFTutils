@@ -9,6 +9,10 @@ using System.Windows.Forms;
 namespace FileCreater
 {
 
+    public static class TGlobNonst
+    {
+        public static int ReadFrom_Setting0_INI1 = 0;
+    }
 
     class TResurser
     {

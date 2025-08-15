@@ -272,6 +272,7 @@ namespace TFTprog
             AKVApar = new SAKVApar();
             LoadSaveTable.LoadDataGridViewFromCsv(dGparam, true, Proper,true);//загрузка последнего сохранённого варианта таблицы параметров
 
+            tBgrafDIR.Text = Proper.FolderGRAF;
 
 
 
@@ -309,7 +310,7 @@ namespace TFTprog
             // *************  !!!  РУЧНОЕ ИЗМЕНЕНИЕ ДАННЫХ ИМЕЕТ АБСОЛЮТНЫЙ ПРИОРИТЕТ  !!! *********
                 if (WORKAKVATEST.HandlAKVAchange >= 0) 
                 {// ВРУЧНУЮ с помощью ComboBox sBrej изменён режим работы
-                 //отрисовка выеделения нового столбца таблицы
+                 //отрисовка выделения нового столбца таблицы
                     Invoke(new Action(() => WORKAKVATEST.SelectColumn(dGparam, WORKAKVATEST.HandlAKVAchange)));
                     Invoke(new Action(() => WORKAKVATEST.SetNewRej(WORKAKVATEST.HandlAKVAchange)));
                  // извлечение данных структуры AKVAPAR из таблицы и отправка в TFT контроллер
@@ -527,8 +528,8 @@ namespace TFTprog
 
         private void bGRAFdir_Click(object sender, EventArgs e)
         {
-
- FolderBrowserDialog FolderResult = new FolderBrowserDialog();
+            
+            FolderBrowserDialog FolderResult = new FolderBrowserDialog();
              string dirName = Proper.FolderGRAF;
              if (FolderResult.ShowDialog() == DialogResult.OK)
              {
@@ -619,7 +620,7 @@ namespace TFTprog
 
         private void butSelBaseFile_Click(object sender, EventArgs e)
         {
-    /*        string basefileName = tBbasefile.Text;
+   /*         string basefileName = tBbasefile.Text;
 
             using (OpenFileDialog openFileDialog = new OpenFileDialog())
             {
@@ -1847,9 +1848,9 @@ namespace TFTprog
             {
                 if (selectedColumn >= 0 && selectedColumn < dGparam.ColumnCount)
                 {
- //              !!! ВСЕ ОТРИСОВКИ ТАБЛИЦЫ ПАРАМЕТРОВ ПРОИВЗОДЯТСЯ В СОБЫИИ ОБНОВЛЕНИЯ !!!     WORKAKVATEST.SelectColumn(dGparam, selectedColumn);
+ //              !!! ВСЕ ОТРИСОВКИ ТАБЛИЦЫ ПАРАМЕТРОВ ПРОИВЗОДЯТСЯ В СОБЫТИИ ОБНОВЛЕНИЯ !!!     WORKAKVATEST.SelectColumn(dGparam, selectedColumn);
  //                   WORKAKVATEST.SetNewRej(selectedColumn);
-                    WORKAKVATEST.HandlAKVAchange = selectedColumn; // Обновляем глобальную переменну
+                    WORKAKVATEST.HandlAKVAchange = selectedColumn; // Обновляем глобальную переменную
                 }
             }
         }

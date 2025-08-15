@@ -122,6 +122,7 @@
             this.tB_PARfileMan = new System.Windows.Forms.TextBox();
             this.dGparam = new System.Windows.Forms.DataGridView();
             this.WRpro = new System.ComponentModel.BackgroundWorker();
+            this.comboBox1 = new System.Windows.Forms.ComboBox();
             this.tabControl1.SuspendLayout();
             this.tabPagePack.SuspendLayout();
             this.statusStrip1.SuspendLayout();
@@ -217,6 +218,7 @@
             // tabPagePack
             // 
             this.tabPagePack.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.tabPagePack.Controls.Add(this.comboBox1);
             this.tabPagePack.Controls.Add(this.button3);
             this.tabPagePack.Controls.Add(this.statusStrip1);
             this.tabPagePack.Controls.Add(this.groupBox2);
@@ -1107,6 +1109,14 @@
             this.WRpro.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.WRpro_ProgressChanged);
             this.WRpro.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.WRpro_RunWorkerCompleted);
             // 
+            // comboBox1
+            // 
+            this.comboBox1.FormattingEnabled = true;
+            this.comboBox1.Location = new System.Drawing.Point(8, 8);
+            this.comboBox1.Name = "comboBox1";
+            this.comboBox1.Size = new System.Drawing.Size(121, 21);
+            this.comboBox1.TabIndex = 25;
+            // 
             // FormHUB
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1241,6 +1251,7 @@
         private System.Windows.Forms.ComboBox cBrejSimulator;
         private System.Windows.Forms.Label labRejSimulator;
         private System.Windows.Forms.Button butTest;
+        private System.Windows.Forms.ComboBox comboBox1;
     }
 }
 
