@@ -198,7 +198,8 @@ namespace TESTAKVA
         // Метод для загрузки данных структуры из таблицы
         public void LoadFromDataGridViewColumn(DataGridView paramGridView, int columnIndex)
         {
-            if (paramGridView == null || columnIndex < 0 || columnIndex >= paramGridView.ColumnCount)
+            // старая версия ограничений         if (paramGridView == null || columnIndex < 0 || columnIndex >= paramGridView.ColumnCount)
+            if ((paramGridView == null) || (columnIndex < 0) || ((columnIndex > 4) && (columnIndex != 8)))
                 throw new ArgumentException("Invalid DataGridView or column index.");
 
             var values = new List<string>();

@@ -212,11 +212,11 @@ namespace TFTprog
                             }
                             else
                             {
-                                MessageBox.Show("Необходимо подсоединить устройство к COM порту и повторно запустить программу", "Устройство не обнаружено",
+     /*                           MessageBox.Show("Необходимо подсоединить устройство к COM порту и повторно запустить программу", "Устройство не обнаружено",
                                    MessageBoxButtons.OKCancel, MessageBoxIcon.Error);
                                 // Закрываем приложение независимо от выбора пользователя
                                 Environment.Exit(0);
-
+     */
                             }
                             
                         }
@@ -291,9 +291,11 @@ namespace TFTprog
             {
                 Scan_and_OpenHUBTFTCOMport(Proper.COMportName, Proper.COMportBaud, cBoxEnMess.Checked);
                 SelectComPort(Proper.COMportName, listComPort);
+
+// ОТКЛЮЧАЕМ ПРИЁМ ДАННЫЙ В SLAVE РЕЖИМЕ !
                 // Подписываемся на событие DataReceivedEvent
-                CANHUB.DataReceivedEvent += OnDataReceived; // Обработчик события
-                CANHUB.StartReceiveThread();
+  //              CANHUB.DataReceivedEvent += OnDataReceived; // Обработчик события
+  //              CANHUB.StartReceiveThread();
             }
 
            // WORKAKVATEST
@@ -1543,8 +1545,9 @@ namespace TFTprog
 
         private void bParamRead_Click(object sender, EventArgs e)
         {
-
             LoadSaveTable.LoadDataGridViewFromCsv(dGparam, true,Proper,false);
+
+
         }
 
 
@@ -1637,7 +1640,22 @@ namespace TFTprog
 
         private void bParamWrite_Click(object sender, EventArgs e)
         {
-            LoadSaveTable.SaveTableWithFileDialog(dGparam, true,Proper);
+            //LoadSaveTable.SaveTableWithFileDialog(dGparam, true,Proper);
+
+            if (WORKAKVATEST.HandlAKVAchange >= 0)
+            {// ВРУЧНУЮ с помощью ComboBox sBrej изменён режим работы
+             //отрисовка выделения нового столбца таблицы
+                WORKAKVATEST.SelectColumn(dGparam, WORKAKVATEST.HandlAKVAchange);
+                WORKAKVATEST.SetNewRej(WORKAKVATEST.HandlAKVAchange);
+                // извлечение данных структуры AKVAPAR из таблицы и отправка в TFT контроллер
+                AKVApar.LoadFromDataGridViewColumn(dGparam, WORKAKVATEST.HandlAKVAchange);// извлекаем  данные из таблицы в структуру AKVAPAR 
+                byte[] arrAKVAPAR = AKVApar.AKVAPARtoByteArray();//копируем данные в массив
+
+                WORKAKVATEST.HandlAKVAchange = -1;
+                //отправляем структуру в TFT контроллер без требования ответа
+                CANHUB.CommSendAnsv(ECommand.cmd_ExhParams, Efl_DEV.fld_TFTboard, arrAKVAPAR, 0);
+                return;
+            }
         }
 
         private void listComPort_SelectedIndexChanged_1(object sender, EventArgs e)
@@ -1656,6 +1674,8 @@ namespace TFTprog
             try
             {
 
+                CANHUB.StartTFTcalibr(Efl_DEV.fld_TFTboard);
+/*
                 //	public enum Efl_DEV { fld_PC = 0, fld_HUB, fld_MainBoard, fld_TFTboard, fld_FEUdetect, fld_none = 0x0f };//тип устройства
                 if (CANHUB.ChangeDEVExhRejWork(ERejWork.evrTFTcalibr, Efl_DEV.fld_TFTboard) == ERejWork.ervNewSetOK)
                 {
@@ -1665,7 +1685,7 @@ namespace TFTprog
                        // funk(); // Вызов функции funk() после нажатия OK
                     }
                 }
-
+*/
             }
             catch (Exception)
             {
@@ -1830,10 +1850,7 @@ namespace TFTprog
             CANHUB.SetRTCDateTime(WinNowTime, Efl_DEV.fld_MainBoard);
         }
 
-        private void bCalibr_Click(object sender, EventArgs e)
-        {
-            CANHUB.StartTFTcalibr(Efl_DEV.fld_TFTboard);
-        }
+
 
         private void cBrej_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -1887,7 +1904,7 @@ namespace TFTprog
                         break;
                     case 1:
                         if (CANHUB.IsOpen)
-                            CANHUB.ChangeDEVExhRejWork(ERejWork.evrPCsimulator, Efl_DEV.fld_TFTboard);
+                            CANHUB.ChangeDEVExhRejWork(ERejWork.ervPC_SENSemul, Efl_DEV.fld_TFTboard);
                         break;
                     default:
                         break;
@@ -1904,8 +1921,46 @@ namespace TFTprog
 
         private void butTest_Click_1(object sender, EventArgs e)
         {
-            AKVApar.LoadFromDataGridViewColumn(dGparam, 0);
-            AKVApar.PutGridViewColumn(dGparam, 0);
+              AKVApar.LoadFromDataGridViewColumn(dGparam, cBrej.SelectedIndex);
+            //  AKVApar.PutGridViewColumn(dGparam, 0);
+
+
+        }
+
+        private void dGparam_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+
+        }
+
+        private void chBsebsEmul_CheckedChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                if (!chBsebsEmul.Checked)
+                {
+
+                    CANHUB.ChangeDEVExhRejWork(ERejWork.ervTFT_master, Efl_DEV.fld_MainBoard);
+
+                }
+                else
+                {// в этом режиме MainBoard отправляет в TFT контроллер данные из выбранного столбца таблицы вместо данных датчиков
+                    CANHUB.ChangeDEVExhRejWork(ERejWork.ervPC_SENSemul, Efl_DEV.fld_MainBoard);
+                }
+            }
+            catch (Exception)
+            {
+                MessageBox.Show("Не удалось изменить режим работы", "Не получен ответ от устройства", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void bWriteTIMERS_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void bReadTIMERS_Click(object sender, EventArgs e)
+        {
+
         }
     }
 
