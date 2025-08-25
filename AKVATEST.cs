@@ -381,7 +381,6 @@ namespace TESTAKVA
         }
 
 
-
         public SWORKAKVATEST(DataGridView _TimersGridView, DataGridView _ParamGridView)
         {//конструктор в котором происходит формирование таблиц таймеров и параметров
             TimersGridView = _TimersGridView ?? throw new ArgumentNullException(nameof(_TimersGridView));
@@ -433,7 +432,7 @@ namespace TESTAKVA
                         }
                     }
    //видимо необходимо вместо булевой переменной вносить тип возвращаемой посылке 
-                    boolChangeTimersVol = READoneTimerFromDataGridView(ref T[NumCol],NumCol);
+                    boolChangeTimersVol = READoneTimerFromDataGridView(ref TIMS[NumCol],NumCol);
                     if (boolChangeTimersVol)
                     {
                         xChangeTimersVol = NumCol;
@@ -458,7 +457,7 @@ namespace TESTAKVA
                     {
                         // Если получилось, присваиваем значение переменной ChangeTimersVol
                         int NumCol = e.ColumnIndex;
-                         boolChangeTimersVol = READoneTimerFromDataGridView(ref T[NumCol],NumCol);//попытка обновить значения таймера введёнными данными
+                         boolChangeTimersVol = READoneTimerFromDataGridView(ref TIMS[NumCol],NumCol);//попытка обновить значения таймера введёнными данными
                         if (boolChangeTimersVol)
                         {
                             xChangeTimersVol = NumCol;
@@ -480,7 +479,7 @@ namespace TESTAKVA
         }
 
         public GridViewParams FormatParamsGV;//структура хранения параметров форматирования таблицы ParamGridView
-        public SATIMER[] T = new SATIMER[ArraySize];
+        public SATIMER[] TIMS = new SATIMER[ArraySize];
 
 
 
@@ -508,14 +507,14 @@ namespace TESTAKVA
         private byte[] tmpbufTimersData = new byte[Marshal.SizeOf(typeof(SATIMER)) * ArraySize];//массив в который копируются считанные данные таймеров
 
         //  преобразование СТРУКТУРЫ SATIMER в МАССИВ байт
-        public  byte[] SATIMER_ToBytes(SATIMER s)
+        public  byte[] SATIMER_ToBytes(SATIMER oneTIM)
         {
             int size = Marshal.SizeOf(typeof(SATIMER));
             var buf = new byte[size];
             IntPtr ptr = Marshal.AllocHGlobal(size);
             try
             {
-                Marshal.StructureToPtr(s, ptr, false);
+                Marshal.StructureToPtr(oneTIM, ptr, false);
                 Marshal.Copy(ptr, buf, 0, size);
                 return buf;
             }
@@ -538,35 +537,35 @@ namespace TESTAKVA
         }
 
         //  преобразование МАССИВА структур SATIMER в МАССИВ байт
-        public  byte[] SATIMER_ArrayToBytes(SATIMER[] arr)
+        public  byte[] SATIMER_ArrayToBytes(SATIMER[] arrTIM)
         {
             int itemSize = Marshal.SizeOf(typeof(SATIMER));
-            int total = itemSize * arr.Length;
+            int total = itemSize * arrTIM.Length;
             var buf = new byte[total];
             IntPtr basePtr = Marshal.AllocHGlobal(total);
             try
             {
-                for (int i = 0; i < arr.Length; i++)
-                    Marshal.StructureToPtr(arr[i], IntPtr.Add(basePtr, i * itemSize), false);
+                for (int i = 0; i < arrTIM.Length; i++)
+                    Marshal.StructureToPtr(arrTIM[i], IntPtr.Add(basePtr, i * itemSize), false);
                 Marshal.Copy(basePtr, buf, 0, total);
                 return buf;
             }
             finally { Marshal.FreeHGlobal(basePtr); }
         }
 
-        //  преобразование МАССИВА байт в МАССИВ структур SATIMER 
-        public  void Bytes_ToSATIMER_Array(byte[] data, SATIMER[] dest)
+        //  преобразование МАССИВА байт в МАССИВ структур SATIMER Bytes_ToSATIMER
+        public void Bytes_ToSATIMER_Array(byte[] data, SATIMER[] arrTIM)
         {
             int itemSize = Marshal.SizeOf(typeof(SATIMER));
-            int expected = itemSize * dest.Length;
+            int expected = itemSize * arrTIM.Length;
             if (data == null || data.Length != expected)
                 throw new ArgumentException("Invalid data size");
             IntPtr basePtr = Marshal.AllocHGlobal(expected);
             try
             {
                 Marshal.Copy(data, 0, basePtr, expected);
-                for (int i = 0; i < dest.Length; i++)
-                    dest[i] = (SATIMER)Marshal.PtrToStructure(IntPtr.Add(basePtr, i * itemSize), typeof(SATIMER));
+                for (int i = 0; i < arrTIM.Length; i++)
+                    arrTIM[i] = (SATIMER)Marshal.PtrToStructure(IntPtr.Add(basePtr, i * itemSize), typeof(SATIMER));
             }
             finally { Marshal.FreeHGlobal(basePtr); }
         }
@@ -578,11 +577,11 @@ namespace TESTAKVA
             for (int i = 0; i < ArraySize; i++)
             {
                 // Проверяем каждую ячейку перед записью
-                UpdateCellIfChanged(TimersGridView.Rows[0].Cells[i], T[i].Rej);
-                UpdateCellIfChanged(TimersGridView.Rows[1].Cells[i], T[i].CountSec);
+                UpdateCellIfChanged(TimersGridView.Rows[0].Cells[i], TIMS[i].Rej);
+                UpdateCellIfChanged(TimersGridView.Rows[1].Cells[i], TIMS[i].CountSec);
                 //              UpdateCellIfChanged(TimersGridView.Rows[2].Cells[i], T[i].LastStamp_mSec);
                 //              UpdateCellIfChanged(TimersGridView.Rows[3].Cells[i], T[i].MaxCountSec);
-                UpdateCellIfChanged(TimersGridView.Rows[4].Cells[i], T[i].DamageSec);
+                UpdateCellIfChanged(TimersGridView.Rows[4].Cells[i], TIMS[i].DamageSec);
             }
 
         }
@@ -633,7 +632,7 @@ namespace TESTAKVA
         public bool READoneTimerFromDataGridView(ref SATIMER TIM, int TimerNum)
         {//считывание данных об одном таймере из соответствующего столбца таблицы
             // Проверка выхода за пределы массива
-            if (TimerNum >= T.Length)
+            if (TimerNum >= TIMS.Length)
                 return false;
 
             // Создание временного массива для проверки корректности данных
@@ -661,7 +660,7 @@ namespace TESTAKVA
         {// считывание всех данных из таблицы
             for (int i = 0; i < ArraySize; i++)
             {
-                READoneTimerFromDataGridView(ref T[i], i);
+                READoneTimerFromDataGridView(ref TIMS[i], i);
             }
         }
 

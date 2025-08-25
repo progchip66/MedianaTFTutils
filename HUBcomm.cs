@@ -234,7 +234,7 @@ namespace ExtHubComm
             }
         }
 
-
+/*
         public void WRoneFILTtimer(int NumTIM, Efl_DEV DevType)
         {//обмен данными с таймером
 
@@ -250,7 +250,7 @@ namespace ExtHubComm
                 throw new Exception("Ошибка операции записи-чтения в RTC MainBoard");
             }
         }
-
+*/
         public int GetSelectedColumnIndex(DataGridView dgv)
         {
             if (dgv == null || dgv.SelectedCells.Count == 0)

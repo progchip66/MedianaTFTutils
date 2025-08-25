@@ -292,10 +292,6 @@ namespace TFTprog
                 Scan_and_OpenHUBTFTCOMport(Proper.COMportName, Proper.COMportBaud, cBoxEnMess.Checked);
                 SelectComPort(Proper.COMportName, listComPort);
 
-// ОТКЛЮЧАЕМ ПРИЁМ ДАННЫЙ В SLAVE РЕЖИМЕ !
-                // Подписываемся на событие DataReceivedEvent
-  //              CANHUB.DataReceivedEvent += OnDataReceived; // Обработчик события
-  //              CANHUB.StartReceiveThread();
             }
 
            // WORKAKVATEST
@@ -303,112 +299,7 @@ namespace TFTprog
 
 
 
-        private void OnDataReceived(object sender, DataReceivedEventArgs e)
-        {//СЧИТЫВАНИЕ И ОБРАБОТКА ДАННЫХ, ПРИНЯТЫХ В РЕЖИМЕ SLAVE по по RS-485
-            ErejAKVA receiveAKVA= WORKAKVATEST.selectedMode;
-            // Поскольку событие может быть вызвано из другого потока, используем Invoke
-            if (InvokeRequired)
-            {
-            // *************  !!!  РУЧНОЕ ИЗМЕНЕНИЕ ДАННЫХ ИМЕЕТ АБСОЛЮТНЫЙ ПРИОРИТЕТ  !!! *********
-                if (WORKAKVATEST.HandlAKVAchange >= 0) 
-                {// ВРУЧНУЮ с помощью ComboBox sBrej изменён режим работы
-                 //отрисовка выделения нового столбца таблицы
-                    Invoke(new Action(() => WORKAKVATEST.SelectColumn(dGparam, WORKAKVATEST.HandlAKVAchange)));
-                    Invoke(new Action(() => WORKAKVATEST.SetNewRej(WORKAKVATEST.HandlAKVAchange)));
-                 // извлечение данных структуры AKVAPAR из таблицы и отправка в TFT контроллер
-                        Invoke(new Action(() => AKVApar.LoadFromDataGridViewColumn(dGparam, WORKAKVATEST.HandlAKVAchange)));// извлекаем  данные из таблицы в структуру AKVAPAR 
-                        byte[] arrAKVAPAR = AKVApar.AKVAPARtoByteArray();//копируем данные в массив
-                                                                         
-                        WORKAKVATEST.HandlAKVAchange = -1;
-                    //отправляем структуру в TFT контроллер без требования ответа
-                    CANHUB.CommSendAnsv(ECommand.cmd_ExhParams, Efl_DEV.fld_TFTboard, arrAKVAPAR, 0);
-                    return;
-                }
-                if (WORKAKVATEST.xChangeTimersVol >= 0)
-                {// ВРУЧНУЮ изменены параметры таймера и необходимо переслать новые значение в прибор
-                   
 
-                    // надо отправить обновлённые данные о таймере в который были внесены изменения
-                    int LenTIM = System.Runtime.InteropServices.Marshal.SizeOf(typeof(SATIMER));
-                    byte[] Senddata = new byte[LenTIM + 1];
-                    Senddata[0] = (byte)WORKAKVATEST.xChangeTimersVol;//номер таймера в котором были внесены изменения
-                    byte[] byteArray = WORKAKVATEST.OneTimerToBytes(WORKAKVATEST.T[WORKAKVATEST.xChangeTimersVol]);
-                    WORKAKVATEST.boolChangeTimersVol = false;//сбрасываем флаг ручного изменения данных
-                    Array.Copy(byteArray, 0, Senddata, 1, LenTIM);
-                    CANHUB.CommSendAnsv(ECommand.cmd_exhSimulator, Efl_DEV.fld_TFTboard, Senddata, 0);//отправляем команду которая не предусматривает ответа
-                    WORKAKVATEST.xChangeTimersVol = -1;
-                    return;
-                }
-                
-
-
-
-                    //обработка данных пришедших от TFT контроллера
-                    byte[] RXdata = new byte[e.Data.Length - 6];//создаём массив для хранения данных
-                Array.Copy(e.Data, 4, RXdata, 0, e.Data.Length - 6);
-                ECommand Comm = (ECommand)(e.Data[1]);//извлекаем команду
-
-                if (Comm == ECommand.cmd_exhSimulator)
-                {//обрабатываем принятую по RS-485 посылку данных                   
-                    int Rejim = e.Data[4];//копируем режим принятых данных
-                    byte[] SIMULdata = new byte[e.Data.Length - 7];//массив для "чистых данных" симулятора
-                    Array.Copy(e.Data, 5, SIMULdata, 0, e.Data.Length - 7);//копируем в него ЧИСТЫЕ принятые данные без заголовка CRC и режима
-                    switch (Rejim)
-                    {
-  /*                      case 9://приём и установка нового режима работы
-
-                            break;*/
-                        case 10://приём и отображение данных о всех таймерах и ответ в зависимости от того какие параметры были изменены
-
-                            //ОБНОВЛЕНИЕ СТРУКТУРЫ ТАЙМЕРОВ производим только в случае, если не было изменений вручную, если были изменения будут учтены при следующем приходе данных через секунду
-                            WORKAKVATEST.TimersParArray_from_ByteArray(SIMULdata);//обновление структуры таймеров
-                            Invoke(new Action(() => WORKAKVATEST.DisplayInTimersGridView()));
-                            break;
-                    }
-                    return;
-                }
-
-
-                {
-                    if (Comm == ECommand.cmd_ExhParams)
-                    {//выполнение команды содержащей текущий режим работы  TFT контроллера от TFT контроллера
-                        {//данные из пришедшей посылки от TFT контроллера находятся в RXdata
-                         // Конвертируем массив байтов в 32-битное целое число
-                            int _Rejim = BitConverter.ToInt32(RXdata, 0);
-                            receiveAKVA = (ErejAKVA)_Rejim;
-
-                            if (WORKAKVATEST.selectedMode != receiveAKVA)
-                            {//TFTконтроллер сменил режим работы
-
-                                //отрисовка выеделения нового столбца таблицы
-                                Invoke(new Action(() => WORKAKVATEST.SelectColumn(dGparam, AKVApar.GetNumVol(receiveAKVA))));
-                                Invoke(new Action(() => WORKAKVATEST.SetNewRej(AKVApar.GetNumVol(receiveAKVA))));
-                                // извлечение данных структуры AKVAPAR из таблицы и отправка в TFT контроллер
-                                Invoke(new Action(() => AKVApar.LoadFromDataGridViewColumn(dGparam, AKVApar.GetNumVol(receiveAKVA))));// извлекаем  данные из таблицы в структуру AKVAPAR 
-                                byte[] arrAKVAPAR1 = AKVApar.AKVAPARtoByteArray();//копируем данные в массив
-
-                                //отправляем структуру в TFT контроллер без требования ответа
-                                CANHUB.CommSendAnsv(ECommand.cmd_ExhParams, Efl_DEV.fld_TFTboard, arrAKVAPAR1, 0);
-
-
-                                return;                                        //режим работы сменили
-                                
-                            }
-
-                            // извлечение данных структуры AKVAPAR из таблицы и отправка в TFT контроллер
-                            Invoke(new Action(() => AKVApar.LoadFromDataGridViewColumn(dGparam, AKVApar.GetNumVol(WORKAKVATEST.selectedMode))));// извлекаем  данные из таблицы в структуру AKVAPAR 
-                            byte[] arrAKVAPAR = AKVApar.AKVAPARtoByteArray();//копируем данные в массив
-                                                                             //отправляем структуру в TFT контроллер без требования ответа
-                            WORKAKVATEST.NewAKVAint = -1;
-                            CANHUB.CommSendAnsv(ECommand.cmd_ExhParams, Efl_DEV.fld_TFTboard, arrAKVAPAR, 0);
-                        }
-                    }
-                }
-
-
-            }
-
-        }
 
 
 
@@ -1956,7 +1847,7 @@ namespace TFTprog
         private void bWriteTIMERS_Click(object sender, EventArgs e)
         {
             int NumCol = CANHUB.GetSelectedColumnIndex(dGtimers);//считываем номер выдленного столбца таблицы
-            WORKAKVATEST.READoneTimerFromDataGridView(ref WORKAKVATEST.T[NumCol], NumCol);//попытка обновить значения таймера введёнными данными
+            WORKAKVATEST.READoneTimerFromDataGridView(ref WORKAKVATEST.TIMS[NumCol], NumCol);//попытка обновить значения таймера введёнными данными
 
         }
 
