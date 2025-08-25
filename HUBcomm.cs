@@ -9,6 +9,8 @@ using System.Threading;
 using TFTprog;
 using System.ComponentModel;
 using System.IO;
+using System.Windows.Forms;
+using TESTAKVA;
 
 namespace ExtHubComm
 {//хаб использует расширенный вариант команд для передачи данных внешним платам и приёма данных от них
@@ -233,7 +235,29 @@ namespace ExtHubComm
         }
 
 
+        public void WRoneFILTtimer(int NumTIM, Efl_DEV DevType)
+        {//обмен данными с таймером
 
+            byte[] comm_data = SATIMER_ToBytes(T[NumTIM]);
+
+
+
+            comm_data = BitConverter.GetBytes((uint)(number & 0xFFFFFFFF));
+            CommSendAnsv(ECommand.cmd_SetRTCDateTime, DevType, comm_data, 100);
+            long result = BitConverter.ToUInt32(RxBuff, 0);
+            if (result != number)
+            {
+                throw new Exception("Ошибка операции записи-чтения в RTC MainBoard");
+            }
+        }
+
+        public int GetSelectedColumnIndex(DataGridView dgv)
+        {
+            if (dgv == null || dgv.SelectedCells.Count == 0)
+                return -1; // Нет выделенной ячейки
+
+            return dgv.SelectedCells[0].ColumnIndex;
+        }
 
         // Функция SetSpeedFromStr
         public void SetSpeedFromStr(string xSpeed)
@@ -248,7 +272,7 @@ namespace ExtHubComm
                 ret = result;
             }
             byte[] byteArray = BitConverter.GetBytes(ret);
-            CommSendAnsv(ECommand.cmd_TimeAccelerat, Efl_DEV.fld_TFTboard, byteArray, 50);
+ //ФУНКЦИЯ УСКОРЕНИЯ ИСКЛЮЧЕНА ИЗ АЛГОРИТМА ПРОГРАММЫ           CommSendAnsv(ECommand.cmd_TimeAccelerat, Efl_DEV.fld_TFTboard, byteArray, 50);
         }
 
 

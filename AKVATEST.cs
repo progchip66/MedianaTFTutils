@@ -14,7 +14,7 @@ using TFTprog;
 using System.IO;
 using System.Drawing;
 using System.Runtime.InteropServices;
-
+using System.Runtime.CompilerServices;
 
 
 
@@ -29,6 +29,7 @@ namespace TESTAKVA
     public enum ErejTimer : uint
     {
         rejt_off = 0x00U,
+
         rejt_on = 0x01U,
         rejt_over = 0x02U
     }
@@ -432,7 +433,7 @@ namespace TESTAKVA
                         }
                     }
    //видимо необходимо вместо булевой переменной вносить тип возвращаемой посылке 
-                    boolChangeTimersVol = UpdateOneTimerFromDataGridView(ref T[NumCol],NumCol);
+                    boolChangeTimersVol = READoneTimerFromDataGridView(ref T[NumCol],NumCol);
                     if (boolChangeTimersVol)
                     {
                         xChangeTimersVol = NumCol;
@@ -457,7 +458,7 @@ namespace TESTAKVA
                     {
                         // Если получилось, присваиваем значение переменной ChangeTimersVol
                         int NumCol = e.ColumnIndex;
-                        boolChangeTimersVol = UpdateOneTimerFromDataGridView(ref T[NumCol],NumCol);//попытка обновить значения таймера введёнными данными
+                         boolChangeTimersVol = READoneTimerFromDataGridView(ref T[NumCol],NumCol);//попытка обновить значения таймера введёнными данными
                         if (boolChangeTimersVol)
                         {
                             xChangeTimersVol = NumCol;
@@ -506,22 +507,86 @@ namespace TESTAKVA
 
         private byte[] tmpbufTimersData = new byte[Marshal.SizeOf(typeof(SATIMER)) * ArraySize];//массив в который копируются считанные данные таймеров
 
-
-        public void TimersParFromByteArray(byte[] data)
-        {//преобразования из массива байт в структуру таймера
-            if (data.Length != Marshal.SizeOf(typeof(SATIMER)) * ArraySize)
-                throw new ArgumentException("Invalid data length");
-
-            for (int i = 0; i < ArraySize; i++)
-            {// считывание параметров в структуру одного из таймеров
-                int offset = i * Marshal.SizeOf(typeof(SATIMER));
-                IntPtr ptr = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(SATIMER)));
-                Marshal.Copy(data, offset, ptr, Marshal.SizeOf(typeof(SATIMER)));
-                T[i] = (SATIMER)Marshal.PtrToStructure(ptr, typeof(SATIMER));
-                Marshal.FreeHGlobal(ptr);
+        //  преобразование СТРУКТУРЫ SATIMER в МАССИВ байт
+        public  byte[] SATIMER_ToBytes(SATIMER s)
+        {
+            int size = Marshal.SizeOf(typeof(SATIMER));
+            var buf = new byte[size];
+            IntPtr ptr = Marshal.AllocHGlobal(size);
+            try
+            {
+                Marshal.StructureToPtr(s, ptr, false);
+                Marshal.Copy(ptr, buf, 0, size);
+                return buf;
             }
-            Array.Copy(data, tmpbufTimersData, data.Length);//копируем считанные данные таймеров
+            finally { Marshal.FreeHGlobal(ptr); }
         }
+
+        //  преобразование  МАССИВА байт в СТРУКТУРУ SATIMER
+        public  SATIMER Bytes_ToSATIMER(byte[] data)
+        {
+            int size = Marshal.SizeOf(typeof(SATIMER));
+            if (data == null || data.Length != size)
+                throw new ArgumentException("Invalid data size");
+            IntPtr ptr = Marshal.AllocHGlobal(size);
+            try
+            {
+                Marshal.Copy(data, 0, ptr, size);
+                return (SATIMER)Marshal.PtrToStructure(ptr, typeof(SATIMER));
+            }
+            finally { Marshal.FreeHGlobal(ptr); }
+        }
+
+        //  преобразование МАССИВА структур SATIMER в МАССИВ байт
+        public  byte[] SATIMER_ArrayToBytes(SATIMER[] arr)
+        {
+            int itemSize = Marshal.SizeOf(typeof(SATIMER));
+            int total = itemSize * arr.Length;
+            var buf = new byte[total];
+            IntPtr basePtr = Marshal.AllocHGlobal(total);
+            try
+            {
+                for (int i = 0; i < arr.Length; i++)
+                    Marshal.StructureToPtr(arr[i], IntPtr.Add(basePtr, i * itemSize), false);
+                Marshal.Copy(basePtr, buf, 0, total);
+                return buf;
+            }
+            finally { Marshal.FreeHGlobal(basePtr); }
+        }
+
+        //  преобразование МАССИВА байт в МАССИВ структур SATIMER 
+        public  void Bytes_ToSATIMER_Array(byte[] data, SATIMER[] dest)
+        {
+            int itemSize = Marshal.SizeOf(typeof(SATIMER));
+            int expected = itemSize * dest.Length;
+            if (data == null || data.Length != expected)
+                throw new ArgumentException("Invalid data size");
+            IntPtr basePtr = Marshal.AllocHGlobal(expected);
+            try
+            {
+                Marshal.Copy(data, 0, basePtr, expected);
+                for (int i = 0; i < dest.Length; i++)
+                    dest[i] = (SATIMER)Marshal.PtrToStructure(IntPtr.Add(basePtr, i * itemSize), typeof(SATIMER));
+            }
+            finally { Marshal.FreeHGlobal(basePtr); }
+        }
+
+    public void DisplayInTimersGridView()
+        {
+
+            // Заполняем таблицу данными из массива таймеров SATIMER[]
+            for (int i = 0; i < ArraySize; i++)
+            {
+                // Проверяем каждую ячейку перед записью
+                UpdateCellIfChanged(TimersGridView.Rows[0].Cells[i], T[i].Rej);
+                UpdateCellIfChanged(TimersGridView.Rows[1].Cells[i], T[i].CountSec);
+                //              UpdateCellIfChanged(TimersGridView.Rows[2].Cells[i], T[i].LastStamp_mSec);
+                //              UpdateCellIfChanged(TimersGridView.Rows[3].Cells[i], T[i].MaxCountSec);
+                UpdateCellIfChanged(TimersGridView.Rows[4].Cells[i], T[i].DamageSec);
+            }
+
+        }
+
 
 
 
@@ -560,24 +625,12 @@ namespace TESTAKVA
             }
         }
 
-        public void DisplayInTimersGridView()
-        {
-
-            // Заполняем таблицу данными из SATIMER[]
-            for (int i = 0; i < ArraySize; i++)
-            {
-                // Проверяем каждую ячейку перед записью
-                UpdateCellIfChanged(TimersGridView.Rows[0].Cells[i], T[i].Rej);
-                UpdateCellIfChanged(TimersGridView.Rows[1].Cells[i], T[i].CountSec);
-  //              UpdateCellIfChanged(TimersGridView.Rows[2].Cells[i], T[i].LastStamp_mSec);
-  //              UpdateCellIfChanged(TimersGridView.Rows[3].Cells[i], T[i].MaxCountSec);
-                UpdateCellIfChanged(TimersGridView.Rows[4].Cells[i], T[i].DamageSec);
-            }
-
-        }
 
 
-        public bool UpdateOneTimerFromDataGridView(ref SATIMER TIM, int TimerNum)
+
+
+
+        public bool READoneTimerFromDataGridView(ref SATIMER TIM, int TimerNum)
         {//считывание данных об одном таймере из соответствующего столбца таблицы
             // Проверка выхода за пределы массива
             if (TimerNum >= T.Length)
@@ -608,7 +661,7 @@ namespace TESTAKVA
         {// считывание всех данных из таблицы
             for (int i = 0; i < ArraySize; i++)
             {
-                UpdateOneTimerFromDataGridView(ref T[i], i);
+                READoneTimerFromDataGridView(ref T[i], i);
             }
         }
 

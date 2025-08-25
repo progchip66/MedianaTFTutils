@@ -129,7 +129,7 @@ namespace COMMAND
 		cmd_exhSimulator = 0x5D,//Обмен информации с симулятором PC (описание режимов в DecodeSimulData
 		cmd_StartTFTcalibr = 0x5E,//Запуск режима калибровки TFT панели
 		cmd_USER = 0x70,
-		cmd_TimeAccelerat = 0x71,
+		cmd_RdWrTimers = 0x71,
 		cmd_MaxminAKVAparMCUtoPC = 0x72,
 
 		cmd_rd_flow = 0x81,

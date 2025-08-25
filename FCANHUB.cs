@@ -361,7 +361,7 @@ namespace TFTprog
                         case 10://приём и отображение данных о всех таймерах и ответ в зависимости от того какие параметры были изменены
 
                             //ОБНОВЛЕНИЕ СТРУКТУРЫ ТАЙМЕРОВ производим только в случае, если не было изменений вручную, если были изменения будут учтены при следующем приходе данных через секунду
-                            WORKAKVATEST.TimersParFromByteArray(SIMULdata);//обновление структуры таймеров
+                            WORKAKVATEST.TimersParArray_from_ByteArray(SIMULdata);//обновление структуры таймеров
                             Invoke(new Action(() => WORKAKVATEST.DisplayInTimersGridView()));
                             break;
                     }
@@ -1955,6 +1955,8 @@ namespace TFTprog
 
         private void bWriteTIMERS_Click(object sender, EventArgs e)
         {
+            int NumCol = CANHUB.GetSelectedColumnIndex(dGtimers);//считываем номер выдленного столбца таблицы
+            WORKAKVATEST.READoneTimerFromDataGridView(ref WORKAKVATEST.T[NumCol], NumCol);//попытка обновить значения таймера введёнными данными
 
         }
 
