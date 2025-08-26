@@ -18,7 +18,7 @@ using RS485;
 using COMMAND;
 using ExtHubComm;
 using TESTAKVA;
-
+using System.Runtime.InteropServices;
 
 namespace TFTprog
 {
@@ -1863,12 +1863,18 @@ namespace TFTprog
 
         private void bReadTIMERS_Click(object sender, EventArgs e)
         {
-
+            //int NumBytes = Marshal.SizeOf(typeof(SATIMER));
+            //byte[] byteArray = new byte[NumBytes];
+            //считываем данные о таймерах из TFT контроллера путём отсылки команды без данных
+            byte[] byteArray = CANHUB.CommSendAnsv(ECommand.cmd_RdWrTimers, Efl_DEV.fld_TFTboard, null, 200);
+            //записываем считанные байты в массив таймеров
+            WORKAKVATEST.Bytes_ToSATIMER_Array(byteArray, WORKAKVATEST.TIMS);
+            WORKAKVATEST.DisplayInTimersGridView();
         }
 
         private void dGtimers_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-
+            
         }
     }
 
