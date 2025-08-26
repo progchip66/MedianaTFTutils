@@ -1080,6 +1080,7 @@
             this.dGtimers.Name = "dGtimers";
             this.dGtimers.Size = new System.Drawing.Size(776, 126);
             this.dGtimers.TabIndex = 5;
+            this.dGtimers.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dGtimers_CellContentClick);
             // 
             // b_PARtableLoad
             // 

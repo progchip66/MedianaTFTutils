@@ -1812,7 +1812,9 @@ namespace TFTprog
 
         private void butTest_Click_1(object sender, EventArgs e)
         {
-              AKVApar.LoadFromDataGridViewColumn(dGparam, cBrej.SelectedIndex);
+            int numCol = AKVApar.GetSelectedColumnIndex(dGtimers);
+            if (numCol>=0)
+                AKVApar.LoadFromDataGridViewColumn(dGparam, numCol);
             //  AKVApar.PutGridViewColumn(dGparam, 0);
 
 
@@ -1846,12 +1848,25 @@ namespace TFTprog
 
         private void bWriteTIMERS_Click(object sender, EventArgs e)
         {
-            int NumCol = CANHUB.GetSelectedColumnIndex(dGtimers);//считываем номер выдленного столбца таблицы
-            WORKAKVATEST.READoneTimerFromDataGridView(ref WORKAKVATEST.TIMS[NumCol], NumCol);//попытка обновить значения таймера введёнными данными
-
+            //определяем номер выдленного столбца таблицы
+            int numCol = AKVApar.GetSelectedColumnIndex(dGtimers);
+            if (numCol < 0)
+                return;
+            //считываем данные таймера из выделенного столбца таблицы
+            WORKAKVATEST.READoneTimerFromDataGridView(ref WORKAKVATEST.TIMS[numCol], numCol);
+            //помещаемиз выделенного столбца таблицы в соответствующий ей таймер
+            byte[] comm_data = WORKAKVATEST.SATIMER_ToBytes(WORKAKVATEST.TIMS[numCol]);
+            //отправляем структуру в TFT контроллер без требования ответа
+            CANHUB.CommSendAnsv(ECommand.cmd_RdWrTimers, Efl_DEV.fld_TFTboard, comm_data, 0);
+           
         }
 
         private void bReadTIMERS_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void dGtimers_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
 
         }

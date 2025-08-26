@@ -235,7 +235,25 @@ namespace TESTAKVA
             INs = raw.INs;
             TimeStampSec = raw.TimeStampSec;
         }
-//***********************************************************************************************
+
+        public  int GetSelectedColumnIndex(DataGridView dgv)
+        { //определения столбца таблицы с выделенной ячейкой
+            if (dgv == null)
+                return -1;
+
+            if (dgv.SelectedCells.Count == 0)
+            {
+                MessageBox.Show("Выделите ячейку в столбце устанавливаемого таймера",
+                                "Нет выделения",
+                                MessageBoxButtons.OK,
+                                MessageBoxIcon.Warning);
+                return -1;
+            }
+
+            // Возвращаем номер столбца первой выделенной ячейки
+            return dgv.SelectedCells[0].ColumnIndex;
+        }
+        //***********************************************************************************************
         // Метод преобразования ErejAKVA в номер выделенного столбца ему соответствующее
         public  int GetNumVol(ErejAKVA rej)
         {
@@ -357,28 +375,7 @@ namespace TESTAKVA
         public bool isUpdating = false; // Флаг для предотвращения самоблокировки
         public ErejAKVA selectedMode = ErejAKVA.rejak_Stop;//Выбранный режим работы
 
-        public void SetNewRej(int ColumnIndex)
-        {
-            // Проходим по всем ячейкам таблицы
-            foreach (DataGridViewRow row in ParamGridView.Rows)
-            {
-                foreach (DataGridViewCell cell in row.Cells)
-                {
-                    // Если ячейка в том же столбце, что и заголовок, на который кликнули
-                    if (cell.ColumnIndex == ColumnIndex)
-                    {
-                        // Устанавливаем цвет на DefaultCellStyle.BackColor
-                        cell.Style.BackColor = ParamGridView.DefaultCellStyle.BackColor;
-                    }
-                    else
-                    {
-                        // Устанавливаем цвет на LightGray
-                        cell.Style.BackColor = Color.LightGray;
-                    }
-                }
-            }
-            NewAKVAint = ColumnIndex + 1;//выбран новый режим в таблице параметров
-        }
+
 
 
         public SWORKAKVATEST(DataGridView _TimersGridView, DataGridView _ParamGridView)
@@ -394,18 +391,7 @@ namespace TESTAKVA
             TimersParPerminEdit();
 
 
-/*
 
-            ParamGridView.ColumnHeaderMouseClick += (s, e) =>
-            {//одиночный клик на верхнем ЗАГОЛОВКЕ таблицы параметров
-                // Получаем индекс столбца, на который кликнули
-                int clickedColumnIndex = e.ColumnIndex;
-                SetNewRej(clickedColumnIndex);
-
-                //              UpdateDataFloatFromColumn(ParamGridView, NewAKVAint, float[][] dataFloat)
-
-            };
-*/
 
             TimersGridView.CellMouseDoubleClick += (s, e) =>
             {//подключаемся к событию двойного клика - событие изменения состояния таймера on/off
@@ -496,7 +482,28 @@ namespace TESTAKVA
         public float[,] floatParamsGridView;
 
 
-        
+        public void SetNewRej(int ColumnIndex)
+        {
+            // Проходим по всем ячейкам таблицы
+            foreach (DataGridViewRow row in ParamGridView.Rows)
+            {
+                foreach (DataGridViewCell cell in row.Cells)
+                {
+                    // Если ячейка в том же столбце, что и заголовок, на который кликнули
+                    if (cell.ColumnIndex == ColumnIndex)
+                    {
+                        // Устанавливаем цвет на DefaultCellStyle.BackColor
+                        cell.Style.BackColor = ParamGridView.DefaultCellStyle.BackColor;
+                    }
+                    else
+                    {
+                        // Устанавливаем цвет на LightGray
+                        cell.Style.BackColor = Color.LightGray;
+                    }
+                }
+            }
+            NewAKVAint = ColumnIndex + 1;//выбран новый режим в таблице параметров
+        }
 
 
         #region Timers
@@ -510,7 +517,7 @@ namespace TESTAKVA
         public  byte[] SATIMER_ToBytes(SATIMER oneTIM)
         {
             int size = Marshal.SizeOf(typeof(SATIMER));
-            var buf = new byte[size];
+            byte[] buf = new byte[size];
             IntPtr ptr = Marshal.AllocHGlobal(size);
             try
             {
@@ -553,7 +560,7 @@ namespace TESTAKVA
             finally { Marshal.FreeHGlobal(basePtr); }
         }
 
-        //  преобразование МАССИВА байт в МАССИВ структур SATIMER Bytes_ToSATIMER
+        //  преобразование МАССИВА байт в МАССИВ структур SATIMER
         public void Bytes_ToSATIMER_Array(byte[] data, SATIMER[] arrTIM)
         {
             int itemSize = Marshal.SizeOf(typeof(SATIMER));
