@@ -565,8 +565,6 @@ namespace TESTAKVA
         {
             int itemSize = Marshal.SizeOf(typeof(SATIMER));
             int expected = itemSize * arrTIM.Length;
-            if (data == null || data.Length != expected)
-                throw new ArgumentException("Invalid data size");
             IntPtr basePtr = Marshal.AllocHGlobal(expected);
             try
             {

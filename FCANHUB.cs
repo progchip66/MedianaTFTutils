@@ -1868,7 +1868,9 @@ namespace TFTprog
             //считываем данные о таймерах из TFT контроллера путём отсылки команды без данных
             byte[] byteArray = CANHUB.CommSendAnsv(ECommand.cmd_RdWrTimers, Efl_DEV.fld_TFTboard, null, 200);
             //записываем считанные байты в массив таймеров
-            WORKAKVATEST.Bytes_ToSATIMER_Array(byteArray, WORKAKVATEST.TIMS);
+
+            WORKAKVATEST.Bytes_ToSATIMER_Array(CANHUB.RxBuff, WORKAKVATEST.TIMS);
+            //загружаем параметры таймеров в таблицу и отображаем её
             WORKAKVATEST.DisplayInTimersGridView();
         }
 
