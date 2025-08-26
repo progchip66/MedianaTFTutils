@@ -1853,11 +1853,19 @@ namespace TFTprog
             if (numCol < 0)
                 return;
             //считываем данные таймера из выделенного столбца таблицы
-            WORKAKVATEST.READoneTimerFromDataGridView(ref WORKAKVATEST.TIMS[numCol], numCol);
-            //помещаемиз выделенного столбца таблицы в соответствующий ей таймер
-            byte[] comm_data = WORKAKVATEST.SATIMER_ToBytes(WORKAKVATEST.TIMS[numCol]);
-            //отправляем структуру в TFT контроллер без требования ответа
-            CANHUB.CommSendAnsv(ECommand.cmd_RdWrTimers, Efl_DEV.fld_TFTboard, comm_data, 0);
+            if (WORKAKVATEST.READoneTimerFromDataGridView(ref WORKAKVATEST.TIMS[numCol], numCol))
+            //помещаем выделенного столбца таблицы в соответствующий ей таймер
+            {
+                byte[] timerBytes = WORKAKVATEST.SATIMER_ToBytes(WORKAKVATEST.TIMS[numCol]);
+                byte[] comm_data = new byte[4 + timerBytes.Length];
+                byte[] numBytes = BitConverter.GetBytes(numCol);
+                Array.Copy(numBytes, 0, comm_data, 0, 4);
+                Array.Copy(timerBytes, 0, comm_data, 4, timerBytes.Length);
+
+                //отправляем структуру в TFT контроллер без требования ответа
+                CANHUB.CommSendAnsv(ECommand.cmd_RdWrTimers, Efl_DEV.fld_TFTboard, comm_data, 0);
+            }
+
            
         }
 
@@ -1866,10 +1874,14 @@ namespace TFTprog
             //int NumBytes = Marshal.SizeOf(typeof(SATIMER));
             //byte[] byteArray = new byte[NumBytes];
             //считываем данные о таймерах из TFT контроллера путём отсылки команды без данных
-            byte[] byteArray = CANHUB.CommSendAnsv(ECommand.cmd_RdWrTimers, Efl_DEV.fld_TFTboard, null, 200);
+            byte[] comm_data  = CANHUB.CommSendAnsv(ECommand.cmd_RdWrTimers, Efl_DEV.fld_TFTboard, null, 200);
             //записываем считанные байты в массив таймеров
 
-            WORKAKVATEST.Bytes_ToSATIMER_Array(CANHUB.RxBuff, WORKAKVATEST.TIMS);
+            byte[] byteArray = new byte[comm_data.Length-6];
+            Array.Copy(comm_data, 4, byteArray, 0, byteArray.Length);
+            
+
+            WORKAKVATEST.Bytes_ToSATIMER_Array(byteArray, WORKAKVATEST.TIMS);
             //загружаем параметры таймеров в таблицу и отображаем её
             WORKAKVATEST.DisplayInTimersGridView();
         }

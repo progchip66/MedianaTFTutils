@@ -400,23 +400,34 @@ namespace TESTAKVA
                 {
                     // Определяем номер колонки
                     int NumCol = e.ColumnIndex;
+                    int value;
+    //                return int.TryParse(text, out value);
 
                     // Получаем текст ячейки, на которую был произведён двойной клик
                     string text = TimersGridView.Rows[e.RowIndex].Cells[NumCol].Value?.ToString();
 
                     // Проверяем текст и при необходимости изменяем его
-                    if (text == "rejt_over")
-                    {
+
+
+                    if ((text == "rejt_over")|| (text == "rejt_off") )
+                    { 
                         TimersGridView.Rows[1].Cells[NumCol].Value = "0";
                         TimersGridView.Rows[e.RowIndex].Cells[NumCol].Value = "rejt_on";
+                        return;
                     }
                     else
                     {
-                        if (text == "rejt_on")
+                        if (text == "rejt_on" || (text == "") || (text == null))
                         {
                             TimersGridView.Rows[e.RowIndex].Cells[NumCol].Value = "rejt_over";
+                            return;
                         }
                     }
+
+                    return;
+
+
+
    //видимо необходимо вместо булевой переменной вносить тип возвращаемой посылке 
                     boolChangeTimersVol = READoneTimerFromDataGridView(ref TIMS[NumCol],NumCol);
                     if (boolChangeTimersVol)
@@ -443,6 +454,9 @@ namespace TESTAKVA
                     {
                         // Если получилось, присваиваем значение переменной ChangeTimersVol
                         int NumCol = e.ColumnIndex;
+
+                        return;
+
                          boolChangeTimersVol = READoneTimerFromDataGridView(ref TIMS[NumCol],NumCol);//попытка обновить значения таймера введёнными данными
                         if (boolChangeTimersVol)
                         {
@@ -643,22 +657,36 @@ namespace TESTAKVA
             // Создание временного массива для проверки корректности данных
             SATIMER Ttmp = new SATIMER();
 
-            try
-            {
                 // Попытка преобразовать данные во временный массив
-                Ttmp.Rej = (ErejTimer)Enum.Parse(typeof(ErejTimer), TimersGridView.Rows[0].Cells[TimerNum].Value.ToString());
-                Ttmp.CountSec = uint.Parse(TimersGridView.Rows[1].Cells[TimerNum].Value.ToString());
-                Ttmp.DamageSec = uint.Parse(TimersGridView.Rows[4].Cells[TimerNum].Value.ToString());
+                try
+                {
+                    Ttmp.CountSec = uint.Parse(TimersGridView.Rows[1].Cells[TimerNum].Value.ToString());
+                    Ttmp.DamageSec = uint.Parse(TimersGridView.Rows[4].Cells[TimerNum].Value.ToString());
+
+                }
+                catch 
+                {
+                    // Обработка исключения (например, вывод сообщения об ошибке)
+                    MessageBox.Show("введите корректные данные", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return false; // Ошибка преобразования
+            }
+
+                try
+                {
+                    Ttmp.Rej = (ErejTimer)Enum.Parse(typeof(ErejTimer), TimersGridView.Rows[0].Cells[TimerNum].Value.ToString());
+                }
+                catch //(FormatException)
+                {
+                    if (Ttmp.CountSec>= Ttmp.DamageSec)
+                    Ttmp.Rej = ErejTimer.rejt_over;
+                }
+               
+
 
                 // Если все преобразования прошли успешно, копируем данные в структуру таймера
                 TIM = Ttmp;
                 return true; // Успешное преобразование
-            }
-            catch
-            {
-                // Логируем или игнорируем ошибку
-                return false; // Ошибка преобразования
-            }
+
         }
 
         public void UpdateAllTimersFromDataGridView()
