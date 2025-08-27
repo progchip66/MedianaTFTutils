@@ -275,8 +275,6 @@ namespace TFTprog
             tBgrafDIR.Text = Proper.FolderGRAF;
 
 
-
-            cBtimeSpeed.SelectedIndex = 0;
             tabControl1.SelectedIndex = 2;
             WORKAKVATEST.UpdateComboBoxRejak(cBrej);
 
@@ -285,7 +283,6 @@ namespace TFTprog
             LBoxInterface.Items.Clear();
 
             cBrej.SelectedIndex = 0;
-            cBrejSimulator.SelectedIndex = 0;
 
             if (CANHUB.IsPortOpen(listComPort.Items))
             {
@@ -1710,18 +1707,7 @@ namespace TFTprog
 
         }
 
-        private void cBtimeSpeed_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if (isInitComboSpeed)
-            {
-                string selectedItem = cBtimeSpeed.SelectedItem.ToString();
-                CANHUB.SetSpeedFromStr(selectedItem);//команда изменения скорости работы таймеров
-            }
-            else
-            {
-                isInitComboSpeed = true;
-            }
-        }
+
 
         private void bSetBOARDwinDT_Click(object sender, EventArgs e)
         {
@@ -1745,7 +1731,7 @@ namespace TFTprog
 
         private void cBrej_SelectedIndexChanged(object sender, EventArgs e)
         {
-  //          if (WORKAKVATEST.isUpdating) return; // Предотвращаем самоблокировку
+
 
             ComboBox sBrej = sender as ComboBox;
  //           DataGridView dGparam = Controls["dGparam"] as DataGridView;
@@ -1783,32 +1769,7 @@ namespace TFTprog
         }
 
 
-        private void cBrejSimulator_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            try
-            {
-                switch (cBrejSimulator.SelectedIndex)
-                {
-                    case 0:
-                        if (CANHUB.IsOpen)
-                            CANHUB.ChangeDEVExhRejWork(ERejWork.ervTFT_master, Efl_DEV.fld_TFTboard);
-                        break;
-                    case 1:
-                        if (CANHUB.IsOpen)
-                            CANHUB.ChangeDEVExhRejWork(ERejWork.ervPC_SENSemul, Efl_DEV.fld_TFTboard);
-                        break;
-                    default:
-                        break;
-                }
-            }
-            catch (Exception)
-            {
-                MessageBox.Show("Возникла ошибка при попытке сменить режим работы", "Не удаётся сменить режим работы",
-                         MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
 
-        }
 
         private void butTest_Click_1(object sender, EventArgs e)
         {
@@ -1820,16 +1781,12 @@ namespace TFTprog
 
         }
 
-        private void dGparam_CellContentClick(object sender, DataGridViewCellEventArgs e)
-        {
-
-        }
 
         private void chBsebsEmul_CheckedChanged(object sender, EventArgs e)
         {
             try
             {
-                if (!chBsebsEmul.Checked)
+                if (!chBparEmul.Checked)
                 {
 
                     CANHUB.ChangeDEVExhRejWork(ERejWork.ervTFT_master, Efl_DEV.fld_MainBoard);
