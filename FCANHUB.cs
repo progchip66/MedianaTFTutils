@@ -1279,7 +1279,7 @@ namespace TFTprog
                         int alignFileLen = fcreater.RESjpg.GetAlignVol((int)fileSizeInBytes, CANHUB.FLASHalign, 1);//получаем выравненную длину файла, в данном случае с увеличением
 
                         WRpro.ReportProgress(proFiles, fileName);
-                        //адресация файлов фонтов и картинок идёт с понижением адреса, поэтому для вычисления стартового адреса необходим вычесть длину CANHUB.fileDataFLASH.Length
+                        //адресация файлов фонтов и картинок идёт с понижением адреса, поэтому для вычисления стартового адреса необходим вычесть длину 
                         FLASHwrFileStartAdr = FLASHwrFileStartAdr - alignFileLen;//устанавливаем новый адрес с уменьшением!
 
 
@@ -1738,6 +1738,9 @@ namespace TFTprog
 
             int selectedColumn = sBrej.SelectedIndex;
 
+            WORKAKVATEST.SelTableRowHead(dGparam, selectedColumn, "1,2,3,4,5");
+            WORKAKVATEST.HandlAKVAchange = selectedColumn;
+/*
             if (selectedColumn != WORKAKVATEST.AKVAint)
             {
                 if (selectedColumn >= 0 && selectedColumn < dGparam.ColumnCount)
@@ -1747,6 +1750,7 @@ namespace TFTprog
                     WORKAKVATEST.HandlAKVAchange = selectedColumn; // Обновляем глобальную переменную
                 }
             }
+
         }
 
 
@@ -1771,12 +1775,22 @@ namespace TFTprog
 
 
 
-        private void butTest_Click_1(object sender, EventArgs e)
+        private void butTest_Click(object sender, EventArgs e)
         {
-            int numCol = AKVApar.GetSelectedColumnIndex(dGtimers);
+            /*int numCol = AKVApar.GetSelectedColumnIndex(dGtimers);
             if (numCol>=0)
                 AKVApar.LoadFromDataGridViewColumn(dGparam, numCol);
-            //  AKVApar.PutGridViewColumn(dGparam, 0);
+            */
+
+            // извлечение данных структуры AKVAPAR из таблицы и отправка в TFT контроллер
+            AKVApar.LoadFromDataGridViewColumn(dGparam, WORKAKVATEST.HandlAKVAchange);// извлекаем  данные из таблицы в структуру AKVAPAR 
+            byte[] arrAKVAPAR = AKVApar.AKVAPARtoByteArray();//копируем данные в массив
+
+            WORKAKVATEST.HandlAKVAchange = -1;
+            //отправляем структуру в TFT контроллер без требования ответа
+            CANHUB.CommSendAnsv(ECommand.cmd_RdWrSens, Efl_DEV.fld_MainBoard, arrAKVAPAR, 0);
+
+
 
 
         }

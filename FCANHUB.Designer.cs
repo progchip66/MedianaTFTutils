@@ -901,11 +901,11 @@
             // 
             this.butSetPar.Location = new System.Drawing.Point(226, 377);
             this.butSetPar.Name = "butSetPar";
-            this.butSetPar.Size = new System.Drawing.Size(130, 22);
+            this.butSetPar.Size = new System.Drawing.Size(140, 22);
             this.butSetPar.TabIndex = 11;
             this.butSetPar.Text = "Установить параметры";
             this.butSetPar.UseVisualStyleBackColor = true;
-            this.butSetPar.Click += new System.EventHandler(this.butTest_Click_1);
+            this.butSetPar.Click += new System.EventHandler(this.butTest_Click);
             // 
             // gBchangePar
             // 
@@ -952,10 +952,6 @@
             this.lspeederTIME.Size = new System.Drawing.Size(117, 13);
             this.lspeederTIME.TabIndex = 10;
             this.lspeederTIME.Text = "Ускорение Таймеров";
-            // 
-            // cBtimeSpeed
-            // 
-
             // 
             // bSetBOARDwinDT
             // 

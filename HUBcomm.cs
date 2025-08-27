@@ -308,16 +308,9 @@ namespace ExtHubComm
         //     cmd_GetAKVAparFromPC = 0x60,//PC как мастер считывает структуру допустимых параметров
         //		cmd_SendAKVAparToPC = 0x61, //PC как мастер Записывает структуру допустимых параметров
 
-        public void GetAKVAparFromMainBoard()
-        {//формируем параметры из считанного массива
-            CommSendAnsv(ECommand.cmd_MaxminAKVAparMCUtoPC, Efl_DEV.fld_MainBoard);
-            MinmaxParams.getParamsFromArr(RxBuff);
-
-        }
 
         #region SendDataTestPro
 
-        public byte[] fileDataFLASH;
 
         public byte[] CreatDataTestPro( int CountByte)
         {

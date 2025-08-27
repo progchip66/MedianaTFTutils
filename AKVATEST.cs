@@ -371,9 +371,51 @@ namespace TESTAKVA
         private DataGridView ParamGridView;
         public int AKVAint = 0;// номер столбца таблицы соответствующий текущему значению режима работы устройства
         public int NewAKVAint = -1;//номер столбца таблицы соответствующий новому значению режима работы устройства
-        public int HandlAKVAchange = -1;//руное обновление режима из Комбобокса
+        public int HandlAKVAchange = 0;//исходный режим
         public bool isUpdating = false; // Флаг для предотвращения самоблокировки
         public ErejAKVA selectedMode = ErejAKVA.rejak_Stop;//Выбранный режим работы
+
+
+        public void SelTableRowHead(DataGridView Grid, int numCol, string allowedCols)
+        {//метод выделения заголовка выделенного столбца
+            var allowed = allowedCols.Split(',').Select(s => int.Parse(s.Trim())).ToArray();
+            int numPAR = numCol + 1;
+            if (!allowed.Contains(numPAR))
+            {
+                MessageBox.Show($"Столбец {numCol} не входит в список допустимых: {allowedCols}",
+                    "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            if (Grid == null || numCol < 0 || numCol >= Grid.Columns.Count)
+            {
+                MessageBox.Show("Недопустимый номер столбца.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            Grid.EnableHeadersVisualStyles = false;
+            var def = Grid.ColumnHeadersDefaultCellStyle;
+
+            for (int i = 0; i < Grid.Columns.Count; i++)
+            {
+                var hc = Grid.Columns[i].HeaderCell;
+                if (i == numCol)
+                {
+                    hc.Style.BackColor = Color.Blue;
+                    hc.Style.ForeColor = Color.White;
+                }
+                else
+                {
+                    hc.Style.BackColor = def.BackColor;
+                    hc.Style.ForeColor = def.ForeColor;
+                    hc.Style.Font = def.Font;
+                    hc.Style.SelectionBackColor = def.SelectionBackColor;
+                    hc.Style.SelectionForeColor = def.SelectionForeColor;
+                    hc.Style.Alignment = def.Alignment;
+                    hc.Style.WrapMode = def.WrapMode;
+                }
+            }
+        }
 
 
 
