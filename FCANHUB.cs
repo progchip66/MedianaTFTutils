@@ -18,23 +18,27 @@ using RS485;
 using COMMAND;
 using ExtHubComm;
 using TESTAKVA;
+using Simulator;
 using System.Runtime.InteropServices;
 
 namespace TFTprog
 {
-    
+
     public partial class FormHUB : Form
     {
-        public  SParameterManager Proper = new SParameterManager();
+        public SParameterManager Proper = new SParameterManager();
         public SWORKAKVATEST WORKAKVATEST;
-        public SAKVApar  AKVApar;
+        public SAKVApar AKVApar;
+        public BackCommSimul _simul;
+        // Создаём симулятор, передаём вашу функцию обмена и интервал в мс
+
 
         TFileManager fcreater = new TFileManager();
-        
+
         SCANHUB CANHUB = new SCANHUB();
-        
+
         SGRAF_FILES GRAF_FILES = new SGRAF_FILES();
-        
+
         bool isInitComboSpeed = false;
 
 
@@ -55,7 +59,7 @@ namespace TFTprog
                 SLprocess.Text = "";
                 SLfileName.Text = "";
                 cBLoadPict.Checked = GRAF_FILES.oldStopExtExhData;
-                       
+
             }
             else
             {
@@ -71,7 +75,7 @@ namespace TFTprog
         }
         //public enum Efl_DEV { fld_PC = 0, fld_HUB, fld_MainBoard, fld_TFTboard, fld_FEUdetect, fld_none = 0x0f };//тип устройства Ошибка в
 
-        public string TryOpenDev(BoardVer Dev, Efl_DEV DevType,bool ShowMess)
+        public string TryOpenDev(BoardVer Dev, Efl_DEV DevType, bool ShowMess)
         {//public enum Efl_DEV { fld_PC = 0, fld_HUB, fld_MainBoard, fld_TFTboard, fld_FEUdetect, fld_none = 0x0f };//тип устройства
             string ret;
             try
@@ -103,13 +107,13 @@ namespace TFTprog
                     switch (DevType)
                     {
                         case Efl_DEV.fld_HUB:
-                            MessageBox.Show( "USB HUB не найден", "Обнаружение устройства USB HUB", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            MessageBox.Show("USB HUB не найден", "Обнаружение устройства USB HUB", MessageBoxButtons.OK, MessageBoxIcon.Information);
                             break;
                         case Efl_DEV.fld_MainBoard:
-                            MessageBox.Show( "Плата Main Board не обнаружена", "Обнаружение устройства - Main Board", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            MessageBox.Show("Плата Main Board не обнаружена", "Обнаружение устройства - Main Board", MessageBoxButtons.OK, MessageBoxIcon.Information);
                             break;
                         case Efl_DEV.fld_TFTboard:
-                            MessageBox.Show( "Плата TFT контроллера не обнаружена", "Обнаружение устройства - TFT Board", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            MessageBox.Show("Плата TFT контроллера не обнаружена", "Обнаружение устройства - TFT Board", MessageBoxButtons.OK, MessageBoxIcon.Information);
                             break;
                         default:
                             break;
@@ -129,9 +133,9 @@ namespace TFTprog
             {// пытаемся соединиться с устройством посредство порта, сохранённых в property по умолчанию
                 try
                 {
-                    
+
                     string tmpStr;
-  //                  CANHUB.PortName = ComPortName;
+                    //                  CANHUB.PortName = ComPortName;
 
                     tmpStr = TryOpenDev(CANHUB.MainBoard, Efl_DEV.fld_MainBoard, false);
                     if ((tmpStr != "") && (!tmpStr.Contains(" not ")))
@@ -140,7 +144,7 @@ namespace TFTprog
                         LBoxInterface.Items.Add(tmpStr);
                         i++;
                     }
-                    
+
                     SLprocess.Text = ComPortName + "  Baud:" + baudrate.ToString();
                     tmpStr = TryOpenDev(CANHUB.TFT_Board, Efl_DEV.fld_TFTboard, false);
                     if ((tmpStr != "") && (!tmpStr.Contains(" not ")))
@@ -159,8 +163,8 @@ namespace TFTprog
                             MessageBox.Show("Обнаружены устройства", "Обнаруженные устройства подключены", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
 
-                    if (i>0)
-                     return i;
+                    if (i > 0)
+                        return i;
                 }
                 catch (Exception)
                 {
@@ -193,7 +197,7 @@ namespace TFTprog
                                 i++;
                             }
 
-                            
+
                             tmpStr = TryOpenDev(CANHUB.TFT_Board, Efl_DEV.fld_TFTboard, false);
                             if ((tmpStr != "") && (!tmpStr.Contains(" not ")))
                             {
@@ -202,23 +206,23 @@ namespace TFTprog
                                 i++;
                             }
 
-                            if (i>0)
+                            if (i > 0)
                             {//На COM портру определены рабочие устройства, значит далее работаем именно с ним!
                                 SLprocess.Text = ComPortName + "  Baud:" + baudrate.ToString();
                                 Proper.COMportName = CANHUB.PortName;
-                                MessageBox.Show( "Номер порта сохранён в файле инициализации", "Определено устройство", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                MessageBox.Show("Номер порта сохранён в файле инициализации", "Определено устройство", MessageBoxButtons.OK, MessageBoxIcon.Information);
                                 //new Thread(CANHUB.SlaveReceiveLoop) { IsBackground = true }.Start();
-                                return i;                
+                                return i;
                             }
                             else
                             {
-     /*                           MessageBox.Show("Необходимо подсоединить устройство к COM порту и повторно запустить программу", "Устройство не обнаружено",
-                                   MessageBoxButtons.OKCancel, MessageBoxIcon.Error);
-                                // Закрываем приложение независимо от выбора пользователя
-                                Environment.Exit(0);
-     */
+                                /*                           MessageBox.Show("Необходимо подсоединить устройство к COM порту и повторно запустить программу", "Устройство не обнаружено",
+                                                              MessageBoxButtons.OKCancel, MessageBoxIcon.Error);
+                                                           // Закрываем приложение независимо от выбора пользователя
+                                                           Environment.Exit(0);
+                                */
                             }
-                            
+
                         }
                         catch (Exception)
                         {
@@ -244,7 +248,7 @@ namespace TFTprog
 
 
 
-        public  void SelectComPort(string comPortNumber, ListBox listComPort)
+        public void SelectComPort(string comPortNumber, ListBox listComPort)
         {
             // Ищем номер COM порта в списке
             for (int i = 0; i < listComPort.Items.Count; i++)
@@ -267,10 +271,15 @@ namespace TFTprog
         public FormHUB()
         {
             InitializeComponent();
-           
+
+            _simul = new BackCommSimul((ECommand cmd, Efl_DEV dev, byte[] buf, int to) => CANHUB.CommSendAnsv(cmd, dev, buf, to), 1000);
+
+            _simul.ResultReady += OnResultReady;
+            _simul.Error += OnCommError;
+
             WORKAKVATEST = new SWORKAKVATEST(dGtimers, dGparam);//инициализация таблиц таймеров и таблиц параметров
             AKVApar = new SAKVApar();
-            LoadSaveTable.LoadDataGridViewFromCsv(dGparam, true, Proper,true);//загрузка последнего сохранённого варианта таблицы параметров
+            LoadSaveTable.LoadDataGridViewFromCsv(dGparam, true, Proper, true);//загрузка последнего сохранённого варианта таблицы параметров
 
             tBgrafDIR.Text = Proper.FolderGRAF;
 
@@ -291,8 +300,8 @@ namespace TFTprog
 
             }
 
-           // WORKAKVATEST
-         }
+            // WORKAKVATEST
+        }
 
 
 
@@ -418,21 +427,21 @@ namespace TFTprog
 
         private void bGRAFdir_Click(object sender, EventArgs e)
         {
-            
+
             FolderBrowserDialog FolderResult = new FolderBrowserDialog();
-             string dirName = Proper.FolderGRAF;
-             if (FolderResult.ShowDialog() == DialogResult.OK)
-             {
-                 tBgrafDIR.Text = FolderResult.SelectedPath;
+            string dirName = Proper.FolderGRAF;
+            if (FolderResult.ShowDialog() == DialogResult.OK)
+            {
+                tBgrafDIR.Text = FolderResult.SelectedPath;
                 Proper.FolderGRAF = tBgrafDIR.Text;
-             }
+            }
         }
 
 
 
         private void bSaveConf_Click(object sender, EventArgs e)
         {
-           // SaveDefaultSetting();
+            // SaveDefaultSetting();
         }
 
         private void backWorkDo(object sender, DoWorkEventArgs e)
@@ -479,89 +488,89 @@ namespace TFTprog
             tBCode.Clear();
 
 
-                tBCode.Text += "aaa\r\nbbb\r\nccc";
+            tBCode.Text += "aaa\r\nbbb\r\nccc";
 
-            
+
         }
 
         private void butINSERT_Click(object sender, EventArgs e)
         {
-   /*         Properties.Settings.Default.NameBaseFile = tBbasefile.Text;
-            Properties.Settings.Default.NameInsFile = tBinsFile.Text;
-            Properties.Settings.Default.StartInsAddr = tBadrins.Text;
+            /*         Properties.Settings.Default.NameBaseFile = tBbasefile.Text;
+                     Properties.Settings.Default.NameInsFile = tBinsFile.Text;
+                     Properties.Settings.Default.StartInsAddr = tBadrins.Text;
 
-            int InsAdr = fcreater.ConvHextoInt(tBadrins.Text);
+                     int InsAdr = fcreater.ConvHextoInt(tBadrins.Text);
 
-            using (FileStream INSstream = File.Open(tBinsFile.Text, FileMode.Open))
-            {
-                // выделяем массив для считывания данных из файла
-                byte[] buffer = new byte[INSstream.Length];
-                // считываем данные
-                INSstream.Read(buffer, 0, buffer.Length);
+                     using (FileStream INSstream = File.Open(tBinsFile.Text, FileMode.Open))
+                     {
+                         // выделяем массив для считывания данных из файла
+                         byte[] buffer = new byte[INSstream.Length];
+                         // считываем данные
+                         INSstream.Read(buffer, 0, buffer.Length);
 
-                using (FileStream BASEstream = File.Open(tBbasefile.Text, FileMode.Open))
-                {
-                    BASEstream.Seek(InsAdr, SeekOrigin.Begin);
+                         using (FileStream BASEstream = File.Open(tBbasefile.Text, FileMode.Open))
+                         {
+                             BASEstream.Seek(InsAdr, SeekOrigin.Begin);
 
-                    BASEstream.Write(buffer, 0, buffer.Length);
-                }
-            }*/
+                             BASEstream.Write(buffer, 0, buffer.Length);
+                         }
+                     }*/
         }
 
         private void butSelBaseFile_Click(object sender, EventArgs e)
         {
-   /*         string basefileName = tBbasefile.Text;
+            /*         string basefileName = tBbasefile.Text;
 
-            using (OpenFileDialog openFileDialog = new OpenFileDialog())
-            {
+                     using (OpenFileDialog openFileDialog = new OpenFileDialog())
+                     {
 
-                if (File.Exists(basefileName))
-                {
-                    openFileDialog.InitialDirectory = Path.GetFileName(basefileName);
-                }
-                else
-                    openFileDialog.InitialDirectory = "c:\\";
+                         if (File.Exists(basefileName))
+                         {
+                             openFileDialog.InitialDirectory = Path.GetFileName(basefileName);
+                         }
+                         else
+                             openFileDialog.InitialDirectory = "c:\\";
 
 
-                openFileDialog.Filter = "BIN files (*.bin)|*.bin";
-               // openFileDialog.RestoreDirectory = true;
+                         openFileDialog.Filter = "BIN files (*.bin)|*.bin";
+                        // openFileDialog.RestoreDirectory = true;
 
-                if (openFileDialog.ShowDialog() == DialogResult.OK)
-                {
-                    //Get the path of specified file
-                    tBbasefile.Text = openFileDialog.FileName;
-                    Properties.Settings.Default.NameBaseFile = tBbasefile.Text;
-                    Properties.Settings.Default.Save();
-                }
-            }*/
+                         if (openFileDialog.ShowDialog() == DialogResult.OK)
+                         {
+                             //Get the path of specified file
+                             tBbasefile.Text = openFileDialog.FileName;
+                             Properties.Settings.Default.NameBaseFile = tBbasefile.Text;
+                             Properties.Settings.Default.Save();
+                         }
+                     }*/
         }
 
         private void butSelinsFile_Click(object sender, EventArgs e)
         {
-  /*          string insfileName = tBinsFile.Text;
+            /*          string insfileName = tBinsFile.Text;
 
-            using (OpenFileDialog openFileDialog = new OpenFileDialog())
-            {
+                      using (OpenFileDialog openFileDialog = new OpenFileDialog())
+                      {
 
-                if (File.Exists(insfileName))
-                {
-                    openFileDialog.InitialDirectory = Path.GetFileName(insfileName);
-                }
-                else
-                    openFileDialog.InitialDirectory = "c:\\";
+                          if (File.Exists(insfileName))
+                          {
+                              openFileDialog.InitialDirectory = Path.GetFileName(insfileName);
+                          }
+                          else
+                              openFileDialog.InitialDirectory = "c:\\";
 
 
-                openFileDialog.Filter = "BIN files (*.bin)|*.bin";
-                // openFileDialog.RestoreDirectory = true;
+                          openFileDialog.Filter = "BIN files (*.bin)|*.bin";
+                          // openFileDialog.RestoreDirectory = true;
 
-                if (openFileDialog.ShowDialog() == DialogResult.OK)
-                {
-                    //Get the path of specified file
-                    tBinsFile.Text = openFileDialog.FileName;
-                    Properties.Settings.Default.NameInsFile = tBinsFile.Text;
-                    Properties.Settings.Default.Save();
-                } 
-            }*/
+                          if (openFileDialog.ShowDialog() == DialogResult.OK)
+                          {
+                              //Get the path of specified file
+                              tBinsFile.Text = openFileDialog.FileName;
+                              Properties.Settings.Default.NameInsFile = tBinsFile.Text;
+                              Properties.Settings.Default.Save();
+                          } 
+                      }*/
         }
 
         private void bfindPort_Click(object sender, EventArgs e)
@@ -590,7 +599,7 @@ namespace TFTprog
                 try
 
                 {
-                   //вставить сюда команду считывания версии ПО и платы DCOM.WRUFComm(0);
+                    //вставить сюда команду считывания версии ПО и платы DCOM.WRUFComm(0);
                 }
                 catch (Exception)
                 {
@@ -640,9 +649,9 @@ namespace TFTprog
                 try
 
                 {
-                   // вставить сюда команду считывания версии  DCOM.WRUFComm(0);
+                    // вставить сюда команду считывания версии  DCOM.WRUFComm(0);
                     if (Proper.COMportName != CANHUB.PortName)
-                        Proper.COMportName= CANHUB.PortName;
+                        Proper.COMportName = CANHUB.PortName;
 
                 }
                 catch (Exception)
@@ -669,7 +678,7 @@ namespace TFTprog
             {
                 MessageBox.Show("Не выделен ни один порт", "Выделите порт", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
-            
+
 
             if (CANHUB.GetOpenComport(itemText, Proper.COMportBaud, false))
             {// пытаемся соединиться с устройством посредством выделенного порта
@@ -693,7 +702,7 @@ namespace TFTprog
                         tmpStr = CANHUB.ConcatenateStrings(tmpStr, "", "");
                         LBoxInterface.Items.Add(tmpStr);
                         i++;
-                        Proper.COMportName= itemText;
+                        Proper.COMportName = itemText;
                     }
 
 
@@ -709,7 +718,7 @@ namespace TFTprog
                     }
 
 
-                 //   if (ShowMessage)
+                    //   if (ShowMessage)
                     {
                         if (i == 0)//ни одно из устройств не найдено на COM порту по умолчанию
                             MessageBox.Show("Ни одно из устройств не найдено", "Проверьте подключены ли устройства и повторите попытку", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -729,19 +738,6 @@ namespace TFTprog
 
 
 
-
-
-            /*        int index = listComPort.Items.IndexOf(Properties.Settings.Default.COMportName);
-
-                    if (index == -1)
-                    {
-                        listComPort.SelectedIndex = 0;
-                    }
-                    else
-                    {
-                        listComPort.SelectedIndex = index;
-                    }*/
-
             if (CANHUB.GetOpenComport(listComPort.SelectedItem.ToString(), Proper.COMportBaud, true))
             //    if (Sens.GetOpenComport(Properties.Settings.Default.COMportName, Properties.Settings.Default.COMportBaud, false))
             {
@@ -750,7 +746,7 @@ namespace TFTprog
                 try
 
                 {
-                    CANHUB.GetVerDev(CANHUB.TFT_Board, Efl_DEV.fld_TFTboard,true);
+                    CANHUB.GetVerDev(CANHUB.TFT_Board, Efl_DEV.fld_TFTboard, true);
                 }
                 catch (Exception)
                 {
@@ -761,16 +757,16 @@ namespace TFTprog
 
 
 
-/*
-                catch (Exception ex)
-                {
-                    MessageBox.Show("Не удаётся выполнить команду, возможно требуется обновить микрокод платы", ex.Message,
-                           MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }*/
+                /*
+                                catch (Exception ex)
+                                {
+                                    MessageBox.Show("Не удаётся выполнить команду, возможно требуется обновить микрокод платы", ex.Message,
+                                           MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                }*/
                 MessageBox.Show("Определено устройство - USB HUB", "USB HUB успешно подключен",
                            MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
-            
+
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -779,23 +775,23 @@ namespace TFTprog
             try
 
             {
-                button1.Text=CANHUB.GetVerDev(CANHUB.TFT_Board, Efl_DEV.fld_TFTboard,true);
+                button1.Text = CANHUB.GetVerDev(CANHUB.TFT_Board, Efl_DEV.fld_TFTboard, true);
                 bTestProWRFLASH.Text = "TestProWRFLASH";
             }
             catch (Exception)
             {
-  /*              MessageBox.Show("Выберете номер подключенного COM потра, затем подключите датчик и нажмите на кнопку \"Выбрать порт\"", "Не удаётся связаться с прибором",
-                       MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;*/
+                /*              MessageBox.Show("Выберете номер подключенного COM потра, затем подключите датчик и нажмите на кнопку \"Выбрать порт\"", "Не удаётся связаться с прибором",
+                                     MessageBoxButtons.OK, MessageBoxIcon.Error);
+                              return;*/
             }
 
-            
+
         }
 
 
 
 
-//прямая функция, извлекающая данные из таблицы и вставляющая их в массив байт
+        //прямая функция, извлекающая данные из таблицы и вставляющая их в массив байт
 
         private byte[] ExtractFloatDataFromTable(DataTable table)
         {
@@ -818,7 +814,7 @@ namespace TFTprog
             return byteList.ToArray();
         }
 
-//обратная функция извлекающая данные из массива байт и вставляющая их в таблицу
+        //обратная функция извлекающая данные из массива байт и вставляющая их в таблицу
         private void InsertFloatDataIntoTable(byte[] data, DataTable table)
         {
             int floatSizeInBytes = sizeof(float);
@@ -860,7 +856,7 @@ namespace TFTprog
             }
         }
 
-//проверочная функция, которая сначала извлекает данные из таблицы в массив байт, а потом вставляет их обратно
+        //проверочная функция, которая сначала извлекает данные из таблицы в массив байт, а потом вставляет их обратно
         private byte[] ExtractAndInsertFloatData(DataTable originalTable)
         {
             List<byte> extractedData = new List<byte>();
@@ -878,24 +874,10 @@ namespace TFTprog
                 }
             }
 
-  /*          DataTable newTable = new DataTable();
-
-            // Assume the columns are already created in the same order as during extraction
-            foreach (DataColumn column in originalTable.Columns)
-            {
-                newTable.Columns.Add(column.ColumnName, column.DataType);
-            }
-  */
- //           InsertFloatDataIntoTable(extractedData.ToArray(), originalTable);
-  
-            // Now newTable should contain the extracted data
-
-            // Optionally, you can compare the originalTable and newTable to verify the correctness
-
             return extractedData.ToArray();
         }
 
-        
+
 
         public void FormHUB_Load(object sender, EventArgs e)
         {
@@ -914,7 +896,7 @@ namespace TFTprog
             dataGridView1.DataSource = tablePAR;
             dataGridView1.AllowUserToAddRows = false;
 
-            tablePAR.Rows.Add("val > P0", 0,0,0,0, 0, "Бар", 0);//enump_P0  - минимальное давление исходной воды
+            tablePAR.Rows.Add("val > P0", 0, 0, 0, 0, 0, "Бар", 0);//enump_P0  - минимальное давление исходной воды
             tablePAR.Rows.Add("val < QT0", 0, 0, 0, 0, 0, "мкСм/см", 0); //enump_QT0  - максимальная УЭП исходной воды
             tablePAR.Rows.Add("val > FT1", 0, 0, 0, 0, 0, "л/мин", 0);//enump_F1_P5  минимальный расход пермиата по расходомеру FT1 для пресета P5
             tablePAR.Rows.Add("val > FT0-FT1", 0, 0, 0, 0, 0, "л/мин", 0);//enump_F1_P5  минимальный расход пермиата по расходомеру FT1 для пресета P5
@@ -924,27 +906,9 @@ namespace TFTprog
             tablePAR.Rows.Add("val < FT0/FT1", 0, 0, 0, 0, 0, "л/мин", 0);//
 
 
-            /*
-            
-            tablePAR.Rows.Add("val < QT0",300,1000*0.8,1000,2000, "мкСм/см",500 ); //enump_QT0  - максимальная УЭП исходной воды
-            tablePAR.Rows.Add("val < QT1", 20,40*0.8, 40, 100, "мкСм/см", 30);//enump_QT1  - максимальная УЭП пермеата
-            tablePAR.Rows.Add("val < QT2", 1, 10 * 0.8, 10, 20 , "мкСм/см", 5);//enump_QT2  - максимальная УЭП фильтрата
-            tablePAR.Rows.Add("val < Tfilt ", 25, 35 * 0.8,35, 50 ,"C", 27);//enump_tfilt  - максимальная температура фильтрата
-            tablePAR.Rows.Add("val > P0", 0.1, 0.5 * 1.2, 0.5, 1.5,  "Бар", 1.3);//enump_P0  - минимальное давление исходной воды
-            tablePAR.Rows.Add("val > R1",20, 35 * 1.2, 35,50,"%", 45);//enump_R1  - минимальная степень отбора в процентах
-            tablePAR.Rows.Add("val < R2",50,65 * 0.8,65, 80,"%", 55);//enump_R2  -максимальная степень отбора в процентах
-
-            tablePAR.Rows.Add("val > FT1_P5", 0.1, 2 * 1.2, 2, 5, "л/мин", 3);//enump_F1_P5  минимальный расход пермиата по расходомеру FT1 для пресета P5
-            tablePAR.Rows.Add("val > FT1_P10", 0.1, 5 * 1.2, 5,7,"л / мин", 10);//enump_F1_P10  минимальный расход пермиата по расходомеру FT1 для пресета P10
-            tablePAR.Rows.Add("val > FT1_P20", 0.1, 10 * 1.2, 10, 20 , "л/мин", 15);//enump_F1_P20  минимальный расход пермиата по расходомеру FT1 для пресета P20
-
-            tablePAR.Rows.Add("val > F2_P5", 0.1, 2 * 1.2, 2, 3, "л/мин", 5);//enump_F2_P5  минимальный расход концентрата по расходомеру FT0-FT1 для пресета P5
-            tablePAR.Rows.Add("val > F2_P10", 0.1, 5 * 1.2, 5, 10, "л/мин", 7);//enump_F2_P10  минимальный расход концентрата по расходомеру FT0-FT1 для пресета P10
-            tablePAR.Rows.Add("val > F2_P20", 0.1, 10 * 1.2, 10, 20, "л/мин", 15);//enump_F2_P20  минимальный расход концентрата по расходомеру FT0-FT1 для пресета P20
-            */
 
             ExtractAndInsertFloatData(tablePAR);
-     //       byte[] DataFromTable = ExtractFloatDataFromTable(tablePAR);
+            //       byte[] DataFromTable = ExtractFloatDataFromTable(tablePAR);
 
 
             DataTable tableTimer = new DataTable();
@@ -956,7 +920,7 @@ namespace TFTprog
             tableTimer.Columns.Add("Dimension", typeof(string));
             tableTimer.Columns.Add("Value", typeof(float));
 
-            tableTimer.Rows.Add("T1 простоя", 1, 15, 60, "мин",15);//enump_T1  - таймер простоя
+            tableTimer.Rows.Add("T1 простоя", 1, 15, 60, "мин", 15);//enump_T1  - таймер простоя
             tableTimer.Rows.Add("T2 промывки", 1, 2, 10, "мин", 2);//eapar_T2 - таймер промывки
             tableTimer.Rows.Add("T3 ожидания ", 5, 240, 240, "мин", 240);//enump_T3   - таймер ожидания
             tableTimer.Rows.Add("T4 MFC/ACC промывки", 5, 10, 20, "мин", 10);//enump_T4  - таймер промывки MFC/ACC
@@ -970,7 +934,7 @@ namespace TFTprog
             {
                 column.SortMode = DataGridViewColumnSortMode.NotSortable;
             }
-            
+
             foreach (DataGridViewColumn column in dGparam.Columns)
             {
                 column.SortMode = DataGridViewColumnSortMode.NotSortable;
@@ -993,16 +957,16 @@ namespace TFTprog
         }
 
         private void bTestFileToFLASH_Click(object sender, EventArgs e)
-        {        
+        {
 
             try
             {
-                
+
                 CANHUB.StartFLASHadrFlowPro = CANHUB.StartFLASHadr;
 
                 EnDisComponent(false);
 
-                
+
                 WRpro.RunWorkerAsync();
             }
             catch (Exception ex)
@@ -1018,25 +982,7 @@ namespace TFTprog
         {
 
 
-            /*  
-            try
-            {
-                CANHUB.DirFlowPro = "BLOB";
-                CANHUB.StartFLASHadrFlowPro = CANHUB.StartFLASHadrBLOB;
-                CANHUB.Up1Doun0adrFLASH = 1;
 
-                EnDisComponent(false);
-                WRpro.RunWorkerAsync();
-                EnDisComponent(true);
-            }
-            catch (Exception ex)
-            {
-                EnDisComponent(true);
-                tabControl1.Enabled = true;
-                MessageBox.Show(ex.Message, "Ошибка выполнения цикла", MessageBoxButtons.OK, MessageBoxIcon.Error);
-
-            }
-            */
         }
         private void PBFileToMem_Click(object sender, EventArgs e)
         {
@@ -1046,7 +992,7 @@ namespace TFTprog
 
         private void cBCreatBEN_CheckedChanged(object sender, EventArgs e)
         {
-            CANHUB.enProFontPict = Convert.ToInt32 (cBfontPict.Checked);
+            CANHUB.enProFontPict = Convert.ToInt32(cBfontPict.Checked);
         }
         private void cBpict_CheckedChanged(object sender, EventArgs e)
         {
@@ -1069,16 +1015,16 @@ namespace TFTprog
         private void button2_Click(object sender, EventArgs e)
         {//запись одного файла по заданному адресу
 
-                CANHUB.enProFontPict = 0;
-                CANHUB.enProMenu = 0;
-                CANHUB.enProFontPict = 0;
-                CANHUB.enProAddOneMenuFile = 0;
+            CANHUB.enProFontPict = 0;
+            CANHUB.enProMenu = 0;
+            CANHUB.enProFontPict = 0;
+            CANHUB.enProAddOneMenuFile = 0;
 
-                string filename = tBNameOneFile.Text;
-                string DIR_FlowPro = Proper.FolderGRAF;//директория;
-                if (!GRAF_FILES.CheckFileExist(filename, DIR_FlowPro, "MENU"))
-                    return;//файл либо путь к нему указан не правильно
-                CANHUB.OneFileName = filename;//имя файла подлежит записи
+            string filename = tBNameOneFile.Text;
+            string DIR_FlowPro = Proper.FolderGRAF;//директория;
+            if (!GRAF_FILES.CheckFileExist(filename, DIR_FlowPro, "MENU"))
+                return;//файл либо путь к нему указан не правильно
+            CANHUB.OneFileName = filename;//имя файла подлежит записи
 
             try
             {
@@ -1102,7 +1048,7 @@ namespace TFTprog
 
         private void WRpro_DoWork(object sender, DoWorkEventArgs e)
         {
-            int PbarDataLen=0;
+            int PbarDataLen = 0;
             int OneFileCount = 0;
             e.Result = 0;
             e.Result = "Все операции выполнены успешно";
@@ -1115,7 +1061,7 @@ namespace TFTprog
             string[] MENUfilenames = GRAF_FILES.Init_WRtoFLASHfiles(DIR_FlowPro, "MENU");//получаем список файлов директории c изображениями меню
             Array.Sort(MENUfilenames);
             int MENUfilecount = MENUfilenames.Length;
-            
+
             if (CANHUB.enProAddOneMenuFile > 0)
             {//перезапись/дозапись одного графического файла в TFT FLASH память 
                 CANHUB.enProMenu = 0;
@@ -1129,16 +1075,16 @@ namespace TFTprog
                     string MENU_FULLfilename = MENUfilenames[CANHUB.OneFileNum];
                     FileInfo MENUfileInfo = new FileInfo(MENU_FULLfilename);
                     long fileSizeInBytes = MENUfileInfo.Length;
-                    if (CANHUB.OneFileNum< (MENUfilesStartAdr.Length-1))
+                    if (CANHUB.OneFileNum < (MENUfilesStartAdr.Length - 1))
                     {//только если файл не последний в списке делаем проверку не наезжает ли новый записываемый файл на начало следующего
-                        if (fileSizeInBytes>(MENUfilesStartAdr[CANHUB.OneFileNum+1]- MENUfilesStartAdr[CANHUB.OneFileNum]))
+                        if (fileSizeInBytes > (MENUfilesStartAdr[CANHUB.OneFileNum + 1] - MENUfilesStartAdr[CANHUB.OneFileNum]))
                         {
                             MessageBox.Show("Длина файла слишком велика для перезаписи, необходимо создание новых заголовочных структур файлов и полная перезапись всего меню, либо дозапись в конец под другим именем", "Ошибка записи файла",
                                    MessageBoxButtons.OK, MessageBoxIcon.Error);
                             e.Result = null;
                         }
                     }
-                    
+
                     CANHUB.Up1Doun0adrFLASH = 1;
                     int pPbarCount = 0;
 
@@ -1152,14 +1098,14 @@ namespace TFTprog
                     }
 
                     //отображение загруженной картинки меню на TFT панели
-                     //CommSendAnsv(ECommand command, Efl_DEV _RecDev = Efl_DEV.fld_none, byte[] data = null, byte SubCom = 0, int TimeOutStartAnsv = 500, int TimeOutNextByte = 100)
-                        int j = GRAF_FILES.NumMenuOneMenuFile;
-                        byte[] numMenu = { 0, 0, 0, 0, 0, 0, 0, 0 };
-                        numMenu[4] = Convert.ToByte(j & 0xff);
-                        numMenu[5] = Convert.ToByte((j >> 8) & 0xff);
-                        CANHUB.CommSendAnsv(ECommand.cmd_TFTmenu, Efl_DEV.fld_TFTboard, numMenu, 1000);
-                        e.Result = "Файл  успешно записан в TFT FLASH память";
-                        return;//в режиме записи одного файла один файл записан
+                    //CommSendAnsv(ECommand command, Efl_DEV _RecDev = Efl_DEV.fld_none, byte[] data = null, byte SubCom = 0, int TimeOutStartAnsv = 500, int TimeOutNextByte = 100)
+                    int j = GRAF_FILES.NumMenuOneMenuFile;
+                    byte[] numMenu = { 0, 0, 0, 0, 0, 0, 0, 0 };
+                    numMenu[4] = Convert.ToByte(j & 0xff);
+                    numMenu[5] = Convert.ToByte((j >> 8) & 0xff);
+                    CANHUB.CommSendAnsv(ECommand.cmd_TFTmenu, Efl_DEV.fld_TFTboard, numMenu, 1000);
+                    e.Result = "Файл  успешно записан в TFT FLASH память";
+                    return;//в режиме записи одного файла один файл записан
 
                 }
                 catch (Exception ex)
@@ -1209,7 +1155,7 @@ namespace TFTprog
                             byte[] num_Menu = { 0, 0, 0, 0, 0, 0, 0, 0 };
                             num_Menu[4] = Convert.ToByte(j & 0xff);
                             num_Menu[5] = Convert.ToByte((j >> 8) & 0xff);
-                            CANHUB.CommSendAnsv(ECommand.cmd_TFTmenu, Efl_DEV.fld_TFTboard, num_Menu,  1000);
+                            CANHUB.CommSendAnsv(ECommand.cmd_TFTmenu, Efl_DEV.fld_TFTboard, num_Menu, 1000);
 
                         }
                         if (OneFileCount > 0)
@@ -1260,7 +1206,7 @@ namespace TFTprog
                     NumFile = 0;
                     while (NumFile < FileCount)
                     {
-                        int proFiles = ((NumFile+1) * 100) / FileCount;//нормализованный счётчик прогрессбара количества файлов
+                        int proFiles = ((NumFile + 1) * 100) / FileCount;//нормализованный счётчик прогрессбара количества файлов
                         int pPbarCount = 0;
                         string FULLfilename;
                         if (NumFile < FONTfilecount)
@@ -1294,9 +1240,9 @@ namespace TFTprog
                             byte[] comPICT = { 1, 0, 0, 0, 0, 0, 0, 0 };//признаком отображения картинки служит единица в младшем байте, если ноль, то грузилось бы меню
                             comPICT[4] = Convert.ToByte(NumPICT & 0xff);
                             comPICT[5] = Convert.ToByte((NumPICT >> 8) & 0xff);
-  //		public void CommSendAnsv(ECommand command, Efl_DEV _RecDev = Efl_DEV.fld_none, byte[] data = null, byte SubCom = 0, int TimeOutStartAnsv = 1000, int TimeOutNextByte = 100)
+                            //		public void CommSendAnsv(ECommand command, Efl_DEV _RecDev = Efl_DEV.fld_none, byte[] data = null, byte SubCom = 0, int TimeOutStartAnsv = 1000, int TimeOutNextByte = 100)
 
-                            CANHUB.CommSendAnsv(ECommand.cmd_TFTmenu, Efl_DEV.fld_TFTboard, comPICT,  1000);// команда отображение картинки
+                            CANHUB.CommSendAnsv(ECommand.cmd_TFTmenu, Efl_DEV.fld_TFTboard, comPICT, 1000);// команда отображение картинки
                             NumPICT++;
                         }
                         NumFile++;
@@ -1336,7 +1282,7 @@ namespace TFTprog
             {
 
                 this.PBwrFilePro.Value = e.ProgressPercentage;
-               
+
             }
 
         }
@@ -1348,7 +1294,7 @@ namespace TFTprog
             {
                 EnDisComponent(true);
                 tabControl1.Enabled = true;
-              //  toolStripProgressBar1.Value = 0;
+                //  toolStripProgressBar1.Value = 0;
                 MessageBox.Show("Процесс прерван пользователем", "Процесс прерван", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 statusStrip1.Text = "Процесс прерван!";
             }
@@ -1358,17 +1304,17 @@ namespace TFTprog
                 {
                     EnDisComponent(true);
                     tabControl1.Enabled = true;
-                  //  toolStripProgressBar1.Value = 0;
+                    //  toolStripProgressBar1.Value = 0;
                     MessageBox.Show("Не удаётся выполнить процесс до конца", "Cистемная ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     statusStrip1.Text = "Ошибка!";
                 }
                 else
                 {
                     if (e.Result != null)
-                    { 
+                    {
                         s = e.Result as string;
-                    MessageBox.Show(s, "OK", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    statusStrip1.Text = "OK";
+                        MessageBox.Show(s, "OK", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        statusStrip1.Text = "OK";
                     }
                     /*
                     if ((int)e.Result == 0)
@@ -1398,7 +1344,7 @@ namespace TFTprog
 
         private void bProcessCreater_Click(object sender, EventArgs e)
         {
-            
+
             try
             {
                 /*
@@ -1411,7 +1357,7 @@ namespace TFTprog
                 GRAF_FILES.Init_ArrFLASHaddr_MENU(Proper.FolderGRAF, CANHUB.StartFLASHadr, GRAF_FILES.const_sizeTFTFLASHalign, GRAF_FILES.const_AddLenFileSize);
                 GRAF_FILES.Init_FONTE_PICT(Proper.FolderGRAF, CANHUB.StartFLASHadr, CANHUB.adrBASEMenuGPUpict);
 
- //               GRAF_FILES.Init_MENU_enum(Properties.Settings.Default.FolderGRAF, 0x100000);//load filenames
+                //               GRAF_FILES.Init_MENU_enum(Properties.Settings.Default.FolderGRAF, 0x100000);//load filenames
                 GRAF_FILES.codeMENUcreater_(Proper.FolderGRAF);
 
                 /*
@@ -1419,7 +1365,7 @@ namespace TFTprog
                 WRpro.RunWorkerAsync();
                 EnDisComponent(true);
                 */
-                MessageBox.Show( "Файлы помещены в папку DOC", "Все файлы успешно созданы", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("Файлы помещены в папку DOC", "Все файлы успешно созданы", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex)
             {
@@ -1433,7 +1379,7 @@ namespace TFTprog
 
         private void bParamRead_Click(object sender, EventArgs e)
         {
-            LoadSaveTable.LoadDataGridViewFromCsv(dGparam, true,Proper,false);
+            LoadSaveTable.LoadDataGridViewFromCsv(dGparam, true, Proper, false);
 
 
         }
@@ -1443,71 +1389,71 @@ namespace TFTprog
         private void button3_Click(object sender, EventArgs e)
         {
 
-                // Задайте полные пути к файлам
-                string fileName1 = "c:\\Projects\\WaterMassProd1\\AKVAGRAF\\GRAFdata\\Fonts\\RobotoRus\\Roboto-Regular_16\\L4\\Roboto-Regular_16_L4.raw";
-                string fileName2 = "c:\\Projects\\WaterMassProd1\\AKVAGRAF\\GRAFdata\\Fonts\\RobotoRusPlus_FR\\Roboto-Regular_16\\L4\\Roboto-Regular_16_L4.raw";
+            // Задайте полные пути к файлам
+            string fileName1 = "c:\\Projects\\WaterMassProd1\\AKVAGRAF\\GRAFdata\\Fonts\\RobotoRus\\Roboto-Regular_16\\L4\\Roboto-Regular_16_L4.raw";
+            string fileName2 = "c:\\Projects\\WaterMassProd1\\AKVAGRAF\\GRAFdata\\Fonts\\RobotoRusPlus_FR\\Roboto-Regular_16\\L4\\Roboto-Regular_16_L4.raw";
 
-                // Проверка существования файлов
-                if (!File.Exists(fileName1) || !File.Exists(fileName2))
+            // Проверка существования файлов
+            if (!File.Exists(fileName1) || !File.Exists(fileName2))
+            {
+                Console.WriteLine("Один или оба файла не существуют.");
+                return;
+            }
+
+            // Сравнение файлов
+            CompareFiles(fileName1, fileName2);
+        }
+
+        static void CompareFiles(string fileName1, string fileName2)
+        {
+            using (FileStream fs1 = new FileStream(fileName1, FileMode.Open))
+            using (FileStream fs2 = new FileStream(fileName2, FileMode.Open))
+            {
+                // Проверка на равенство размеров файлов
+                if (fs1.Length != fs2.Length)
                 {
-                    Console.WriteLine("Один или оба файла не существуют.");
+                    Console.WriteLine("Файлы имеют разные размеры.");
                     return;
                 }
 
-                // Сравнение файлов
-                CompareFiles(fileName1, fileName2);
-            }
+                int bufferSize = 4096; // Размер буфера для сравнения байтов
+                byte[] buffer1 = new byte[bufferSize];
+                byte[] buffer2 = new byte[bufferSize];
 
-            static void CompareFiles(string fileName1, string fileName2)
-            {
-                using (FileStream fs1 = new FileStream(fileName1, FileMode.Open))
-                using (FileStream fs2 = new FileStream(fileName2, FileMode.Open))
+                long position = 148;//148 - длина метрики, метрики должны получиться разными, их точно придётся заменять
+                long firstMismatchStart = -1;
+                long lastMismatchEnd = -1;
+
+                while (position < fs1.Length)
                 {
-                    // Проверка на равенство размеров файлов
-                    if (fs1.Length != fs2.Length)
+                    int bytesRead1 = fs1.Read(buffer1, 0, bufferSize);
+                    int bytesRead2 = fs2.Read(buffer2, 0, bufferSize);
+
+                    for (int i = 0; i < bytesRead1; i++)
                     {
-                        Console.WriteLine("Файлы имеют разные размеры.");
-                        return;
-                    }
-
-                    int bufferSize = 4096; // Размер буфера для сравнения байтов
-                    byte[] buffer1 = new byte[bufferSize];
-                    byte[] buffer2 = new byte[bufferSize];
-
-                    long position = 148;//148 - длина метрики, метрики должны получиться разными, их точно придётся заменять
-                    long firstMismatchStart = -1;
-                    long lastMismatchEnd = -1;
-
-                    while (position < fs1.Length)
-                    {
-                        int bytesRead1 = fs1.Read(buffer1, 0, bufferSize);
-                        int bytesRead2 = fs2.Read(buffer2, 0, bufferSize);
-
-                        for (int i = 0; i < bytesRead1; i++)
+                        if (buffer1[i] != buffer2[i])
                         {
-                            if (buffer1[i] != buffer2[i])
+                            if (firstMismatchStart == -1)
                             {
-                                if (firstMismatchStart == -1)
-                                {
-                                    firstMismatchStart = position + i;
-                                }
-                                lastMismatchEnd = position + i;
+                                firstMismatchStart = position + i;
                             }
+                            lastMismatchEnd = position + i;
                         }
-
-                        position += bytesRead1;
                     }
 
-                    if (firstMismatchStart == -1)
-                    {
-                        Console.WriteLine("Файлы идентичны.");
-                    }
-                    else
-                    {
-                        Console.WriteLine($"Первое отличие в позиции 0x{firstMismatchStart:X}, последнее отличие в позиции 0x{lastMismatchEnd:X}.");
-                    }
+                    position += bytesRead1;
+                }
+
+                if (firstMismatchStart == -1)
+                {
+                    Console.WriteLine("Файлы идентичны.");
+                }
+                else
+                {
+                    Console.WriteLine($"Первое отличие в позиции 0x{firstMismatchStart:X}, последнее отличие в позиции 0x{lastMismatchEnd:X}.");
                 }
             }
+        }
 
         private void tP_TFT_WR_RD_Click(object sender, EventArgs e)
         {
@@ -1516,13 +1462,10 @@ namespace TFTprog
 
         private void LBoxInterface_SelectedIndexChanged(object sender, EventArgs e)
         {
- 
+
         }
 
-  /*      private void listComPort_SelectedIndexChanged_1(object sender, EventArgs e)
-        {
 
-        }*/
 
 
 
@@ -1553,31 +1496,31 @@ namespace TFTprog
 
         private void checkBox1_CheckedChanged(object sender, EventArgs e)
         {
-//            SaveDefaultSetting();
+            //            SaveDefaultSetting();
         }
 
         private void buttestSw_Click(object sender, EventArgs e)
         {
-            
+
             try
             {
 
                 CANHUB.StartTFTcalibr(Efl_DEV.fld_TFTboard);
-/*
-                //	public enum Efl_DEV { fld_PC = 0, fld_HUB, fld_MainBoard, fld_TFTboard, fld_FEUdetect, fld_none = 0x0f };//тип устройства
-                if (CANHUB.ChangeDEVExhRejWork(ERejWork.evrTFTcalibr, Efl_DEV.fld_TFTboard) == ERejWork.ervNewSetOK)
-                {
-                    DialogResult result = MessageBox.Show("Запуск калибровки TFT панели", "Дождитесь окончания калибровки панели и нажмите на кнопку ОК", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    if (result == DialogResult.OK)
-                    {
-                       // funk(); // Вызов функции funk() после нажатия OK
-                    }
-                }
-*/
+                /*
+                                //	public enum Efl_DEV { fld_PC = 0, fld_HUB, fld_MainBoard, fld_TFTboard, fld_FEUdetect, fld_none = 0x0f };//тип устройства
+                                if (CANHUB.ChangeDEVExhRejWork(ERejWork.evrTFTcalibr, Efl_DEV.fld_TFTboard) == ERejWork.ervNewSetOK)
+                                {
+                                    DialogResult result = MessageBox.Show("Запуск калибровки TFT панели", "Дождитесь окончания калибровки панели и нажмите на кнопку ОК", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                    if (result == DialogResult.OK)
+                                    {
+                                       // funk(); // Вызов функции funk() после нажатия OK
+                                    }
+                                }
+                */
             }
             catch (Exception)
             {
-                MessageBox.Show( "Проверьте соединение", "Не получен ответ от устройства", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Проверьте соединение", "Не получен ответ от устройства", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
 
         }
@@ -1595,7 +1538,7 @@ namespace TFTprog
                 else
                 {
                     CANHUB.ChangeDEVExhRejWork(ERejWork.ervPICTupd, Efl_DEV.fld_TFTboard);
-       
+
                 }
             }
             catch (Exception)
@@ -1734,42 +1677,13 @@ namespace TFTprog
 
 
             ComboBox sBrej = sender as ComboBox;
- //           DataGridView dGparam = Controls["dGparam"] as DataGridView;
+            //           DataGridView dGparam = Controls["dGparam"] as DataGridView;
 
             int selectedColumn = sBrej.SelectedIndex;
 
             WORKAKVATEST.SelTableRowHead(dGparam, selectedColumn, "1,2,3,4,5");
             WORKAKVATEST.HandlAKVAchange = selectedColumn;
-/*
-            if (selectedColumn != WORKAKVATEST.AKVAint)
-            {
-                if (selectedColumn >= 0 && selectedColumn < dGparam.ColumnCount)
-                {
- //              !!! ВСЕ ОТРИСОВКИ ТАБЛИЦЫ ПАРАМЕТРОВ ПРОИВЗОДЯТСЯ В СОБЫТИИ ОБНОВЛЕНИЯ !!!     WORKAKVATEST.SelectColumn(dGparam, selectedColumn);
- //                   WORKAKVATEST.SetNewRej(selectedColumn);
-                    WORKAKVATEST.HandlAKVAchange = selectedColumn; // Обновляем глобальную переменную
-                }
-            }
 
-        }
-
-
-        private void DGparam_ColumnHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
-        {
- /*           if (WORKAKVATEST.isUpdating) return; // Предотвращаем самоблокировку
-
- //           DataGridView dGparam = sender as DataGridView;
-            ComboBox sBrej = Controls["sBrej"] as ComboBox;
-
-            if (e.ColumnIndex != WORKAKVATEST.AKVAint)
-            {
-                WORKAKVATEST.AKVAint = e.ColumnIndex; // Обновляем глобальную переменную
-                WORKAKVATEST.NewAKVAint = WORKAKVATEST.AKVAint;//обновляем переменную для передачи данных об изменении режима работы в прибор
-                WORKAKVATEST.isUpdating = true;
-                sBrej.SelectedIndex = WORKAKVATEST.AKVAint; // Синхронизируем ComboBox
-
-                WORKAKVATEST.isUpdating = false;
-            }*/
         }
 
 
@@ -1796,26 +1710,7 @@ namespace TFTprog
         }
 
 
-        private void chBsebsEmul_CheckedChanged(object sender, EventArgs e)
-        {
-            try
-            {
-                if (!chBparEmul.Checked)
-                {
 
-                    CANHUB.ChangeDEVExhRejWork(ERejWork.ervTFT_master, Efl_DEV.fld_MainBoard);
-
-                }
-                else
-                {// в этом режиме MainBoard отправляет в TFT контроллер данные из выбранного столбца таблицы вместо данных датчиков
-                    CANHUB.ChangeDEVExhRejWork(ERejWork.ervPC_SENSemul, Efl_DEV.fld_MainBoard);
-                }
-            }
-            catch (Exception)
-            {
-                MessageBox.Show("Не удалось изменить режим работы", "Не получен ответ от устройства", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
 
         private void bWriteTIMERS_Click(object sender, EventArgs e)
         {
@@ -1837,7 +1732,7 @@ namespace TFTprog
                 CANHUB.CommSendAnsv(ECommand.cmd_RdWrTimers, Efl_DEV.fld_TFTboard, comm_data, 0);
             }
 
-           
+
         }
 
         private void bReadTIMERS_Click(object sender, EventArgs e)
@@ -1845,12 +1740,12 @@ namespace TFTprog
             //int NumBytes = Marshal.SizeOf(typeof(SATIMER));
             //byte[] byteArray = new byte[NumBytes];
             //считываем данные о таймерах из TFT контроллера путём отсылки команды без данных
-            byte[] comm_data  = CANHUB.CommSendAnsv(ECommand.cmd_RdWrTimers, Efl_DEV.fld_TFTboard, null, 200);
+            byte[] comm_data = CANHUB.CommSendAnsv(ECommand.cmd_RdWrTimers, Efl_DEV.fld_TFTboard, null, 200);
             //записываем считанные байты в массив таймеров
 
-            byte[] byteArray = new byte[comm_data.Length-6];
+            byte[] byteArray = new byte[comm_data.Length - 6];
             Array.Copy(comm_data, 4, byteArray, 0, byteArray.Length);
-            
+
 
             WORKAKVATEST.Bytes_ToSATIMER_Array(byteArray, WORKAKVATEST.TIMS);
             //загружаем параметры таймеров в таблицу и отображаем её
@@ -1859,194 +1754,243 @@ namespace TFTprog
 
         private void dGtimers_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            
-        }
-    }
 
-
-    #region TablesLoadSave
-
-    public static class LoadSaveTable
-    {
-
-        public static void LoadDataGridViewFromCsv(DataGridView dataGridView, bool loadHeader, SParameterManager Prop, bool AvtoLoad)
-        {
-            dataGridView.AllowUserToAddRows = false;
-
-            string filePath = Prop.LastTableFile;
-
-            if (AvtoLoad && File.Exists(filePath))
-            {
-                // Если AvtoLoad == true и файл существует, загружаем его без показа диалога
-                LoadFile(filePath, dataGridView, loadHeader, Prop, AvtoLoad);
-            }
-            else
-            {
-                using (OpenFileDialog openFileDialog = new OpenFileDialog())
-                {
-                    openFileDialog.Filter = "CSV files (*.csv)|*.csv";
-                    openFileDialog.FileName = Prop.LastTableFile;
-
-                    if (openFileDialog.ShowDialog() == DialogResult.OK)
-                    {
-                        filePath = openFileDialog.FileName;
-                        LoadFile(filePath, dataGridView, loadHeader, Prop, AvtoLoad);
-                    }
-                }
-            }
         }
 
-        private static void LoadFile(string filePath, DataGridView dataGridView, bool loadHeader, SParameterManager Prop, bool AvtoLoad)
+
+
+        private void bStartStop_Click(object sender, EventArgs e)
         {
             try
             {
-                dataGridView.Rows.Clear();
-                if (loadHeader)
-                    dataGridView.Columns.Clear();
-
-                using (StreamReader reader = new StreamReader(filePath, Encoding.UTF8))
-                {
-                    bool isFirstLine = true;
-                    while (!reader.EndOfStream)
-                    {
-                        string line = reader.ReadLine();
-                        string[] values = line.Split(';');
-
-                        if (isFirstLine && loadHeader)
-                        {
-                            // Добавляем столбцы (верхний заголовок)
-                            for (int i = 1; i < values.Length; i++) // Начинаем с 1, чтобы пропустить левый заголовок
-                            {
-                                dataGridView.Columns.Add(values[i], values[i]);
-                            }
-                            isFirstLine = false;
-                        }
-                        else
-                        {
-                            // Создаем новую строку
-                            DataGridViewRow newRow = new DataGridViewRow();
-                            newRow.CreateCells(dataGridView);
-
-                            // Устанавливаем левый заголовок строки
-                            if (values.Length > 0)
-                            {
-                                newRow.HeaderCell.Value = values[0]; // Левый заголовок строки
-                            }
-
-                            // Заполняем данные строки
-                            for (int i = 1; i < values.Length; i++) // Начинаем с 1, чтобы пропустить левый заголовок
-                            {
-                                newRow.Cells[i - 1].Value = values[i];
-                            }
-
-                            dataGridView.Rows.Add(newRow);
-                        }
-                    }
+                if (bStartStop.Text == "CТАРТ")
+                {//запускаем эмуляцию датчиков из PC
+                    bStartStop.Text = "СТОП";
+                    bStartStop.ForeColor = Color.Red;
+                    CANHUB.ChangeDEVExhRejWork(ERejWork.ervTFT_master, Efl_DEV.fld_MainBoard);
+                    rBpause.Visible = true;
+                    rBpause.Checked = false;
+                    //rBpause
+                }
+                else
+                {//датчики опрашиваются из микроконтроллера
+                    bStartStop.Text = "CТАРТ";
+                    bStartStop.ForeColor = Color.Black;
+                    CANHUB.ChangeDEVExhRejWork(ERejWork.ervPC_SENSemul, Efl_DEV.fld_MainBoard);
+                    rBpause.Visible = false;
+                    rBpause.Checked = false;
                 }
 
-                // Отключаем сортировку для всех столбцов
-                foreach (DataGridViewColumn column in dataGridView.Columns)
-                {
-                    column.SortMode = DataGridViewColumnSortMode.NotSortable;
-                }
-
-                Prop.LastTableFile = filePath;
-
-                if (!AvtoLoad)
-                {
-                    MessageBox.Show("File loaded successfully.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                MessageBox.Show("An error occurred while loading the file: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Не удалось изменить режим работы", "Не получен ответ от устройства", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
 
-        public static void SaveDataGridViewToCsv(DataGridView dataGridView, bool saveHeader, string filePath)
+        private void OnResultReady(byte[] ansv)
         {
-            using (StreamWriter writer = new StreamWriter(filePath, false, Encoding.UTF8))
+            if (ansv == null) return;
+            // Здесь безопасно обновляем UI
+        }
+
+        private void OnCommError(Exception ex)
+        {
+            MessageBox.Show(ex.Message, "Ошибка обмена", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+
+        protected override void OnFormClosed(FormClosedEventArgs e)
+        {
+            _simul?.Dispose();
+            base.OnFormClosed(e);
+        }
+
+
+        #region TablesLoadSave
+
+        public static class LoadSaveTable
+        {
+
+            public static void LoadDataGridViewFromCsv(DataGridView dataGridView, bool loadHeader, SParameterManager Prop, bool AvtoLoad)
             {
-                // Сохраняем верхний заголовок (столбцы)
-                if (saveHeader)
+                dataGridView.AllowUserToAddRows = false;
+
+                string filePath = Prop.LastTableFile;
+
+                if (AvtoLoad && File.Exists(filePath))
                 {
-                    writer.Write(";"); // Пустая ячейка для заголовка строк
-                    for (int i = 0; i < dataGridView.Columns.Count; i++)
-                    {
-                        writer.Write(dataGridView.Columns[i].HeaderText);
-                        if (i < dataGridView.Columns.Count - 1)
-                            writer.Write(";");
-                    }
-                    writer.WriteLine();
+                    // Если AvtoLoad == true и файл существует, загружаем его без показа диалога
+                    LoadFile(filePath, dataGridView, loadHeader, Prop, AvtoLoad);
                 }
-
-                // Сохраняем данные строк
-                foreach (DataGridViewRow row in dataGridView.Rows)
+                else
                 {
-                    if (!row.IsNewRow)
+                    using (OpenFileDialog openFileDialog = new OpenFileDialog())
                     {
-                        // Левый заголовок строки
-                        writer.Write(row.HeaderCell.Value?.ToString() ?? string.Empty);
-                        writer.Write(";");
+                        openFileDialog.Filter = "CSV files (*.csv)|*.csv";
+                        openFileDialog.FileName = Prop.LastTableFile;
 
-                        // Данные строки
+                        if (openFileDialog.ShowDialog() == DialogResult.OK)
+                        {
+                            filePath = openFileDialog.FileName;
+                            LoadFile(filePath, dataGridView, loadHeader, Prop, AvtoLoad);
+                        }
+                    }
+                }
+            }
+
+            private static void LoadFile(string filePath, DataGridView dataGridView, bool loadHeader, SParameterManager Prop, bool AvtoLoad)
+            {
+                try
+                {
+                    dataGridView.Rows.Clear();
+                    if (loadHeader)
+                        dataGridView.Columns.Clear();
+
+                    using (StreamReader reader = new StreamReader(filePath, Encoding.UTF8))
+                    {
+                        bool isFirstLine = true;
+                        while (!reader.EndOfStream)
+                        {
+                            string line = reader.ReadLine();
+                            string[] values = line.Split(';');
+
+                            if (isFirstLine && loadHeader)
+                            {
+                                // Добавляем столбцы (верхний заголовок)
+                                for (int i = 1; i < values.Length; i++) // Начинаем с 1, чтобы пропустить левый заголовок
+                                {
+                                    dataGridView.Columns.Add(values[i], values[i]);
+                                }
+                                isFirstLine = false;
+                            }
+                            else
+                            {
+                                // Создаем новую строку
+                                DataGridViewRow newRow = new DataGridViewRow();
+                                newRow.CreateCells(dataGridView);
+
+                                // Устанавливаем левый заголовок строки
+                                if (values.Length > 0)
+                                {
+                                    newRow.HeaderCell.Value = values[0]; // Левый заголовок строки
+                                }
+
+                                // Заполняем данные строки
+                                for (int i = 1; i < values.Length; i++) // Начинаем с 1, чтобы пропустить левый заголовок
+                                {
+                                    newRow.Cells[i - 1].Value = values[i];
+                                }
+
+                                dataGridView.Rows.Add(newRow);
+                            }
+                        }
+                    }
+
+                    // Отключаем сортировку для всех столбцов
+                    foreach (DataGridViewColumn column in dataGridView.Columns)
+                    {
+                        column.SortMode = DataGridViewColumnSortMode.NotSortable;
+                    }
+
+                    Prop.LastTableFile = filePath;
+
+                    if (!AvtoLoad)
+                    {
+                        MessageBox.Show("File loaded successfully.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("An error occurred while loading the file: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+
+
+            public static void SaveDataGridViewToCsv(DataGridView dataGridView, bool saveHeader, string filePath)
+            {
+                using (StreamWriter writer = new StreamWriter(filePath, false, Encoding.UTF8))
+                {
+                    // Сохраняем верхний заголовок (столбцы)
+                    if (saveHeader)
+                    {
+                        writer.Write(";"); // Пустая ячейка для заголовка строк
                         for (int i = 0; i < dataGridView.Columns.Count; i++)
                         {
-                            writer.Write(row.Cells[i].Value?.ToString() ?? string.Empty);
+                            writer.Write(dataGridView.Columns[i].HeaderText);
                             if (i < dataGridView.Columns.Count - 1)
                                 writer.Write(";");
                         }
                         writer.WriteLine();
                     }
+
+                    // Сохраняем данные строк
+                    foreach (DataGridViewRow row in dataGridView.Rows)
+                    {
+                        if (!row.IsNewRow)
+                        {
+                            // Левый заголовок строки
+                            writer.Write(row.HeaderCell.Value?.ToString() ?? string.Empty);
+                            writer.Write(";");
+
+                            // Данные строки
+                            for (int i = 0; i < dataGridView.Columns.Count; i++)
+                            {
+                                writer.Write(row.Cells[i].Value?.ToString() ?? string.Empty);
+                                if (i < dataGridView.Columns.Count - 1)
+                                    writer.Write(";");
+                            }
+                            writer.WriteLine();
+                        }
+                    }
                 }
             }
-        }
 
 
-        public static void SaveTableWithFileDialog(DataGridView dataGridView, bool saveHeader, SParameterManager Prop)
-        {
-            string defaultFolder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Tables");
-            string defaultFileName = "ParamTable.csv";
-
-            // Убедиться, что папка Debug существует
-            if (!Directory.Exists(defaultFolder))
+            public static void SaveTableWithFileDialog(DataGridView dataGridView, bool saveHeader, SParameterManager Prop)
             {
-                Directory.CreateDirectory(defaultFolder);
-            }
+                string defaultFolder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Tables");
+                string defaultFileName = "ParamTable.csv";
 
-            using (SaveFileDialog saveFileDialog = new SaveFileDialog())
-            {
-                saveFileDialog.InitialDirectory = defaultFolder; // Устанавливаем папку по умолчанию
-                saveFileDialog.FileName = defaultFileName;       // Устанавливаем имя файла по умолчанию
-                saveFileDialog.Filter = "CSV files (*.csv)|*.csv"; // Фильтр для файлов
-
-                if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                // Убедиться, что папка Debug существует
+                if (!Directory.Exists(defaultFolder))
                 {
-                    string selectedFilePath = saveFileDialog.FileName;
+                    Directory.CreateDirectory(defaultFolder);
+                }
 
-                    try
+                using (SaveFileDialog saveFileDialog = new SaveFileDialog())
+                {
+                    saveFileDialog.InitialDirectory = defaultFolder; // Устанавливаем папку по умолчанию
+                    saveFileDialog.FileName = defaultFileName;       // Устанавливаем имя файла по умолчанию
+                    saveFileDialog.Filter = "CSV files (*.csv)|*.csv"; // Фильтр для файлов
+
+                    if (saveFileDialog.ShowDialog() == DialogResult.OK)
                     {
-                        // Сохранение данных в CSV
-                        SaveDataGridViewToCsv(dataGridView, saveHeader, selectedFilePath);
+                        string selectedFilePath = saveFileDialog.FileName;
 
-                        // Сохранить имя файла в настройках
-                        Prop.LastTableFile = selectedFilePath;
+                        try
+                        {
+                            // Сохранение данных в CSV
+                            SaveDataGridViewToCsv(dataGridView, saveHeader, selectedFilePath);
 
-                        MessageBox.Show("File saved successfully.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show($"An error occurred while saving the file: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            // Сохранить имя файла в настройках
+                            Prop.LastTableFile = selectedFilePath;
+
+                            MessageBox.Show("File saved successfully.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show($"An error occurred while saving the file: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
                     }
                 }
             }
+
         }
+
+
+        #endregion
 
     }
-
-    #endregion
-
-
 
 }

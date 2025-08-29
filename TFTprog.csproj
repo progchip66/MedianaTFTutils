@@ -66,6 +66,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AKVATEST.cs" />
+    <Compile Include="BackCommSimul.cs" />
     <Compile Include="ClassRS485.cs">
       <SubType>Component</SubType>
     </Compile>

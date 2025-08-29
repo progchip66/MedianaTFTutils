@@ -97,14 +97,16 @@
             this.bCOMselect = new System.Windows.Forms.Button();
             this.bfindPort = new System.Windows.Forms.Button();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.gBcalk = new System.Windows.Forms.GroupBox();
+            this.lbFT0minusFT1 = new System.Windows.Forms.Label();
+            this.lbFT1divFT0mult100 = new System.Windows.Forms.Label();
+            this.rBpause = new System.Windows.Forms.RadioButton();
+            this.bStartStop = new System.Windows.Forms.Button();
             this.label2 = new System.Windows.Forms.Label();
             this.bWriteTIMERS = new System.Windows.Forms.Button();
-            this.bReadTIMERS = new System.Windows.Forms.Button();
-            this.chBparEmul = new System.Windows.Forms.CheckBox();
             this.labRej = new System.Windows.Forms.Label();
             this.butSetPar = new System.Windows.Forms.Button();
             this.gBchangePar = new System.Windows.Forms.GroupBox();
-            this.labRejSimulator = new System.Windows.Forms.Label();
             this.gBdateTime = new System.Windows.Forms.GroupBox();
             this.lspeederTIME = new System.Windows.Forms.Label();
             this.bSetBOARDwinDT = new System.Windows.Forms.Button();
@@ -119,10 +121,9 @@
             this.b_PARtableLoad = new System.Windows.Forms.Button();
             this.b_PARtableSave = new System.Windows.Forms.Button();
             this.b_newPARfilename = new System.Windows.Forms.Button();
-            this.lbFT1divFT0mult100 = new System.Windows.Forms.Label();
-            this.lbFT0minusFT1 = new System.Windows.Forms.Label();
             this.tB_PARfileMan = new System.Windows.Forms.TextBox();
             this.dGparam = new System.Windows.Forms.DataGridView();
+            this.bReadTIMERS = new System.Windows.Forms.Button();
             this.WRpro = new System.ComponentModel.BackgroundWorker();
             this.tabControl1.SuspendLayout();
             this.tabPagePack.SuspendLayout();
@@ -136,6 +137,7 @@
             this.tP_TFT_WR_RD.SuspendLayout();
             this.gBtestWRgraf.SuspendLayout();
             this.tabPage1.SuspendLayout();
+            this.gBcalk.SuspendLayout();
             this.gBchangePar.SuspendLayout();
             this.gBdateTime.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dGtimers)).BeginInit();
@@ -826,10 +828,11 @@
             // 
             // tabPage1
             // 
+            this.tabPage1.Controls.Add(this.gBcalk);
+            this.tabPage1.Controls.Add(this.rBpause);
+            this.tabPage1.Controls.Add(this.bStartStop);
             this.tabPage1.Controls.Add(this.label2);
             this.tabPage1.Controls.Add(this.bWriteTIMERS);
-            this.tabPage1.Controls.Add(this.bReadTIMERS);
-            this.tabPage1.Controls.Add(this.chBparEmul);
             this.tabPage1.Controls.Add(this.labRej);
             this.tabPage1.Controls.Add(this.butSetPar);
             this.tabPage1.Controls.Add(this.gBchangePar);
@@ -838,8 +841,6 @@
             this.tabPage1.Controls.Add(this.b_PARtableLoad);
             this.tabPage1.Controls.Add(this.b_PARtableSave);
             this.tabPage1.Controls.Add(this.b_newPARfilename);
-            this.tabPage1.Controls.Add(this.lbFT1divFT0mult100);
-            this.tabPage1.Controls.Add(this.lbFT0minusFT1);
             this.tabPage1.Controls.Add(this.tB_PARfileMan);
             this.tabPage1.Controls.Add(this.dGparam);
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
@@ -847,8 +848,60 @@
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
             this.tabPage1.Size = new System.Drawing.Size(1019, 665);
             this.tabPage1.TabIndex = 3;
-            this.tabPage1.Text = "Тест Режимов Работы";
+            this.tabPage1.Text = "Симулятор Работы Датчиков и Таймеров";
             this.tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // gBcalk
+            // 
+            this.gBcalk.Controls.Add(this.lbFT0minusFT1);
+            this.gBcalk.Controls.Add(this.lbFT1divFT0mult100);
+            this.gBcalk.Location = new System.Drawing.Point(494, 369);
+            this.gBcalk.Name = "gBcalk";
+            this.gBcalk.Size = new System.Drawing.Size(289, 67);
+            this.gBcalk.TabIndex = 17;
+            this.gBcalk.TabStop = false;
+            this.gBcalk.Text = "Вычисляемые параметры";
+            // 
+            // lbFT0minusFT1
+            // 
+            this.lbFT0minusFT1.AutoSize = true;
+            this.lbFT0minusFT1.Location = new System.Drawing.Point(13, 25);
+            this.lbFT0minusFT1.Name = "lbFT0minusFT1";
+            this.lbFT0minusFT1.Size = new System.Drawing.Size(60, 13);
+            this.lbFT0minusFT1.TabIndex = 3;
+            this.lbFT0minusFT1.Text = "FT0-FT1 = ";
+            // 
+            // lbFT1divFT0mult100
+            // 
+            this.lbFT1divFT0mult100.AutoSize = true;
+            this.lbFT1divFT0mult100.Location = new System.Drawing.Point(13, 45);
+            this.lbFT1divFT0mult100.Name = "lbFT1divFT0mult100";
+            this.lbFT1divFT0mult100.Size = new System.Drawing.Size(84, 13);
+            this.lbFT1divFT0mult100.TabIndex = 4;
+            this.lbFT1divFT0mult100.Text = "FT1/FT0*100 = ";
+            // 
+            // rBpause
+            // 
+            this.rBpause.AutoSize = true;
+            this.rBpause.Location = new System.Drawing.Point(401, 417);
+            this.rBpause.Name = "rBpause";
+            this.rBpause.Size = new System.Drawing.Size(56, 17);
+            this.rBpause.TabIndex = 16;
+            this.rBpause.TabStop = true;
+            this.rBpause.Text = "Пауза";
+            this.rBpause.UseVisualStyleBackColor = true;
+            this.rBpause.Visible = false;
+            // 
+            // bStartStop
+            // 
+            this.bStartStop.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.bStartStop.Location = new System.Drawing.Point(390, 375);
+            this.bStartStop.Name = "bStartStop";
+            this.bStartStop.Size = new System.Drawing.Size(86, 23);
+            this.bStartStop.TabIndex = 15;
+            this.bStartStop.Text = "CТАРТ";
+            this.bStartStop.UseVisualStyleBackColor = true;
+            this.bStartStop.Click += new System.EventHandler(this.bStartStop_Click);
             // 
             // label2
             // 
@@ -859,34 +912,13 @@
             // 
             // bWriteTIMERS
             // 
-            this.bWriteTIMERS.Location = new System.Drawing.Point(226, 414);
+            this.bWriteTIMERS.Location = new System.Drawing.Point(19, 414);
             this.bWriteTIMERS.Name = "bWriteTIMERS";
             this.bWriteTIMERS.Size = new System.Drawing.Size(347, 23);
             this.bWriteTIMERS.TabIndex = 14;
-            this.bWriteTIMERS.Text = "Записать значение одного таймера в фильтр";
+            this.bWriteTIMERS.Text = "Записать значения таймеров в фильтр";
             this.bWriteTIMERS.UseVisualStyleBackColor = true;
             this.bWriteTIMERS.Click += new System.EventHandler(this.bWriteTIMERS_Click);
-            // 
-            // bReadTIMERS
-            // 
-            this.bReadTIMERS.Location = new System.Drawing.Point(19, 414);
-            this.bReadTIMERS.Name = "bReadTIMERS";
-            this.bReadTIMERS.Size = new System.Drawing.Size(192, 23);
-            this.bReadTIMERS.TabIndex = 13;
-            this.bReadTIMERS.Text = "Считать Таймеры из Фильтра";
-            this.bReadTIMERS.UseVisualStyleBackColor = true;
-            this.bReadTIMERS.Click += new System.EventHandler(this.bReadTIMERS_Click);
-            // 
-            // chBparEmul
-            // 
-            this.chBparEmul.AutoSize = true;
-            this.chBparEmul.Location = new System.Drawing.Point(372, 382);
-            this.chBparEmul.Name = "chBparEmul";
-            this.chBparEmul.Size = new System.Drawing.Size(201, 17);
-            this.chBparEmul.TabIndex = 12;
-            this.chBparEmul.Text = "Эмуляция параметров из таблицы";
-            this.chBparEmul.UseVisualStyleBackColor = true;
-            this.chBparEmul.CheckedChanged += new System.EventHandler(this.chBsebsEmul_CheckedChanged);
             // 
             // labRej
             // 
@@ -899,9 +931,9 @@
             // 
             // butSetPar
             // 
-            this.butSetPar.Location = new System.Drawing.Point(226, 377);
+            this.butSetPar.Location = new System.Drawing.Point(226, 375);
             this.butSetPar.Name = "butSetPar";
-            this.butSetPar.Size = new System.Drawing.Size(140, 22);
+            this.butSetPar.Size = new System.Drawing.Size(140, 23);
             this.butSetPar.TabIndex = 11;
             this.butSetPar.Text = "Установить параметры";
             this.butSetPar.UseVisualStyleBackColor = true;
@@ -909,25 +941,15 @@
             // 
             // gBchangePar
             // 
-            this.gBchangePar.Controls.Add(this.labRejSimulator);
             this.gBchangePar.Controls.Add(this.gBdateTime);
             this.gBchangePar.Controls.Add(this.bParamRead);
             this.gBchangePar.Controls.Add(this.bParamWrite);
             this.gBchangePar.Location = new System.Drawing.Point(790, 6);
             this.gBchangePar.Name = "gBchangePar";
-            this.gBchangePar.Size = new System.Drawing.Size(223, 544);
+            this.gBchangePar.Size = new System.Drawing.Size(223, 345);
             this.gBchangePar.TabIndex = 8;
             this.gBchangePar.TabStop = false;
             this.gBchangePar.Text = "Действия";
-            // 
-            // labRejSimulator
-            // 
-            this.labRejSimulator.AutoSize = true;
-            this.labRejSimulator.Location = new System.Drawing.Point(44, 25);
-            this.labRejSimulator.Name = "labRejSimulator";
-            this.labRejSimulator.Size = new System.Drawing.Size(141, 13);
-            this.labRejSimulator.TabIndex = 10;
-            this.labRejSimulator.Text = "Выбор режима симуляции";
             // 
             // gBdateTime
             // 
@@ -937,25 +959,23 @@
             this.gBdateTime.Controls.Add(this.bSetBoardDT);
             this.gBdateTime.Controls.Add(this.LBDTread);
             this.gBdateTime.Controls.Add(this.lBDT);
-            this.gBdateTime.Location = new System.Drawing.Point(16, 296);
+            this.gBdateTime.Location = new System.Drawing.Point(15, 96);
             this.gBdateTime.Name = "gBdateTime";
-            this.gBdateTime.Size = new System.Drawing.Size(192, 214);
+            this.gBdateTime.Size = new System.Drawing.Size(192, 169);
             this.gBdateTime.TabIndex = 7;
             this.gBdateTime.TabStop = false;
             this.gBdateTime.Text = "ДатаВремя";
             // 
             // lspeederTIME
             // 
-            this.lspeederTIME.AutoSize = true;
-            this.lspeederTIME.Location = new System.Drawing.Point(28, 160);
+            this.lspeederTIME.Location = new System.Drawing.Point(0, 0);
             this.lspeederTIME.Name = "lspeederTIME";
-            this.lspeederTIME.Size = new System.Drawing.Size(117, 13);
-            this.lspeederTIME.TabIndex = 10;
-            this.lspeederTIME.Text = "Ускорение Таймеров";
+            this.lspeederTIME.Size = new System.Drawing.Size(100, 23);
+            this.lspeederTIME.TabIndex = 0;
             // 
             // bSetBOARDwinDT
             // 
-            this.bSetBOARDwinDT.Location = new System.Drawing.Point(31, 128);
+            this.bSetBOARDwinDT.Location = new System.Drawing.Point(31, 131);
             this.bSetBOARDwinDT.Name = "bSetBOARDwinDT";
             this.bSetBOARDwinDT.Size = new System.Drawing.Size(110, 23);
             this.bSetBOARDwinDT.TabIndex = 4;
@@ -965,7 +985,7 @@
             // 
             // textBox2
             // 
-            this.textBox2.Location = new System.Drawing.Point(31, 102);
+            this.textBox2.Location = new System.Drawing.Point(31, 105);
             this.textBox2.Name = "textBox2";
             this.textBox2.Size = new System.Drawing.Size(110, 20);
             this.textBox2.TabIndex = 3;
@@ -974,7 +994,7 @@
             // 
             this.bSetBoardDT.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.bSetBoardDT.ForeColor = System.Drawing.Color.Red;
-            this.bSetBoardDT.Location = new System.Drawing.Point(31, 73);
+            this.bSetBoardDT.Location = new System.Drawing.Point(31, 76);
             this.bSetBoardDT.Name = "bSetBoardDT";
             this.bSetBoardDT.Size = new System.Drawing.Size(110, 23);
             this.bSetBoardDT.TabIndex = 2;
@@ -986,7 +1006,7 @@
             // 
             this.LBDTread.AutoSize = true;
             this.LBDTread.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.LBDTread.Location = new System.Drawing.Point(28, 46);
+            this.LBDTread.Location = new System.Drawing.Point(37, 48);
             this.LBDTread.Name = "LBDTread";
             this.LBDTread.Size = new System.Drawing.Size(51, 13);
             this.LBDTread.TabIndex = 1;
@@ -996,7 +1016,7 @@
             // 
             this.lBDT.AutoSize = true;
             this.lBDT.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.lBDT.Location = new System.Drawing.Point(28, 16);
+            this.lBDT.Location = new System.Drawing.Point(28, 25);
             this.lBDT.Name = "lBDT";
             this.lBDT.Size = new System.Drawing.Size(94, 13);
             this.lBDT.TabIndex = 0;
@@ -1004,7 +1024,7 @@
             // 
             // bParamRead
             // 
-            this.bParamRead.Location = new System.Drawing.Point(16, 55);
+            this.bParamRead.Location = new System.Drawing.Point(15, 29);
             this.bParamRead.Name = "bParamRead";
             this.bParamRead.Size = new System.Drawing.Size(192, 28);
             this.bParamRead.TabIndex = 2;
@@ -1014,7 +1034,7 @@
             // 
             // bParamWrite
             // 
-            this.bParamWrite.Location = new System.Drawing.Point(16, 89);
+            this.bParamWrite.Location = new System.Drawing.Point(15, 63);
             this.bParamWrite.Name = "bParamWrite";
             this.bParamWrite.Size = new System.Drawing.Size(192, 27);
             this.bParamWrite.TabIndex = 3;
@@ -1080,24 +1100,6 @@
             this.b_newPARfilename.UseVisualStyleBackColor = true;
             this.b_newPARfilename.Click += new System.EventHandler(this.b_newPARfilename_Click);
             // 
-            // lbFT1divFT0mult100
-            // 
-            this.lbFT1divFT0mult100.AutoSize = true;
-            this.lbFT1divFT0mult100.Location = new System.Drawing.Point(803, 579);
-            this.lbFT1divFT0mult100.Name = "lbFT1divFT0mult100";
-            this.lbFT1divFT0mult100.Size = new System.Drawing.Size(84, 13);
-            this.lbFT1divFT0mult100.TabIndex = 4;
-            this.lbFT1divFT0mult100.Text = "FT1/FT0*100 = ";
-            // 
-            // lbFT0minusFT1
-            // 
-            this.lbFT0minusFT1.AutoSize = true;
-            this.lbFT0minusFT1.Location = new System.Drawing.Point(803, 553);
-            this.lbFT0minusFT1.Name = "lbFT0minusFT1";
-            this.lbFT0minusFT1.Size = new System.Drawing.Size(60, 13);
-            this.lbFT0minusFT1.TabIndex = 3;
-            this.lbFT0minusFT1.Text = "FT0-FT1 = ";
-            // 
             // tB_PARfileMan
             // 
             this.tB_PARfileMan.Location = new System.Drawing.Point(-4, 637);
@@ -1113,13 +1115,23 @@
             this.dGparam.Size = new System.Drawing.Size(776, 345);
             this.dGparam.TabIndex = 1;
             // 
+            // bReadTIMERS
+            // 
+            this.bReadTIMERS.Location = new System.Drawing.Point(19, 414);
+            this.bReadTIMERS.Name = "bReadTIMERS";
+            this.bReadTIMERS.Size = new System.Drawing.Size(192, 23);
+            this.bReadTIMERS.TabIndex = 13;
+            this.bReadTIMERS.Text = "Считать Таймеры из Фильтра";
+            this.bReadTIMERS.UseVisualStyleBackColor = true;
+            this.bReadTIMERS.Click += new System.EventHandler(this.bReadTIMERS_Click);
+            // 
             // WRpro
             // 
             this.WRpro.WorkerReportsProgress = true;
-            this.WRpro.WorkerSupportsCancellation = true;
             this.WRpro.DoWork += new System.ComponentModel.DoWorkEventHandler(this.WRpro_DoWork);
             this.WRpro.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.WRpro_ProgressChanged);
             this.WRpro.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.WRpro_RunWorkerCompleted);
+
             // 
             // FormHUB
             // 
@@ -1150,8 +1162,9 @@
             this.gBtestWRgraf.PerformLayout();
             this.tabPage1.ResumeLayout(false);
             this.tabPage1.PerformLayout();
+            this.gBcalk.ResumeLayout(false);
+            this.gBcalk.PerformLayout();
             this.gBchangePar.ResumeLayout(false);
-            this.gBchangePar.PerformLayout();
             this.gBdateTime.ResumeLayout(false);
             this.gBdateTime.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dGtimers)).EndInit();
@@ -1229,7 +1242,6 @@
         private System.Windows.Forms.Button bStopTestWrPict;
         private System.Windows.Forms.Button bStartTestWrPict;
         private System.Windows.Forms.TextBox textBox1;
-        private System.Windows.Forms.TabPage tabPage1;
         private System.Windows.Forms.DataGridView dGparam;
         private System.Windows.Forms.Button b_newPARfilename;
         private System.Windows.Forms.Button b_PARtableSave;
@@ -1251,13 +1263,16 @@
         private System.Windows.Forms.Button bParamWrite;
         private System.Windows.Forms.ComboBox cBrej;
         private System.Windows.Forms.Label lspeederTIME;
-        private System.Windows.Forms.Label labRejSimulator;
         private System.Windows.Forms.Button butSetPar;
         private System.Windows.Forms.ComboBox comboBox1;
-        private System.Windows.Forms.CheckBox chBparEmul;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Button bWriteTIMERS;
         private System.Windows.Forms.Button bReadTIMERS;
+        private System.Windows.Forms.Button bStartStop;
+        private System.Windows.Forms.Button bPause;
+        public System.Windows.Forms.TabPage tabPage1;
+        private System.Windows.Forms.RadioButton rBpause;
+        private System.Windows.Forms.GroupBox gBcalk;
     }
 }
 
