@@ -18,7 +18,6 @@ using RS485;
 using COMMAND;
 using ExtHubComm;
 using TESTAKVA;
-using Simulator;
 using System.Runtime.InteropServices;
 
 namespace TFTprog
@@ -29,7 +28,6 @@ namespace TFTprog
         public SParameterManager Proper = new SParameterManager();
         public SWORKAKVATEST WORKAKVATEST;
         public SAKVApar AKVApar;
-        public BackCommSimul _simul;
         // Создаём симулятор, передаём вашу функцию обмена и интервал в мс
 
 
@@ -272,10 +270,6 @@ namespace TFTprog
         {
             InitializeComponent();
 
-            _simul = new BackCommSimul((ECommand cmd, Efl_DEV dev, byte[] buf, int to) => CANHUB.CommSendAnsv(cmd, dev, buf, to), 1000);
-
-            _simul.ResultReady += OnResultReady;
-            _simul.Error += OnCommError;
 
             WORKAKVATEST = new SWORKAKVATEST(dGtimers, dGparam);//инициализация таблиц таймеров и таблиц параметров
             AKVApar = new SAKVApar();
@@ -1802,7 +1796,6 @@ namespace TFTprog
 
         protected override void OnFormClosed(FormClosedEventArgs e)
         {
-            _simul?.Dispose();
             base.OnFormClosed(e);
         }
 

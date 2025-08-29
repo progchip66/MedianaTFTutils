@@ -89,7 +89,7 @@ namespace Simulator
         }
 
         private void StartOnce()
-        {
+        {// старт фонового процесса обмена данными
             if (_bw.IsBusy) return;
 
             var args = new CommArgs

@@ -674,18 +674,6 @@ namespace COMMAND
 
 
 
-		/*
-				public int GetFromSlaveCommand (byte[] data)
-				{//извлекаем данные из команды пришедшей в режиме Slave
-					if (!check0CRC16(data, data.Length))
-						return 1;//Ошибка контрольной суммы при чтении данных
-								 //throw new Exception("Ошибка контрольной суммы при чтении данных");
-								 //считывание полученных данных во внутреннюю структуру устройства
-					SlaveRxHeadCom.getFromCommandArr(data);//получаем заголовок
-					Array.Copy(_SlaveRxBuff, 4, RxBuff, 0, _SlaveRxBuff.Length - 6);//получаем данные
-					GetIntPar();
-				}
-		*/
 
 		public byte[] GetCommFromHeader(byte[] data, int dataLength)
 		{//формируем посылку для отправки команды
@@ -724,46 +712,6 @@ namespace COMMAND
 			return ret;
 		}
 
-		/*
-					if (!check0CRC16(bytesAnsv, bytesAnsv.Length))
-						throw new Exception("Ошибка контрольной суммы при чтении данных");
-				//считывание полученных данных во внутреннюю структуру устройства
-				RxHeadCom.getFromCommandArr(bytesAnsv);
-					Array.Copy(bytesAnsv, 4, RxBuff, 0, bytesAnsv.Length - 6);
 
-					getFromCommandArr(byte[] _bytes)
-
-
-
-
-				public byte[] CommConstrDataIntPar(int NumInt, int par1 = 0, int par2 = 0, int par3 = 0, int par4 = 0, int par5 = 0, int par6 = 0, int par7 = 0, int par8 = 0)
-				{
-					if (NumInt > 8)
-						NumInt = 8;
-					if (NumInt > 0)
-					{
-						int[] iPar = new int[NumInt];
-						int i = 0;
-						iPar[i] = par1;
-						if (++i < NumInt)
-							iPar[1] = par2;
-						if (++i < NumInt)
-							iPar[2] = par3;
-						iPar[3] = par4;
-						if (++i < NumInt)
-							iPar[4] = par5;
-						if (++i < NumInt)
-							iPar[5] = par6;
-						if (++i < NumInt)
-							iPar[6] = par7;
-						if (++i < NumInt)
-							iPar[7] = par8;
-
-						return (FlowProRAMtoMEM.ArrIntToArrByte(iPar));
-					}
-					return null;
-					//команда без параметров
-				}
-		*/
 	}
 }
