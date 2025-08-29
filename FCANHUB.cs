@@ -1783,11 +1783,7 @@ namespace TFTprog
         }
 
 
-        private void OnResultReady(byte[] ansv)
-        {
-            if (ansv == null) return;
-            // Здесь безопасно обновляем UI
-        }
+
 
         private void OnCommError(Exception ex)
         {
