@@ -14,7 +14,7 @@ namespace FileCreater
         public static int ReadFrom_Setting0_INI1 = 0;
     }
 
-    class TResurser
+    public class TResurser
     {
         public int StartRAMadr;
         public int StartFLASHadr;
@@ -351,7 +351,7 @@ namespace FileCreater
 
 
 
-    class TFileManager
+    public class TFileManager
     {
         public const int _RAMsize = 0x100000; //1Mbyte
         public const int _FLASHsize = 0x800000; //8Mbyte

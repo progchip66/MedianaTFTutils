@@ -126,7 +126,7 @@ namespace COMMAND
 		cmd_TFTmenu = 0x5B,//вывод меню на TFT панели
 
 		cmd_SetRTCDateTime = 0x5C,////Установка (считывание если параметр равен нулю) нового системного времени и даты путём отправки в плату управления
-		cmd_exhSimulator = 0x5D,//Обмен информации с симулятором PC (описание режимов в DecodeSimulData
+		cmd_exhSimulator = 0x5D,//Обмен информации с симулятором PC(Отправляем столбец таблицы параметров, принимаем таблицу таймеров) 
 		cmd_StartTFTcalibr = 0x5E,//Запуск режима калибровки TFT панели
 		cmd_USER = 0x70,
 		cmd_RdWrTimers = 0x71,
@@ -160,7 +160,7 @@ namespace COMMAND
 
 
 
-	class SHeadCom
+	public class SHeadCom
 	{
 		public int CountReadData=0;//количество считанных байт находящихся в массиве bytesReadData
 		public  byte[] bytesReadData = new byte[256];//байты для хранения считанных командой данных
@@ -283,7 +283,7 @@ namespace COMMAND
 
 
 
-	class S_subComOp
+	public class S_subComOp
 	{//описывает субкоманду
 		private int prevV_WRflowPro = 0;
 		private int prevV_DEV=0;
@@ -365,7 +365,7 @@ namespace COMMAND
 
 
 
-	class SCommStruct : TComPortDigit
+	public class SCommStruct : TComPortDigit
 	{
 		#region crcConstants
 

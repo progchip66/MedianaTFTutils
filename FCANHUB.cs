@@ -272,7 +272,7 @@ namespace TFTprog
 
 
             WORKAKVATEST = new SWORKAKVATEST(dGtimers, dGparam);//инициализация таблиц таймеров и таблиц параметров
-            AKVApar = new SAKVApar();
+ //           AKVApar = new SAKVApar();
             LoadSaveTable.LoadDataGridViewFromCsv(dGparam, true, Proper, true);//загрузка последнего сохранённого варианта таблицы параметров
 
             tBgrafDIR.Text = Proper.FolderGRAF;
@@ -1707,7 +1707,7 @@ namespace TFTprog
 
 
         private void bWriteTIMERS_Click(object sender, EventArgs e)
-        {
+        {//запись состояния таймера из одного выделенного столбца в фильтр
             //определяем номер выдленного столбца таблицы
             int numCol = AKVApar.GetSelectedColumnIndex(dGtimers);
             if (numCol < 0)
@@ -1731,8 +1731,7 @@ namespace TFTprog
 
         private void bReadTIMERS_Click(object sender, EventArgs e)
         {
-            //int NumBytes = Marshal.SizeOf(typeof(SATIMER));
-            //byte[] byteArray = new byte[NumBytes];
+
             //считываем данные о таймерах из TFT контроллера путём отсылки команды без данных
             byte[] comm_data = CANHUB.CommSendAnsv(ECommand.cmd_RdWrTimers, Efl_DEV.fld_TFTboard, null, 200);
             //записываем считанные байты в массив таймеров
@@ -1784,11 +1783,6 @@ namespace TFTprog
 
 
 
-
-        private void OnCommError(Exception ex)
-        {
-            MessageBox.Show(ex.Message, "Ошибка обмена", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        }
 
         protected override void OnFormClosed(FormClosedEventArgs e)
         {
@@ -1980,6 +1974,20 @@ namespace TFTprog
 
         #endregion
 
+        private void SimulPro_DoWork(object sender, DoWorkEventArgs e)
+        {
+
+        }
+
+        private void SimulPro_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+
+        }
+
+        private void SimulTIM_Tick(object sender, EventArgs e)
+        {
+
+        }
     }
 
 }

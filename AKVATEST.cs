@@ -365,16 +365,22 @@ namespace TESTAKVA
 
 
 
-    public class SWORKAKVATEST
+    public class SWORKAKVATEST : SCommStruct
     {
-        private DataGridView TimersGridView;
-        private DataGridView ParamGridView;
+        public DataGridView TimersGridView;
+        public DataGridView ParamGridView;
         public int AKVAint = 0;// номер столбца таблицы соответствующий текущему значению режима работы устройства
         public int NewAKVAint = -1;//номер столбца таблицы соответствующий новому значению режима работы устройства
         public int HandlAKVAchange = 0;//исходный режим
         public bool isUpdating = false; // Флаг для предотвращения самоблокировки
         public ErejAKVA selectedMode = ErejAKVA.rejak_Stop;//Выбранный режим работы
+        public SAKVApar AKVApar;
 
+        public SWORKAKVATEST()
+        {
+            AKVApar = new SAKVApar();
+        }
+       
 
         public void SelTableRowHead(DataGridView Grid, int numCol, string allowedCols)
         {//метод выделения заголовка выделенного столбца
@@ -644,11 +650,32 @@ namespace TESTAKVA
                 //              UpdateCellIfChanged(TimersGridView.Rows[3].Cells[i], T[i].MaxCountSec);
                 UpdateCellIfChanged(TimersGridView.Rows[4].Cells[i], TIMS[i].DamageSec);
             }
-
         }
 
+        public void ReadTIMsendPAR(DataGridView paramGridView)
+        {
+
+            // извлечение данных структуры AKVAPAR из таблицы и отправка в TFT контроллер
+            AKVApar.LoadFromDataGridViewColumn(paramGridView, HandlAKVAchange);// извлекаем  данные из таблицы в структуру AKVAPAR 
+            byte[] arrAKVAPAR = AKVApar.AKVAPARtoByteArray();//копируем данные в массив
+
+            HandlAKVAchange = -1;
+            //отправляем структуру в TFT контроллер без требования ответа
+            CommSendAnsv(ECommand.cmd_RdWrSens, Efl_DEV.fld_MainBoard, arrAKVAPAR, 0);
 
 
+            //считываем данные о таймерах из TFT контроллера путём отсылки команды без данных
+            byte[] comm_data = CommSendAnsv(ECommand.cmd_ExhParams, Efl_DEV.fld_TFTboard, null, 200);
+            //записываем считанные байты в массив таймеров
+
+            byte[] byteArray = new byte[comm_data.Length - 6];
+            Array.Copy(comm_data, 4, byteArray, 0, byteArray.Length);
+
+
+            Bytes_ToSATIMER_Array(byteArray, TIMS);
+            //загружаем параметры таймеров в таблицу и отображаем её
+            DisplayInTimersGridView();
+        }
 
 
         private void TimersParPerminEdit()

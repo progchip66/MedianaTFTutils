@@ -103,7 +103,7 @@ namespace ExtHubComm
 
 
 
-    class SCANHUB : SCommStruct
+    public class SCANHUB : SWORKAKVATEST
     {
 
         

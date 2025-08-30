@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.lHEX2 = new System.Windows.Forms.Label();
             this.TBSourseDir = new System.Windows.Forms.TextBox();
             this.bSEL2 = new System.Windows.Forms.Button();
@@ -125,6 +126,8 @@
             this.dGparam = new System.Windows.Forms.DataGridView();
             this.bReadTIMERS = new System.Windows.Forms.Button();
             this.WRpro = new System.ComponentModel.BackgroundWorker();
+            this.SimulPro = new System.ComponentModel.BackgroundWorker();
+            this.SimulTIM = new System.Windows.Forms.Timer(this.components);
             this.tabControl1.SuspendLayout();
             this.tabPagePack.SuspendLayout();
             this.statusStrip1.SuspendLayout();
@@ -1131,7 +1134,15 @@
             this.WRpro.DoWork += new System.ComponentModel.DoWorkEventHandler(this.WRpro_DoWork);
             this.WRpro.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.WRpro_ProgressChanged);
             this.WRpro.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.WRpro_RunWorkerCompleted);
-
+            // 
+            // SimulPro
+            // 
+            this.SimulPro.DoWork += new System.ComponentModel.DoWorkEventHandler(this.SimulPro_DoWork);
+            this.SimulPro.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.SimulPro_RunWorkerCompleted);
+            // 
+            // SimulTIM
+            // 
+            this.SimulTIM.Tick += new System.EventHandler(this.SimulTIM_Tick);
             // 
             // FormHUB
             // 
@@ -1273,6 +1284,8 @@
         public System.Windows.Forms.TabPage tabPage1;
         private System.Windows.Forms.RadioButton rBpause;
         private System.Windows.Forms.GroupBox gBcalk;
+        private System.ComponentModel.BackgroundWorker SimulPro;
+        private System.Windows.Forms.Timer SimulTIM;
     }
 }
 
