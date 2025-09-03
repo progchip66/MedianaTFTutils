@@ -87,7 +87,6 @@
             this.bStopTestWrPict = new System.Windows.Forms.Button();
             this.bStartTestWrPict = new System.Windows.Forms.Button();
             this.cBLoadPict = new System.Windows.Forms.CheckBox();
-            this.buttestSw = new System.Windows.Forms.Button();
             this.cBoxEnMess = new System.Windows.Forms.CheckBox();
             this.DevLabel = new System.Windows.Forms.Label();
             this.bTestMainBoardRS485 = new System.Windows.Forms.Button();
@@ -128,6 +127,7 @@
             this.WRpro = new System.ComponentModel.BackgroundWorker();
             this.SimulPro = new System.ComponentModel.BackgroundWorker();
             this.SimulTIM = new System.Windows.Forms.Timer(this.components);
+            this.bTFTcalibr = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
             this.tabPagePack.SuspendLayout();
             this.statusStrip1.SuspendLayout();
@@ -224,6 +224,7 @@
             // tabPagePack
             // 
             this.tabPagePack.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.tabPagePack.Controls.Add(this.bTFTcalibr);
             this.tabPagePack.Controls.Add(this.comboBox1);
             this.tabPagePack.Controls.Add(this.button3);
             this.tabPagePack.Controls.Add(this.statusStrip1);
@@ -624,7 +625,6 @@
             this.tP_TFT_WR_RD.Controls.Add(this.textBox1);
             this.tP_TFT_WR_RD.Controls.Add(this.gBtestWRgraf);
             this.tP_TFT_WR_RD.Controls.Add(this.cBLoadPict);
-            this.tP_TFT_WR_RD.Controls.Add(this.buttestSw);
             this.tP_TFT_WR_RD.Controls.Add(this.cBoxEnMess);
             this.tP_TFT_WR_RD.Controls.Add(this.DevLabel);
             this.tP_TFT_WR_RD.Controls.Add(this.bTestMainBoardRS485);
@@ -731,16 +731,7 @@
             this.cBLoadPict.Text = "StopExhTFTBoard";
             this.cBLoadPict.UseVisualStyleBackColor = true;
             this.cBLoadPict.CheckedChanged += new System.EventHandler(this.cBLoadPict_CheckedChanged);
-            // 
-            // buttestSw
-            // 
-            this.buttestSw.Location = new System.Drawing.Point(581, 152);
-            this.buttestSw.Name = "buttestSw";
-            this.buttestSw.Size = new System.Drawing.Size(283, 33);
-            this.buttestSw.TabIndex = 33;
-            this.buttestSw.Text = "Запустить калибровку TFT панели";
-            this.buttestSw.UseVisualStyleBackColor = true;
-            this.buttestSw.Click += new System.EventHandler(this.buttestSw_Click);
+
             // 
             // cBoxEnMess
             // 
@@ -858,9 +849,9 @@
             // 
             this.gBcalk.Controls.Add(this.lbFT0minusFT1);
             this.gBcalk.Controls.Add(this.lbFT1divFT0mult100);
-            this.gBcalk.Location = new System.Drawing.Point(494, 369);
+            this.gBcalk.Location = new System.Drawing.Point(252, 361);
             this.gBcalk.Name = "gBcalk";
-            this.gBcalk.Size = new System.Drawing.Size(289, 67);
+            this.gBcalk.Size = new System.Drawing.Size(173, 67);
             this.gBcalk.TabIndex = 17;
             this.gBcalk.TabStop = false;
             this.gBcalk.Text = "Вычисляемые параметры";
@@ -886,7 +877,7 @@
             // rBpause
             // 
             this.rBpause.AutoSize = true;
-            this.rBpause.Location = new System.Drawing.Point(401, 417);
+            this.rBpause.Location = new System.Drawing.Point(139, 418);
             this.rBpause.Name = "rBpause";
             this.rBpause.Size = new System.Drawing.Size(56, 17);
             this.rBpause.TabIndex = 16;
@@ -894,11 +885,12 @@
             this.rBpause.Text = "Пауза";
             this.rBpause.UseVisualStyleBackColor = true;
             this.rBpause.Visible = false;
+            this.rBpause.CheckedChanged += new System.EventHandler(this.rBpause_CheckedChanged);
             // 
             // bStartStop
             // 
             this.bStartStop.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.bStartStop.Location = new System.Drawing.Point(390, 375);
+            this.bStartStop.Location = new System.Drawing.Point(19, 415);
             this.bStartStop.Name = "bStartStop";
             this.bStartStop.Size = new System.Drawing.Size(86, 23);
             this.bStartStop.TabIndex = 15;
@@ -915,9 +907,9 @@
             // 
             // bWriteTIMERS
             // 
-            this.bWriteTIMERS.Location = new System.Drawing.Point(19, 414);
+            this.bWriteTIMERS.Location = new System.Drawing.Point(440, 415);
             this.bWriteTIMERS.Name = "bWriteTIMERS";
-            this.bWriteTIMERS.Size = new System.Drawing.Size(347, 23);
+            this.bWriteTIMERS.Size = new System.Drawing.Size(216, 23);
             this.bWriteTIMERS.TabIndex = 14;
             this.bWriteTIMERS.Text = "Записать значения таймеров в фильтр";
             this.bWriteTIMERS.UseVisualStyleBackColor = true;
@@ -934,9 +926,9 @@
             // 
             // butSetPar
             // 
-            this.butSetPar.Location = new System.Drawing.Point(226, 375);
+            this.butSetPar.Location = new System.Drawing.Point(440, 381);
             this.butSetPar.Name = "butSetPar";
-            this.butSetPar.Size = new System.Drawing.Size(140, 23);
+            this.butSetPar.Size = new System.Drawing.Size(216, 23);
             this.butSetPar.TabIndex = 11;
             this.butSetPar.Text = "Установить параметры";
             this.butSetPar.UseVisualStyleBackColor = true;
@@ -1047,6 +1039,7 @@
             // 
             // cBrej
             // 
+            this.cBrej.Enabled = false;
             this.cBrej.FormattingEnabled = true;
             this.cBrej.Items.AddRange(new object[] {
             "Ожидание Wait 1",
@@ -1061,7 +1054,7 @@
             "Останов Stop 10"});
             this.cBrej.Location = new System.Drawing.Point(19, 377);
             this.cBrej.Name = "cBrej";
-            this.cBrej.Size = new System.Drawing.Size(192, 21);
+            this.cBrej.Size = new System.Drawing.Size(216, 21);
             this.cBrej.TabIndex = 4;
             this.cBrej.SelectedIndexChanged += new System.EventHandler(this.cBrej_SelectedIndexChanged);
             // 
@@ -1143,6 +1136,16 @@
             // SimulTIM
             // 
             this.SimulTIM.Tick += new System.EventHandler(this.SimulTIM_Tick);
+            // 
+            // bTFTcalibr
+            // 
+            this.bTFTcalibr.Location = new System.Drawing.Point(797, 105);
+            this.bTFTcalibr.Name = "bTFTcalibr";
+            this.bTFTcalibr.Size = new System.Drawing.Size(197, 23);
+            this.bTFTcalibr.TabIndex = 26;
+            this.bTFTcalibr.Text = "Запуск калибровки TFT панели";
+            this.bTFTcalibr.UseVisualStyleBackColor = true;
+            this.bTFTcalibr.Click += new System.EventHandler(this.bTFTcalibr_Click);
             // 
             // FormHUB
             // 
@@ -1243,7 +1246,6 @@
         private System.Windows.Forms.Button bTestMainBoardRS485;
         private System.Windows.Forms.Label DevLabel;
         private System.Windows.Forms.CheckBox cBoxEnMess;
-        private System.Windows.Forms.Button buttestSw;
         private System.Windows.Forms.CheckBox cBLoadPict;
         private System.Windows.Forms.GroupBox gBtestWRgraf;
         private System.Windows.Forms.Label lbNum_BAD;
@@ -1286,6 +1288,7 @@
         private System.Windows.Forms.GroupBox gBcalk;
         private System.ComponentModel.BackgroundWorker SimulPro;
         private System.Windows.Forms.Timer SimulTIM;
+        private System.Windows.Forms.Button bTFTcalibr;
     }
 }
 

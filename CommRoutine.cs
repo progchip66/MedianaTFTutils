@@ -14,6 +14,14 @@ using System.Runtime.InteropServices;
 namespace COMMAND
 {
 
+	public sealed class CommArgs
+	{
+		public ECommand Command;
+		public Efl_DEV RecDev;
+		public byte[] Data;
+		public int Timeout;
+	}
+
 	public class DataReceivedEventArgs : EventArgs
 	{//создаём класс для передачи данных события
 		public byte[] Data { get; }
@@ -116,20 +124,16 @@ namespace COMMAND
 		cmd_RWpredef_Conf = 0x55,//передача содержания предустановленных значений конфигурации и запись/чтение конфигурации в RAM
 		cmd_RWconf_FLASH = 0x56,//запись/чтение существующей конфигурации из RAM по заданному адресу во FLASH
 		cmd_ExhParams = 0x57,//Команда обмена параметрами передаёт текущий режим работы, в ответ получает структуру AKVAPAR
-		cmd_Rejim = 0x58,//установка режима работы
+		cmd_Rejim = 0x58,//ВЫБОР РЕЖИМА РАБОТЫ - НОРМАЛЬНЫЙ, СИМУЛЯЦИЯ, ПАУЗА
 
 
 
-		cmd_Change_rejak = 0x59,//команда принудительной смены режима работы
-
-		cmd_8byte = 0x5A,//установка режима работы и настроек
 		cmd_TFTmenu = 0x5B,//вывод меню на TFT панели
 
 		cmd_SetRTCDateTime = 0x5C,////Установка (считывание если параметр равен нулю) нового системного времени и даты путём отправки в плату управления
-		cmd_exhSimulator = 0x5D,//Обмен информации с симулятором PC(Отправляем столбец таблицы параметров, принимаем таблицу таймеров) 
 		cmd_StartTFTcalibr = 0x5E,//Запуск режима калибровки TFT панели
 		cmd_USER = 0x70,
-		cmd_RdWrTimers = 0x71,
+		cmd_RDsensWRtimers = 0x71,//чтение сенсоров из таблицы PC в ответ приходит текущий режим работы  и состояние таймеров
 		cmd_RdWrSens = 0x72,//Запись и чтение структуры параметров 
 
 		cmd_rd_flow = 0x81,
@@ -139,7 +143,7 @@ namespace COMMAND
 		cmd_get_gpio = 0x93,
 		cmd_get_ADC = 0x94,
 		cmd_rd_str = 0x95,
-
+		cmd_BackUPdata = 0x96,//сохраненение/чтение данных и настроек в энергонезависимой памяти основной платы
 
 		cmd_test = 0xfe,
 		cmd_none = 0xff,
@@ -155,7 +159,9 @@ namespace COMMAND
 		ervPICTupd = 0x03,//происходит закачка новых изображений в FLASH память TFT панели, работа по стандартному алгоритму останавливается обновление экранов происходит только для демонстрации загруженных картинок
 		ervNewSetOK = 0x04,//ответ подтверждение прихода команды, никаких установок не происходит
 		evrTFTcalibr = 0x05,//переход в режим калибровки TFT панели
-		ervPC_SENSemul = 0x06, //режим симуляции когда данные датчиков извлекаются из компьютера
+		ervPC_SENSemulStart = 0x06, //процедура старта режима симуляции
+		ervPC_SENSemulWork = 0x07, //режим симуляции когда данные датчиков извлекаются из компьютера
+		ervPC_SemulPause = 0x08, //режим ПАУЗЫ В КОТОРОМ РАБОТА ПРИОСТАНАВЛИВАЕТСЯ В ТЕКУЩЕМ СОСТОЯНИИ(НУЖЕН ДЛЯ СИМУЛЯЦИИ)
 	};
 
 
@@ -392,8 +398,8 @@ namespace COMMAND
 
 //		public SWR_RAMtoMEM FlowProRAMtoMEM = new SWR_RAMtoMEM();//Класс процесса для записи/чтения данных в память TFT контроллера для хранения заголовка отправляемой команды
 
-		//	public ECommand _RDCom = ECommand.cmd_none;
-		public ECommand WRCom = ECommand.cmd_none;
+
+		
 
 		public ERxBufStat RxBufStat = ERxBufStat.rxcom_none;
 
