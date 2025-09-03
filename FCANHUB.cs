@@ -1493,31 +1493,7 @@ namespace TFTprog
             //            SaveDefaultSetting();
         }
 
-        private void buttestSw_Click(object sender, EventArgs e)
-        {
 
-            try
-            {
-
-                CANHUB.StartTFTcalibr(Efl_DEV.fld_TFTboard);
-                /*
-                                //	public enum Efl_DEV { fld_PC = 0, fld_HUB, fld_MainBoard, fld_TFTboard, fld_FEUdetect, fld_none = 0x0f };//тип устройства
-                                if (CANHUB.ChangeDEVExhRejWork(ERejWork.evrTFTcalibr, Efl_DEV.fld_TFTboard) == ERejWork.ervNewSetOK)
-                                {
-                                    DialogResult result = MessageBox.Show("Запуск калибровки TFT панели", "Дождитесь окончания калибровки панели и нажмите на кнопку ОК", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                                    if (result == DialogResult.OK)
-                                    {
-                                       // funk(); // Вызов функции funk() после нажатия OK
-                                    }
-                                }
-                */
-            }
-            catch (Exception)
-            {
-                MessageBox.Show("Проверьте соединение", "Не получен ответ от устройства", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-
-        }
 
         private void cBLoadPict_CheckedChanged(object sender, EventArgs e)
         {
@@ -1682,25 +1658,21 @@ namespace TFTprog
 
 
 
-
-        private void butTest_Click(object sender, EventArgs e)
-        {
+   
+                private void butTest_Click(object sender, EventArgs e)
+                {
             /*int numCol = AKVApar.GetSelectedColumnIndex(dGtimers);
             if (numCol>=0)
                 AKVApar.LoadFromDataGridViewColumn(dGparam, numCol);
             */
+            /*
+                        // извлечение данных структуры AKVAPAR из таблицы и отправка в TFT контроллер
+                        AKVApar.LoadFromDataGridViewColumn(dGparam, WORKAKVATEST.HandlAKVAchange);// извлекаем  данные из таблицы в структуру AKVAPAR 
+                        byte[] arrAKVAPAR = AKVApar.AKVAPARtoByteArray();//копируем данные в массив
 
-            // извлечение данных структуры AKVAPAR из таблицы и отправка в TFT контроллер
-            AKVApar.LoadFromDataGridViewColumn(dGparam, WORKAKVATEST.HandlAKVAchange);// извлекаем  данные из таблицы в структуру AKVAPAR 
-            byte[] arrAKVAPAR = AKVApar.AKVAPARtoByteArray();//копируем данные в массив
-
-            WORKAKVATEST.HandlAKVAchange = -1;
-            //отправляем структуру в TFT контроллер без требования ответа
-            CANHUB.CommSendAnsv(ECommand.cmd_RdWrSens, Efl_DEV.fld_MainBoard, arrAKVAPAR, 0);
-
-
-
-
+                        WORKAKVATEST.HandlAKVAchange = -1;
+                        //отправляем структуру в TFT контроллер без требования ответа
+                         CANHUB.CommSendAnsv(ECommand.cmd_RdWrSens, Efl_DEV.fld_MainBoard, arrAKVAPAR, 0); */
         }
 
 
@@ -1723,7 +1695,7 @@ namespace TFTprog
                 Array.Copy(timerBytes, 0, comm_data, 4, timerBytes.Length);
 
                 //отправляем структуру в TFT контроллер без требования ответа
-                CANHUB.CommSendAnsv(ECommand.cmd_RdWrTimers, Efl_DEV.fld_TFTboard, comm_data, 0);
+   //             CANHUB.CommSendAnsv(ECommand.cmd_RdWrTimers, Efl_DEV.fld_TFTboard, comm_data, 0);
             }
 
 
@@ -1733,14 +1705,14 @@ namespace TFTprog
         {
 
             //считываем данные о таймерах из TFT контроллера путём отсылки команды без данных
-            byte[] comm_data = CANHUB.CommSendAnsv(ECommand.cmd_RdWrTimers, Efl_DEV.fld_TFTboard, null, 200);
+  //          byte[] comm_data = CANHUB.CommSendAnsv(ECommand.cmd_RdWrTimers, Efl_DEV.fld_TFTboard, null, 200);
             //записываем считанные байты в массив таймеров
 
-            byte[] byteArray = new byte[comm_data.Length - 6];
-            Array.Copy(comm_data, 4, byteArray, 0, byteArray.Length);
+   //         byte[] byteArray = new byte[comm_data.Length - 6];
+     //       Array.Copy(comm_data, 4, byteArray, 0, byteArray.Length);
 
 
-            WORKAKVATEST.Bytes_ToSATIMER_Array(byteArray, WORKAKVATEST.TIMS);
+    //        WORKAKVATEST.Bytes_ToSATIMER_Array(byteArray, WORKAKVATEST.TIMS);
             //загружаем параметры таймеров в таблицу и отображаем её
             WORKAKVATEST.DisplayInTimersGridView();
         }
@@ -1760,18 +1732,19 @@ namespace TFTprog
                 {//запускаем эмуляцию датчиков из PC
                     bStartStop.Text = "СТОП";
                     bStartStop.ForeColor = Color.Red;
-                    CANHUB.ChangeDEVExhRejWork(ERejWork.ervTFT_master, Efl_DEV.fld_MainBoard);
+                    CANHUB.ChangeDEVExhRejWork(ERejWork.ervPC_SENSemulStart, Efl_DEV.fld_TFTboard);
                     rBpause.Visible = true;
                     rBpause.Checked = false;
-                    //rBpause
+                    SimulTIM.Start();//Запуск таймера обмена данными
                 }
                 else
                 {//датчики опрашиваются из микроконтроллера
                     bStartStop.Text = "CТАРТ";
                     bStartStop.ForeColor = Color.Black;
-                    CANHUB.ChangeDEVExhRejWork(ERejWork.ervPC_SENSemul, Efl_DEV.fld_MainBoard);
+                    CANHUB.ChangeDEVExhRejWork(ERejWork.ervTFT_master, Efl_DEV.fld_TFTboard);
                     rBpause.Visible = false;
                     rBpause.Checked = false;
+                    SimulTIM.Stop();//Остановка таймера обмена данными
                 }
 
             }
@@ -1986,7 +1959,53 @@ namespace TFTprog
 
         private void SimulTIM_Tick(object sender, EventArgs e)
         {
+            // Если предыдущее задание ещё выполняется — новый обмен не запускаем
+            if (SimulPro.IsBusy)
+            {
+                return;
+            }
 
+            CommArgs args = new CommArgs();
+            //подготовка данных для процесса обмена
+
+            AKVApar.LoadFromDataGridViewColumn(dGparam, WORKAKVATEST.HandlAKVAchange);// извлекаем  данные из таблицы в структуру AKVAPAR 
+            byte[] arrAKVAPAR = AKVApar.AKVAPARtoByteArray();//копируем данные в массив
+
+            //отправляем структуру в TFT контроллер без требования ответа
+            CommSendAnsv(ECommand.cmd_RdWrSens, Efl_DEV.fld_MainBoard, arrAKVAPAR, 0);
+
+            args.Command = _simCmd;
+                        args.RecDev = _simRecDev;
+                        args.Data = _simData;
+                        args.Timeout = _simTimeout;
+ 
+            // Запускаем фоновую операцию
+            SimulPro.RunWorkerAsync(args);
+        }
+
+        private void rBpause_CheckedChanged(object sender, EventArgs e)
+        {
+            if(rBpause.Checked)
+            {
+                CANHUB.ChangeDEVExhRejWork(ERejWork.ervPC_SemulPause, Efl_DEV.fld_TFTboard);
+            }
+            else
+            {
+                CANHUB.ChangeDEVExhRejWork(ERejWork.ervPC_SENSemulWork, Efl_DEV.fld_TFTboard);
+            }
+        }
+
+        private void bTFTcalibr_Click(object sender, EventArgs e)
+        {
+            try
+            {
+
+                CANHUB.StartTFTcalibr(Efl_DEV.fld_TFTboard);
+            }
+            catch (Exception)
+            {
+                MessageBox.Show("Проверьте соединение", "Не получен ответ от устройства", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
     }
 

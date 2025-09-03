@@ -375,10 +375,12 @@ namespace TESTAKVA
         public bool isUpdating = false; // Флаг для предотвращения самоблокировки
         public ErejAKVA selectedMode = ErejAKVA.rejak_Stop;//Выбранный режим работы
         public SAKVApar AKVApar;
+        public ERejWork WorkRijim = ERejWork.ervTFT_master;//по умолчанию мастером является TFT  контролер
 
         public SWORKAKVATEST()
         {
             AKVApar = new SAKVApar();
+            
         }
        
 
@@ -652,10 +654,10 @@ namespace TESTAKVA
             }
         }
 
-        public void ReadTIMsendPAR(DataGridView paramGridView)
-        {
+        public void sendPARreadTIM(DataGridView paramGridView)
+        {//обмен данными с TFT контроллером: отправка столбца из таблицы параметров и считывание данных в таблицу таймеров
 
-            // извлечение данных структуры AKVAPAR из таблицы и отправка в TFT контроллер
+            // извлечение данных структуры AKVAPAR из выделенного столбца таблицы и отправка в TFT контроллер
             AKVApar.LoadFromDataGridViewColumn(paramGridView, HandlAKVAchange);// извлекаем  данные из таблицы в структуру AKVAPAR 
             byte[] arrAKVAPAR = AKVApar.AKVAPARtoByteArray();//копируем данные в массив
 
