@@ -272,7 +272,7 @@ namespace TFTprog
 
 
             WORKAKVATEST = new SWORKAKVATEST(dGtimers, dGparam);//инициализация таблиц таймеров и таблиц параметров
- //           AKVApar = new SAKVApar();
+            AKVApar = new SAKVApar();
             LoadSaveTable.LoadDataGridViewFromCsv(dGparam, true, Proper, true);//загрузка последнего сохранённого варианта таблицы параметров
 
             tBgrafDIR.Text = Proper.FolderGRAF;
@@ -1473,8 +1473,8 @@ namespace TFTprog
                 WORKAKVATEST.SelectColumn(dGparam, WORKAKVATEST.HandlAKVAchange);
                 WORKAKVATEST.SetNewRej(WORKAKVATEST.HandlAKVAchange);
                 // извлечение данных структуры AKVAPAR из таблицы и отправка в TFT контроллер
-                AKVApar.LoadFromDataGridViewColumn(dGparam, WORKAKVATEST.HandlAKVAchange);// извлекаем  данные из таблицы в структуру AKVAPAR 
-                byte[] arrAKVAPAR = AKVApar.AKVAPARtoByteArray();//копируем данные в массив
+                WORKAKVATEST.AKVApar.LoadFromDataGridViewColumn(dGparam, WORKAKVATEST.HandlAKVAchange);// извлекаем  данные из таблицы в структуру AKVAPAR 
+                byte[] arrAKVAPAR = WORKAKVATEST.AKVApar.AKVAPARtoByteArray();//копируем данные в массив
 
                 WORKAKVATEST.HandlAKVAchange = -1;
                 //отправляем структуру в TFT контроллер без требования ответа
@@ -1681,7 +1681,7 @@ namespace TFTprog
         private void bWriteTIMERS_Click(object sender, EventArgs e)
         {//запись состояния таймера из одного выделенного столбца в фильтр
             //определяем номер выдленного столбца таблицы
-            int numCol = AKVApar.GetSelectedColumnIndex(dGtimers);
+            int numCol = WORKAKVATEST.AKVApar.GetSelectedColumnIndex(dGtimers);
             if (numCol < 0)
                 return;
             //считываем данные таймера из выделенного столбца таблицы
@@ -1725,14 +1725,21 @@ namespace TFTprog
 
 
         private void bStartStop_Click(object sender, EventArgs e)
-        {
+        {  
             try
             {
-                if (bStartStop.Text == "CТАРТ")
+                if (bStartStop.Text == "CТАРТ") //УСТАНОВИТЬ НОМЕР ВЫДЕЛЕННОГО СТОЛБЦА ДЛЯ ОТПРАВКИ
                 {//запускаем эмуляцию датчиков из PC
                     bStartStop.Text = "СТОП";
                     bStartStop.ForeColor = Color.Red;
-                    CANHUB.ChangeDEVExhRejWork(ERejWork.ervPC_SENSemulStart, Efl_DEV.fld_TFTboard);
+                    //                  public void LoadFromDataGridViewColumn(DataGridView paramGridView, int columnIndex)
+
+                    CANHUB.ChangeAKVARejWork(ERejWork.ervPC_SENSemulStart, WORKAKVATEST.GetErejAKVA(WORKAKVATEST.HandlAKVAchange), Efl_DEV.fld_MainBoard);
+                    //public ERejWork ChangeAKVARejWork(ERejWork rejPro, ErejAKVA REJ, Efl_DEV DevType)
+
+                    //                  public ErejAKVA GetErejAKVA(int num)//определение номера режима в зависимости от столбца таблицы
+  //                  CANHUB.ChangeAKVARejWork(ERejWork.ervPC_SENSemulStart, ErejAKVA REJ, Efl_DEV.fld_TFTboard);
+                    //CANHUB.ChangeDEVExhRejWork(ERejWork.ervPC_SENSemulStart, Efl_DEV.fld_TFTboard);
                     rBpause.Visible = true;
                     rBpause.Checked = false;
                     SimulTIM.Start();//Запуск таймера обмена данными
@@ -1971,15 +1978,15 @@ namespace TFTprog
             AKVApar.LoadFromDataGridViewColumn(dGparam, WORKAKVATEST.HandlAKVAchange);// извлекаем  данные из таблицы в структуру AKVAPAR 
             byte[] arrAKVAPAR = AKVApar.AKVAPARtoByteArray();//копируем данные в массив
 
-            //отправляем структуру в TFT контроллер без требования ответа
-            CommSendAnsv(ECommand.cmd_RdWrSens, Efl_DEV.fld_MainBoard, arrAKVAPAR, 0);
+            //отправляем структуру в TFT контроллер  в ответ должны получить значения таймеров и режима работы
+          //  CommSendAnsv(ECommand.cmd_RdWrSens, Efl_DEV.fld_MainBoard, arrAKVAPAR, 100);
 
-            args.Command = _simCmd;
-                        args.RecDev = _simRecDev;
-                        args.Data = _simData;
-                        args.Timeout = _simTimeout;
+            args.Command = ECommand.cmd_RDsensWRtimers;
+                        args.RecDev = Efl_DEV.fld_TFTboard;
+                        args.Data = arrAKVAPAR;
+                        args.Timeout = 100;
  
-            // Запускаем фоновую операцию
+            // Запускаем фоновый поток для обмена данными операцию
             SimulPro.RunWorkerAsync(args);
         }
 

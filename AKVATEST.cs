@@ -662,9 +662,9 @@ namespace TESTAKVA
             byte[] arrAKVAPAR = AKVApar.AKVAPARtoByteArray();//копируем данные в массив
 
             HandlAKVAchange = -1;
-            //отправляем структуру в TFT контроллер без требования ответа
-            CommSendAnsv(ECommand.cmd_RdWrSens, Efl_DEV.fld_MainBoard, arrAKVAPAR, 0);
-
+            //отправляем структуру данных выделенного столбца
+            byte[] RejTimers_data = CommSendAnsv(ECommand.cmd_RdWrSens, Efl_DEV.fld_MainBoard, arrAKVAPAR, 200);
+            //в ответ получаем массив данных с информацией о режиме и состоянии таймеров
 
             //считываем данные о таймерах из TFT контроллера путём отсылки команды без данных
             byte[] comm_data = CommSendAnsv(ECommand.cmd_ExhParams, Efl_DEV.fld_TFTboard, null, 200);

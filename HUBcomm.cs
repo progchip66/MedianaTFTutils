@@ -274,17 +274,25 @@ namespace ExtHubComm
             byte[] byteArray = BitConverter.GetBytes(ret);
  //ФУНКЦИЯ УСКОРЕНИЯ ИСКЛЮЧЕНА ИЗ АЛГОРИТМА ПРОГРАММЫ           CommSendAnsv(ECommand.cmd_TimeAccelerat, Efl_DEV.fld_TFTboard, byteArray, 50);
         }
-
+        // CANHUB.ChangeDEVExhRejWork(ERejWork.ervTFT_master, Efl_DEV.fld_TFTboard);
+        public ERejWork ChangeDEVExhRejWork(ERejWork rejPro, Efl_DEV DevType)
+        {//Отправка ТОЛЬКО РЕЖИМА РАБОТЫ (надеюсь правильно восстановил прежнюю функцию
+            byte[] comm_data = new byte[4] { 0, 0, 0, 0 };
+            comm_data[0] = Convert.ToByte(rejPro); // режим обмена данными
+            CommSendAnsv(ECommand.cmd_Rejim, DevType, comm_data, 0);
+            return rejPro;
+        }
 
         //	public enum Efl_DEV { fld_PC = 0, fld_HUB, fld_MainBoard, fld_TFTboard, fld_FEUdetect, fld_none = 0x0f };//тип устройства
-        public ERejWork ChangeDEVExhRejWork(ERejWork REJ, Efl_DEV DevType)
-        {
+        public ERejWork ChangeAKVARejWork(ERejWork rejPro , ErejAKVA REJ, Efl_DEV DevType)
+        {//отправка режима работы плюс требование установить режима работы фильтра - AKVAPRO
             
-            byte[] comm_data = new byte[4] { 0, 0, 0, 0 };
-            comm_data[0]= Convert.ToByte(REJ);
+            byte[] comm_data = new byte[8] { 0, 0, 0, 0, 0, 0, 0, 0 };
+            comm_data[0]= Convert.ToByte(rejPro);//режим обменаданными
+            comm_data[4] = Convert.ToByte(REJ);//режим работы фильтра
             //CommSendAnsv(ECommand command, Efl_DEV _RecDev = Efl_DEV.fld_none, byte[] data = null, byte SubCom = 0, int TimeOutStartAnsv = 500, int TimeOutNextByte = 100)
             CommSendAnsv(ECommand.cmd_Rejim, DevType, comm_data,0);
-            return REJ;
+            return rejPro;
         }
 
         public byte[] GenerateByteArray(int NumBytes)

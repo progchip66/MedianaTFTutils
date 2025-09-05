@@ -38,6 +38,7 @@
             this.tBCode = new System.Windows.Forms.TextBox();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPagePack = new System.Windows.Forms.TabPage();
+            this.bTFTcalibr = new System.Windows.Forms.Button();
             this.comboBox1 = new System.Windows.Forms.ComboBox();
             this.button3 = new System.Windows.Forms.Button();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
@@ -127,7 +128,6 @@
             this.WRpro = new System.ComponentModel.BackgroundWorker();
             this.SimulPro = new System.ComponentModel.BackgroundWorker();
             this.SimulTIM = new System.Windows.Forms.Timer(this.components);
-            this.bTFTcalibr = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
             this.tabPagePack.SuspendLayout();
             this.statusStrip1.SuspendLayout();
@@ -244,6 +244,16 @@
             this.tabPagePack.TabIndex = 0;
             this.tabPagePack.Text = "Запись изображений";
             this.tabPagePack.UseVisualStyleBackColor = true;
+            // 
+            // bTFTcalibr
+            // 
+            this.bTFTcalibr.Location = new System.Drawing.Point(797, 105);
+            this.bTFTcalibr.Name = "bTFTcalibr";
+            this.bTFTcalibr.Size = new System.Drawing.Size(197, 23);
+            this.bTFTcalibr.TabIndex = 26;
+            this.bTFTcalibr.Text = "Запуск калибровки TFT панели";
+            this.bTFTcalibr.UseVisualStyleBackColor = true;
+            this.bTFTcalibr.Click += new System.EventHandler(this.bTFTcalibr_Click);
             // 
             // comboBox1
             // 
@@ -731,7 +741,6 @@
             this.cBLoadPict.Text = "StopExhTFTBoard";
             this.cBLoadPict.UseVisualStyleBackColor = true;
             this.cBLoadPict.CheckedChanged += new System.EventHandler(this.cBLoadPict_CheckedChanged);
-
             // 
             // cBoxEnMess
             // 
@@ -1039,7 +1048,6 @@
             // 
             // cBrej
             // 
-            this.cBrej.Enabled = false;
             this.cBrej.FormattingEnabled = true;
             this.cBrej.Items.AddRange(new object[] {
             "Ожидание Wait 1",
@@ -1136,16 +1144,6 @@
             // SimulTIM
             // 
             this.SimulTIM.Tick += new System.EventHandler(this.SimulTIM_Tick);
-            // 
-            // bTFTcalibr
-            // 
-            this.bTFTcalibr.Location = new System.Drawing.Point(797, 105);
-            this.bTFTcalibr.Name = "bTFTcalibr";
-            this.bTFTcalibr.Size = new System.Drawing.Size(197, 23);
-            this.bTFTcalibr.TabIndex = 26;
-            this.bTFTcalibr.Text = "Запуск калибровки TFT панели";
-            this.bTFTcalibr.UseVisualStyleBackColor = true;
-            this.bTFTcalibr.Click += new System.EventHandler(this.bTFTcalibr_Click);
             // 
             // FormHUB
             // 
